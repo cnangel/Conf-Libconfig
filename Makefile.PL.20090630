@@ -1,0 +1,22 @@
+use strict;
+use lib '.';
+use inc::Module::Install;
+
+name     'Conf-Libconfig';
+license  'bsd';
+author   'cnangel <junliang.li@alibaba-inc.com>';
+perl_version        '5.006001';
+all_from 'lib/Conf/Libconfig.pm';
+
+#build_requires 'Test::More';
+build_requires      ('Test::Base' => '0.01');
+build_requires      ('Cwd' => '0.01');
+
+use_test_base;
+
+no_index( directory => qw< t inc xs xsbuilder src > );
+
+auto_install();
+
+WriteAll();
+
