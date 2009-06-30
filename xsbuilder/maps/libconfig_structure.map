@@ -1,0 +1,62 @@
+
+### Added Tue Jun 30 15:15:00 2009 ###
+
+ <union config_value_t>
+   ival
+   llval
+   fval
+   sval
+   list
+   new
+   private
+ </union config_value_t>
+ <config_list_t>
+   length
+   capacity
+   elements
+   new
+   private
+ </config_list_t>
+ <config_setting_t>
+   name
+   type
+   format
+   value
+   parent
+   config
+   hook
+   line
+   new
+   private
+ </config_setting_t>
+ <config_t>
+   root
+   destructor
+   flags
+   error_text
+   error_line
+ </config_t>
+ <struct parse_context>
+   config
+   parent
+   setting
+   name
+   new
+   private
+ </struct parse_context>
+ <struct yy_buffer_state>
+   yy_input_file
+   yy_ch_buf
+   yy_buf_pos
+   yy_buf_size
+   yy_n_chars
+   yy_is_our_buffer
+   yy_is_interactive
+   yy_at_bol
+   yy_bs_lineno
+   yy_bs_column
+   yy_fill_buffer
+   yy_buffer_status
+   new
+   private
+ </struct yy_buffer_state>

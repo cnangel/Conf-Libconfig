@@ -1,0 +1,47 @@
+
+### Added Tue Jun 30 15:15:00 2009 ###
+
+FILE	| FILE
+LIBCONFIG_API double	| NV
+LIBCONFIG_API int	| IV
+LIBCONFIG_API long	| IV
+LIBCONFIG_API long long	| IV
+LIBCONFIG_API short	| IV
+LIBCONFIG_API void	| VOID
+extern LIBCONFIG_API const char * | PV
+YYSTYPE	| UNDEFINED
+struct yy_buffer_state | Conf::Libconfig::YYBufferState
+YY_BUFFER_STATE	| UNDEFINED
+YY_EXTRA_TYPE	| PTR
+char	| CHAR
+config_setting_t	| Conf::Libconfig::ConfigSettingT
+config_t	| Conf::Libconfig::ConfigT
+config_value_t	| Conf::Libconfig::ConfigValueT
+double	| NV
+extern LIBCONFIG_API char	| CHAR
+extern LIBCONFIG_API config_setting_t	| Conf::Libconfig::ConfigSettingT
+long | IV
+long long	| IV
+short	| IV
+struct config_list_t	| Conf::Libconfig::ConfigListT
+struct config_setting_t	| Conf::Libconfig::ConfigSettingT
+struct config_t	| Conf::Libconfig::ConfigT
+struct parse_context	| Conf::Libconfig::ParseContext
+void	| VOID
+yy_size_t	| UV
+yychar	| IV
+yyscan_t	| PTR
+const char * | PV
+FILE * | PV
+int * | PTR
+int | IV
+double * | PTR
+long * | PTR
+long long * | PTR
+unsigned int | UV
+void * | PTR
+const char * *			 | UNDEFINED
+const char **            | UNDEFINED
+char **                  | UNDEFINED
+char ***                 | UNDEFINED
+

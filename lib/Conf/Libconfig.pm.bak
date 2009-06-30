@@ -38,8 +38,6 @@ or
 
 =back
 
-=head2 new 
-
 =cut
 
 sub new 

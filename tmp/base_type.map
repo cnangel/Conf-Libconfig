@@ -1,0 +1,61 @@
+int             | IV
+int *           | UNDEFINED
+unsigned int    | UV
+signed int      | IV
+long            | IV
+long int        | IV
+unsigned long   | UV
+unsigned        | UV
+
+char *                   | PV           | | | strdup
+const char *             | PV           | | | strdup
+const char **            | UNDEFINED    
+char const *             | PV           | | | strdup
+unsigned char *          | PV           | | | strdup
+const unsigned char *    | PV           | | | strdup
+
+##########  Standard types  ##########
+
+int             | IV
+int *           | PTR
+unsigned int    | UV
+signed int      | IV
+long            | IV
+long int        | IV
+unsigned long   | UV
+unsigned        | UV
+double          | NV
+
+char *                   | PV
+const char *             | PV
+const char **            | UNDEFINED
+char const *             | PV
+unsigned char *          | PV
+const unsigned char *    | PV
+char **                  | UNDEFINED
+char ***                 | UNDEFINED
+const char * const *     | UNDEFINED
+
+char                   | CHAR
+const char             | CHAR
+const unsigned char    | U_CHAR
+unsigned char          | U_CHAR
+
+void *           | PTR
+void **          | UNDEFINED
+const void *     | PTR
+const void **    | UNDEFINED
+void             | VOID
+
+...              | UNDEFINED #varargs
+va_list          | UNDEFINED
+
+##########  Misc types  ##########
+
+time_t          | NV
+uid_t           | IV
+gid_t           | IV
+pid_t           | IV
+size_t          | IV
+size_t *        | UNDEFINED
+

@@ -1,0 +1,37 @@
+
+### Added Tue Jun 30 14:50:30 2009 ###
+
+FILE	|
+LIBCONFIG_API double	|
+LIBCONFIG_API int	|
+LIBCONFIG_API long	|
+LIBCONFIG_API long long	|
+LIBCONFIG_API short	|
+LIBCONFIG_API void	|
+YYSTYPE	| Conf::Libconfig::YYSTYPE
+YY_BUFFER_STATE	| Conf::Libconfig::YY_BUFFER_STATE
+YY_EXTRA_TYPE	| Conf::Libconfig::YY_EXTRA_TYPE
+char	|
+char *                   | PV           | | | strdup
+void *                   | PV           | | | strdup
+char **            | UNDEFINED
+config_setting_t	| Conf::Libconfig::config_setting_t
+config_setting_t * *	| UNDEFINED
+config_t	| Conf::Libconfig::config_t
+config_value_t	| Conf::Libconfig::config_value_t
+double	|
+extern LIBCONFIG_API char	|
+extern LIBCONFIG_API config_setting_t	| Conf::Libconfig::config_setting_t
+int	| IV
+long	| IV
+long long	| IV
+short	| IV
+struct config_list_t	| Conf::Libconfig::config_list_t
+struct config_setting_t	| Conf::Libconfig::config_setting_t
+struct config_t	| Conf::Libconfig::config_t
+struct parse_context	| Conf::Libconfig::parse_context
+unsigned int	| UV
+void	|
+yy_size_t	| Conf::Libconfig::yy_size_t
+yychar	| Conf::Libconfig::yychar
+yyscan_t	| Conf::Libconfig::yyscan_t
