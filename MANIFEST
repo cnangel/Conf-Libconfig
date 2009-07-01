@@ -26,7 +26,6 @@ Makefile.PL.20090630
 MANIFEST			This list of files
 MANIFEST.SKIP
 META.yml
-perlobject.map
 README
 src/ac_config.h.in
 src/aclocal.m4
@@ -114,12 +113,14 @@ src/wincompat.h
 src/ylwrap
 t/00-load.t
 t/01-init.t
+t/02-read.t
 t/boilerplate.t
 t/pod-coverage.t
 t/pod.t
 tools/Conf/Libconfig/ParseSource.pm
 tools/Conf/Libconfig/WrapXS.pm
 tools/ok.pl
+tools/ok1.pl
 tools/ParseSource.pl
 tools/WrapXSCheck.pl
 tools/WrapXSRun.pl

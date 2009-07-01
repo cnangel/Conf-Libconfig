@@ -23,7 +23,7 @@
 #     VERSION => q[0.01]
 #     dist => { PREOP=>q[$(PERL) -I. "-MModule::Install::Admin" -e "dist_preop(q($(DISTVNAME)))"] }
 #     realclean => { FILES=>q[MYMETA.yml] }
-#     test => { TESTS=>q[t/00-load.t t/01-init.t t/boilerplate.t t/pod-coverage.t t/pod.t] }
+#     test => { TESTS=>q[t/00-load.t t/01-init.t t/02-read.t t/boilerplate.t t/pod-coverage.t t/pod.t] }
 
 # --- MakeMaker post_initialize section:
 
@@ -882,7 +882,7 @@ $(MAKE_APERL_FILE) : $(FIRST_MAKEFILE) pm_to_blib
 TEST_VERBOSE=0
 TEST_TYPE=test_$(LINKTYPE)
 TEST_FILE = test.pl
-TEST_FILES = t/00-load.t t/01-init.t t/boilerplate.t t/pod-coverage.t t/pod.t
+TEST_FILES = t/00-load.t t/01-init.t t/02-read.t t/boilerplate.t t/pod-coverage.t t/pod.t
 TESTDB_SW = -d
 
 testdb :: testdb_$(LINKTYPE)

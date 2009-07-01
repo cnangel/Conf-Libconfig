@@ -15,8 +15,16 @@ extern "C" {
 #endif
 
 MODULE = Conf::Libconfig     PACKAGE = Conf::Libconfig	PREFIX=libconfig_
-
 PROTOTYPES: DISABLE
 
-void 
+void
 config_init(config_t *config)
+
+int
+config_read_file(config_t *config, const char *filename)
+
+int 
+config_lookup_int(const config_t *config, const char *path, long *value)
+
+
+

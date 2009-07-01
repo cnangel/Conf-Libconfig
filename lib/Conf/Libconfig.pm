@@ -21,6 +21,8 @@ Version 0.01
 =cut
 
 $VERSION = '0.01';
+use XSLoader;
+XSLoader::load('Conf::Libconfig', $VERSION);
 
 =head1 SYNOPSIS
 
@@ -44,21 +46,20 @@ or
 
 sub new 
 {
-	my $class = shift;
-	my $self = {
-		'config' => {},
-	};
-	eval {
-		require XSLoader;
-		XSLoader::load('Conf::Libconfig', $VERSION);
-		1;
-	} or do {
-		require DynaLoader;
-		push @ISA, 'DynaLoader';
-		bootstrap Conf::Libconfig $VERSION;
-	};
-	bless $self, $class;
-	return $self;
+	#my $class = shift;
+	#my $self = { };
+	#eval {
+		#require XSLoader;
+		#XSLoader::load('Conf::Libconfig', $VERSION);
+		#1;
+	#} or do {
+		#require DynaLoader;
+		#push @ISA, 'DynaLoader';
+		#bootstrap Conf::Libconfig $VERSION;
+	#};
+	##$self->{config} = config_init() unless (defined $self->{config});
+	#bless $self, $class;
+	#return $self;
 }
 
 =head1 EXPORT
@@ -75,14 +76,53 @@ if you don't export anything, such as for a purely object-oriented module.
 sub init
 {
 	my $self = shift;
-	config_init($self->config);
+	#return if (defined $self->{config});
+	#$self->{config} = config_init();
+	return;
 }
 
-=head2 function2
+=head2 read_file
 
 =cut
 
-sub function2 {
+sub read_file
+{
+	my ($self, $file) = @_;
+	#$self->{config} = config_init_new() unless (defined $self->{config});
+	#return config_read_file($self->{config}, $file);
+}
+
+=head2 set_path
+
+=cut
+
+sub set_path
+{
+	my ($self, $path) = @_;
+	$self->{path} = $path;
+}
+
+=head2 lookup_int
+
+=cut
+
+sub lookup_int
+{
+	my ($self, $path) = @_;
+	set_path($path) if ($path);
+	#$self->{path} = "jscapplication.anet_timeout" unless ($self->{path});
+	#use Data::Dumper;
+	#print Dumper $self;
+	#my $ret = config_lookup_int_new($self->{path}, \$self->{value});
+	#if ($ret)
+	#{
+		#return $self->{value};
+	#}
+	#else
+	#{
+		#warn "Lookup int fail!";
+		#return 0;
+	#}
 }
 
 =head1 AUTHOR
