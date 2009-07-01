@@ -5,7 +5,7 @@ package Test::Base;
 use 5.006001;
 use Spiffy 0.30 -Base;
 use Spiffy ':XXX';
-our $VERSION = '0.55';
+our $VERSION = '0.54';
 
 my @test_more_exports;
 BEGIN {
@@ -648,6 +648,4 @@ sub _get_filters {
 
 __DATA__
 
-=encoding utf8
-
-#line 1330
+#line 1328

@@ -19,10 +19,10 @@
 #     NAME => q[Conf::Libconfig]
 #     NO_META => q[1]
 #     PL_FILES => {  }
-#     PREREQ_PM => { ExtUtils::XSBuilder=>q[0], Test::Base=>q[0.01], Filter::Util::Call=>q[0], File::Find=>q[1], ExtUtils::MakeMaker=>q[6.42], Cwd=>q[1] }
+#     PREREQ_PM => { ExtUtils::XSBuilder=>q[0], Test::Base=>q[0.01], XSLoader=>q[0.05], File::Find=>q[1], ExtUtils::MakeMaker=>q[6.42], Cwd=>q[1] }
 #     VERSION => q[0.01]
+#     clean => { FILES=>q[META.yml] }
 #     dist => { PREOP=>q[$(PERL) -I. "-MModule::Install::Admin" -e "dist_preop(q($(DISTVNAME)))"] }
-#     realclean => { FILES=>q[MYMETA.yml] }
 #     test => { TESTS=>q[t/00-load.t t/01-init.t t/02-read.t t/boilerplate.t t/pod-coverage.t t/pod.t] }
 
 # --- MakeMaker post_initialize section:
@@ -42,13 +42,13 @@ DLSRC = dl_dlopen.xs
 EXE_EXT = 
 FULL_AR = /usr/bin/ar
 LD = gcc
-LDDLFLAGS = -shared -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector --param=ssp-buffer-size=4 -m32 -march=i586 -mtune=generic -fasynchronous-unwind-tables -DPERL_USE_SAFE_PUTENV -L/usr/local/lib
+LDDLFLAGS = -shared -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector --param=ssp-buffer-size=4 -m32 -march=i386 -mtune=generic -fasynchronous-unwind-tables -DPERL_USE_SAFE_PUTENV -L/usr/local/lib
 LDFLAGS =  -L/usr/local/lib
-LIBC = /lib/libc-2.10.1.so
+LIBC = /lib/libc-2.9.so
 LIB_EXT = .a
 OBJ_EXT = .o
 OSNAME = linux
-OSVERS = 2.6.18-128.1.6.el5
+OSVERS = 2.6.18-128.1.6.el5xen
 RANLIB = :
 SITELIBEXP = /usr/local/lib/perl5/site_perl/5.10.0
 SITEARCHEXP = /usr/local/lib/perl5/site_perl/5.10.0/i386-linux-thread-multi
@@ -279,7 +279,7 @@ DISTVNAME = Conf-Libconfig-0.01
 # --- MakeMaker cflags section:
 
 CCFLAGS = -D_REENTRANT -D_GNU_SOURCE -DDEBUGGING -fno-strict-aliasing -pipe -I/usr/local/include -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -I/usr/include/gdbm
-OPTIMIZE = -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector --param=ssp-buffer-size=4 -m32 -march=i586 -mtune=generic -fasynchronous-unwind-tables -DPERL_USE_SAFE_PUTENV
+OPTIMIZE = -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector --param=ssp-buffer-size=4 -m32 -march=i386 -mtune=generic -fasynchronous-unwind-tables -DPERL_USE_SAFE_PUTENV
 PERLTYPE = 
 MPOLLUTE = 
 
@@ -549,7 +549,7 @@ clean :: clean_subdirs
 	  perlmain.c perl.exe \
 	  so_locations $(BASEEXT).exp 
 	- $(RM_RF) \
-	  blib 
+	  META.yml blib 
 	- $(MV) $(FIRST_MAKEFILE) $(MAKEFILE_OLD) $(DEV_NULL)
 
 
@@ -565,7 +565,7 @@ realclean purge ::  clean realclean_subdirs
 	  $(OBJECT) $(MAKEFILE_OLD) \
 	  $(FIRST_MAKEFILE) 
 	- $(RM_RF) \
-	  MYMETA.yml $(DISTVNAME) 
+	  $(DISTVNAME) 
 
 
 # --- MakeMaker metafile section:
@@ -921,8 +921,8 @@ ppd :
 	$(NOECHO) $(ECHO) '        <DEPENDENCY NAME="ExtUtils-MakeMaker" VERSION="6,42,0,0" />' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '        <DEPENDENCY NAME="ExtUtils-XSBuilder" VERSION="0,0,0,0" />' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '        <DEPENDENCY NAME="File-Find" VERSION="1,0,0,0" />' >> $(DISTNAME).ppd
-	$(NOECHO) $(ECHO) '        <DEPENDENCY NAME="Filter-Util-Call" VERSION="0,0,0,0" />' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '        <DEPENDENCY NAME="Test-Base" VERSION="0,01,0,0" />' >> $(DISTNAME).ppd
+	$(NOECHO) $(ECHO) '        <DEPENDENCY NAME="XSLoader" VERSION="0,05,0,0" />' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '        <OS NAME="$(OSNAME)" />' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '        <ARCHITECTURE NAME="i386-linux-thread-multi-5.1" />' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '        <CODEBASE HREF="" />' >> $(DISTNAME).ppd
@@ -945,14 +945,13 @@ pm_to_blib : $(TO_INST_PM)
 
 
 # End.
-# Postamble by Module::Install 0.82
+# Postamble by Module::Install 0.77
 # --- Module::Install::Admin::Makefile section:
 
 realclean purge ::
 	$(RM_F) $(DISTVNAME).tar$(SUFFIX)
-	$(RM_F) MANIFEST.bak _build
-	$(PERL) "-Ilib" "-MModule::Install::Admin" -e "remove_meta()"
-	$(RM_RF) inc
+	$(RM_RF) inc MANIFEST.bak _build
+	$(PERL) -I. "-MModule::Install::Admin" -e "remove_meta()"
 
 reset :: purge
 

@@ -23,8 +23,8 @@ config_init(config_t *config)
 int
 config_read_file(config_t *config, const char *filename)
 
-int 
-config_lookup_int(const config_t *config, const char *path, long *value)
+long 
+config_lookup_int(const config_t *config, const char *path)
 
 
 
