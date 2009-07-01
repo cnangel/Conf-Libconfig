@@ -45,7 +45,9 @@ or
 sub new 
 {
 	my $class = shift;
-	my $self = {};
+	my $self = {
+		'config' => {},
+	};
 	eval {
 		require XSLoader;
 		XSLoader::load('Conf::Libconfig', $VERSION);
@@ -66,11 +68,14 @@ if you don't export anything, such as for a purely object-oriented module.
 
 =head1 FUNCTIONS
 
-=head2 function1
+=head2 init
 
 =cut
 
-sub function1 {
+sub init
+{
+	my $self = shift;
+	config_init($self->config);
 }
 
 =head2 function2

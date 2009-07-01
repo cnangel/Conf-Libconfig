@@ -1,4 +1,4 @@
-# vi:filetype=c
+// vi:filetype=c
 
 #ifdef __cplusplus
 extern "C" {

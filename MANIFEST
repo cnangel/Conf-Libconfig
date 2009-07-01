@@ -1,11 +1,11 @@
 .cvsignore
 Changes
-Conf-Libconfig.xs
 inc/Module/AutoInstall.pm
 inc/Module/Install.pm
 inc/Module/Install/AutoInstall.pm
 inc/Module/Install/Base.pm
 inc/Module/Install/Can.pm
+inc/Module/Install/Compiler.pm
 inc/Module/Install/Fetch.pm
 inc/Module/Install/Include.pm
 inc/Module/Install/Makefile.pm
@@ -20,11 +20,13 @@ inc/Test/Builder.pm
 inc/Test/Builder/Module.pm
 inc/Test/More.pm
 lib/Conf/Libconfig.pm
+Libconfig.xs
 Makefile.PL
 Makefile.PL.20090630
 MANIFEST			This list of files
 MANIFEST.SKIP
 META.yml
+perlobject.map
 README
 src/ac_config.h.in
 src/aclocal.m4
@@ -59,6 +61,7 @@ src/doc/Makefile.in
 src/doc/texinfo.tex
 src/grammar.c
 src/grammar.h
+src/grammar.o
 src/grammar.y
 src/INSTALL
 src/install-sh
@@ -69,6 +72,7 @@ src/libconfig.c
 src/libconfig.h
 src/libconfig.h++
 src/libconfig.hh
+src/libconfig.o
 src/libconfig.pc.in
 src/libconfig.sln
 src/libconfig.spec
@@ -103,19 +107,23 @@ src/samples/Makefile.in
 src/scanner.c
 src/scanner.h
 src/scanner.l
+src/scanner.o
 src/test.cfg
 src/TODO
 src/wincompat.h
 src/ylwrap
 t/00-load.t
+t/01-init.t
 t/boilerplate.t
 t/pod-coverage.t
 t/pod.t
 tools/Conf/Libconfig/ParseSource.pm
 tools/Conf/Libconfig/WrapXS.pm
+tools/ok.pl
 tools/ParseSource.pl
 tools/WrapXSCheck.pl
 tools/WrapXSRun.pl
+typemap
 xs/blib/arch/.exists
 xs/blib/arch/auto/Conf/.exists
 xs/blib/arch/auto/Conf/Libconfig/.exists

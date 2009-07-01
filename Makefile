@@ -23,7 +23,7 @@
 #     VERSION => q[0.01]
 #     dist => { PREOP=>q[$(PERL) -I. "-MModule::Install::Admin" -e "dist_preop(q($(DISTVNAME)))"] }
 #     realclean => { FILES=>q[MYMETA.yml] }
-#     test => { TESTS=>q[t/00-load.t t/01-new.t t/boilerplate.t t/pod-coverage.t t/pod.t] }
+#     test => { TESTS=>q[t/00-load.t t/01-init.t t/boilerplate.t t/pod-coverage.t t/pod.t] }
 
 # --- MakeMaker post_initialize section:
 
@@ -162,12 +162,9 @@ LINKTYPE = dynamic
 BOOTDEP = 
 
 # Handy lists of source code files:
-XS_FILES = Conf-Libconfig.xs \
-	Libconfig.xs
-C_FILES  = Conf-Libconfig.c \
-	Libconfig.c
-O_FILES  = Conf-Libconfig.o \
-	Libconfig.o
+XS_FILES = Libconfig.xs
+C_FILES  = Libconfig.c
+O_FILES  = Libconfig.o
 H_FILES  = 
 MAN1PODS = 
 MAN3PODS = lib/Conf/Libconfig.pm
@@ -192,12 +189,9 @@ PERL_ARCHIVE       =
 PERL_ARCHIVE_AFTER = 
 
 
-TO_INST_PM = lib/Conf/Libconfig.pm \
-	lib/Conf/Libconfig.pm.bak
+TO_INST_PM = lib/Conf/Libconfig.pm
 
-PM_TO_BLIB = lib/Conf/Libconfig.pm.bak \
-	blib/lib/Conf/Libconfig.pm.bak \
-	lib/Conf/Libconfig.pm \
+PM_TO_BLIB = lib/Conf/Libconfig.pm \
 	blib/lib/Conf/Libconfig.pm
 
 
@@ -218,8 +212,8 @@ XSUBPPDIR = /usr/lib/perl5/5.10.0/ExtUtils
 XSUBPP = $(XSUBPPDIR)$(DFSEP)xsubpp
 XSUBPPRUN = $(PERLRUN) $(XSUBPP)
 XSPROTOARG = 
-XSUBPPDEPS = /usr/lib/perl5/5.10.0/ExtUtils/typemap $(XSUBPP)
-XSUBPPARGS = -typemap /usr/lib/perl5/5.10.0/ExtUtils/typemap
+XSUBPPDEPS = /usr/lib/perl5/5.10.0/ExtUtils/typemap typemap $(XSUBPP)
+XSUBPPARGS = -typemap /usr/lib/perl5/5.10.0/ExtUtils/typemap -typemap typemap
 XSUBPP_EXTRA_ARGS = 
 
 
@@ -546,15 +540,14 @@ clean :: clean_subdirs
 	  $(BASEEXT).x $(BOOTSTRAP) \
 	  perl$(EXE_EXT) tmon.out \
 	  *$(OBJ_EXT) pm_to_blib \
-	  $(INST_ARCHAUTODIR)/extralibs.ld Conf-Libconfig.c \
-	  blibdirs.ts core.[0-9][0-9][0-9][0-9][0-9] \
-	  *perl.core core.*perl.*.? \
-	  Libconfig.c $(MAKE_APERL_FILE) \
-	  $(BASEEXT).def perl \
-	  core.[0-9][0-9][0-9] mon.out \
-	  lib$(BASEEXT).def perlmain.c \
-	  perl.exe so_locations \
-	  $(BASEEXT).exp 
+	  $(INST_ARCHAUTODIR)/extralibs.ld blibdirs.ts \
+	  core.[0-9][0-9][0-9][0-9][0-9] *perl.core \
+	  core.*perl.*.? Libconfig.c \
+	  $(MAKE_APERL_FILE) perl \
+	  $(BASEEXT).def core.[0-9][0-9][0-9] \
+	  mon.out lib$(BASEEXT).def \
+	  perlmain.c perl.exe \
+	  so_locations $(BASEEXT).exp 
 	- $(RM_RF) \
 	  blib 
 	- $(MV) $(FIRST_MAKEFILE) $(MAKEFILE_OLD) $(DEV_NULL)
@@ -845,7 +838,7 @@ PERL_HDRS = \
 
 $(OBJECT) : $(PERL_HDRS)
 
-Libconfig.c Conf-Libconfig.c : $(XSUBPPDEPS)
+Libconfig.c : $(XSUBPPDEPS)
 
 
 # --- MakeMaker makefile section:
@@ -889,7 +882,7 @@ $(MAKE_APERL_FILE) : $(FIRST_MAKEFILE) pm_to_blib
 TEST_VERBOSE=0
 TEST_TYPE=test_$(LINKTYPE)
 TEST_FILE = test.pl
-TEST_FILES = t/00-load.t t/01-new.t t/boilerplate.t t/pod-coverage.t t/pod.t
+TEST_FILES = t/00-load.t t/01-init.t t/boilerplate.t t/pod-coverage.t t/pod.t
 TESTDB_SW = -d
 
 testdb :: testdb_$(LINKTYPE)
@@ -941,7 +934,6 @@ ppd :
 
 pm_to_blib : $(TO_INST_PM)
 	$(NOECHO) $(ABSPERLRUN) -MExtUtils::Install -e 'pm_to_blib({@ARGV}, '\''$(INST_LIB)/auto'\'', '\''$(PM_FILTER)'\'')' -- \
-	  lib/Conf/Libconfig.pm.bak blib/lib/Conf/Libconfig.pm.bak \
 	  lib/Conf/Libconfig.pm blib/lib/Conf/Libconfig.pm 
 	$(NOECHO) $(TOUCH) pm_to_blib
 
