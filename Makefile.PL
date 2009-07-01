@@ -16,9 +16,11 @@ build_requires      'Test::Base' => '0.01';
 
 #test_requires		'Test::Pod::Coverage' => '0';
 
-cc_inc_paths		'./src';
-cc_files			(glob("./src/*.c"));
-can_cc or die 'This module requires C compiler.';
+cc_inc_paths		'/usr/include';
+#cc_files			(glob("./src/*.c"));
+cc_lib_paths		'/usr/lib';
+cc_lib_links		'config';
+#can_cc or die 'This module requires C compiler.';
 
 use_test_base;
 
@@ -33,11 +35,11 @@ auto_install();
 
 WriteAll();
 
-package MY;
-sub c_o
-{
-	my $src = shift->SUPER::c_o(@_);
-	my ($from, $to) = ('$(DEFINE) $*.', '$(DEFINE) -o $@ $*.');
-	$src =~ s{\Q$from\E}{$to}gxms;
-	return $src;
-}
+#package MY;
+#sub c_o
+#{
+	#my $src = shift->SUPER::c_o(@_);
+	#my ($from, $to) = ('$(DEFINE) $*.', '$(DEFINE) -o $@ $*.');
+	#$src =~ s{\Q$from\E}{$to}gxms;
+	#return $src;
+#}
