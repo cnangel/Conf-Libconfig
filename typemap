@@ -1,7 +1,9 @@
 TYPEMAP
-config_t *			T_PTROBJ_SPECIAL
-const config_t *	T_PTROBJ_SPECIAL
-long *				PTR
+config_t *				T_PTROBJ_SPECIAL
+const config_t *		T_PTROBJ_SPECIAL
+Conf_Libconfig *		T_PTROBJ_SPECIAL
+const Conf_Libconfig *	T_PTROBJ_SPECIAL
+long *					PTR
 
 INPUT
 T_PTROBJ_SPECIAL

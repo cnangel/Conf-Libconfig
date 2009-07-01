@@ -1,183 +1,86 @@
 package Conf::Libconfig;
 
 use 5.006001;
-use warnings;
 use strict;
-use vars qw/@ISA $VERSION @EXPORT %EXPORT_TAGS @EXPORT_OK/;
-
-use Carp;
+use warnings;
 
 require Exporter;
-@ISA = qw(Exporter);
+
+our @ISA = qw(Exporter);
+
+# Items to export into callers namespace by default. Note: do not export
+# names by default without a very good reason. Use EXPORT_OK instead.
+# Do not simply export all your public functions/methods/constants.
+
+# This allows declaration	use Conf::Libconfig ':all';
+# If you do not need this, moving things directly into @EXPORT or @EXPORT_OK
+# will save memory.
+our %EXPORT_TAGS = ( 'all' => [ qw(
+	
+) ] );
+
+our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
+
+our @EXPORT = qw(
+	
+);
+
+our $VERSION = '0.01';
+
+require XSLoader;
+XSLoader::load('Conf::Libconfig', $VERSION);
+
+# Preloaded methods go here.
+
+1;
+__END__
+# Below is stub documentation for your module. You'd better edit it!
 
 =head1 NAME
 
-Conf::Libconfig - The great new Conf::Libconfig!
-
-=head1 VERSION
-
-Version 0.01
-
-=cut
-
-$VERSION = '0.01';
-use XSLoader;
-XSLoader::load('Conf::Libconfig', $VERSION);
+Conf::Libconfig - Perl extension for blah blah blah
 
 =head1 SYNOPSIS
 
-Quick summary of what the module does.
+  use Conf::Libconfig;
+  blah blah blah
 
-=over 
+=head1 DESCRIPTION
 
-Perhaps a little code snippet.
+Stub documentation for Conf::Libconfig, created by h2xs. It looks like the
+author of the extension was negligent enough to leave the stub
+unedited.
 
-    use Conf::Libconfig;
-    my $foo = Conf::Libconfig->new();
-or
-    my $foo = new Conf::Libconfig;
-    ...
+Blah blah blah.
 
-=back
+=head2 EXPORT
 
-=head2 new 
+None by default.
 
-=cut
 
-sub new 
-{
-	#my $class = shift;
-	#my $self = { };
-	#eval {
-		#require XSLoader;
-		#XSLoader::load('Conf::Libconfig', $VERSION);
-		#1;
-	#} or do {
-		#require DynaLoader;
-		#push @ISA, 'DynaLoader';
-		#bootstrap Conf::Libconfig $VERSION;
-	#};
-	##$self->{config} = config_init() unless (defined $self->{config});
-	#bless $self, $class;
-	#return $self;
-}
 
-=head1 EXPORT
+=head1 SEE ALSO
 
-A list of functions that can be exported.  You can delete this section
-if you don't export anything, such as for a purely object-oriented module.
+Mention other useful documentation such as the documentation of
+related modules or operating system documentation (such as man pages
+in UNIX), or any relevant external documentation such as RFCs or
+standards.
 
-=head1 FUNCTIONS
+If you have a mailing list set up for your module, mention it here.
 
-=head2 init
-
-=cut
-
-sub init
-{
-	my $self = shift;
-	#return if (defined $self->{config});
-	#$self->{config} = config_init();
-	return;
-}
-
-=head2 read_file
-
-=cut
-
-sub read_file
-{
-	my ($self, $file) = @_;
-	#$self->{config} = config_init_new() unless (defined $self->{config});
-	#return config_read_file($self->{config}, $file);
-}
-
-=head2 set_path
-
-=cut
-
-sub set_path
-{
-	my ($self, $path) = @_;
-	$self->{path} = $path;
-}
-
-=head2 lookup_int
-
-=cut
-
-sub lookup_int
-{
-	my ($self, $path) = @_;
-	set_path($path) if ($path);
-	#$self->{path} = "jscapplication.anet_timeout" unless ($self->{path});
-	#use Data::Dumper;
-	#print Dumper $self;
-	#my $ret = config_lookup_int_new($self->{path}, \$self->{value});
-	#if ($ret)
-	#{
-		#return $self->{value};
-	#}
-	#else
-	#{
-		#warn "Lookup int fail!";
-		#return 0;
-	#}
-}
+If you have a web site set up for your module, mention it here.
 
 =head1 AUTHOR
 
-cnangel, C<< <junliang.li at alibaba-inc.com> >>
+cnangel, E<lt>cnangel@localdomainE<gt>
 
-=head1 BUGS
+=head1 COPYRIGHT AND LICENSE
 
-Please report any bugs or feature requests to C<bug-conf-libconfig at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Conf-Libconfig>.  I will be notified, and then you'll
-automatically be notified of progress on your bug as I make changes.
+Copyright (C) 2009 by cnangel
 
-
-
-
-=head1 SUPPORT
-
-You can find documentation for this module with the perldoc command.
-
-    perldoc Conf::Libconfig
-
-
-You can also look for information at:
-
-=over 4
-
-=item * RT: CPAN's request tracker
-
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Conf-Libconfig>
-
-=item * AnnoCPAN: Annotated CPAN documentation
-
-L<http://annocpan.org/dist/Conf-Libconfig>
-
-=item * CPAN Ratings
-
-L<http://cpanratings.perl.org/d/Conf-Libconfig>
-
-=item * Search CPAN
-
-L<http://search.cpan.org/dist/Conf-Libconfig/>
-
-=back
-
-
-=head1 ACKNOWLEDGEMENTS
-
-
-=head1 COPYRIGHT & LICENSE
-
-Copyright 2009 cnangel, all rights reserved.
-
-This program is released under the following license: bsd
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.10.0 or,
+at your option, any later version of Perl 5 you may have available.
 
 
 =cut
-
-1; # End of Conf::Libconfig

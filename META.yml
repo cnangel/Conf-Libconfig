@@ -1,5 +1,5 @@
 ---
-abstract: 'The great new Conf::Libconfig!'
+abstract: 'Perl extension for blah blah blah'
 author:
   - 'cnangel <junliang.li@alibaba-inc.com>'
 build_requires:

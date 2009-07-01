@@ -2,13 +2,17 @@
 
 use strict;
 use warnings;
+use Data::Dumper;
 use Test::More tests => 1;
 
 use Conf::Libconfig;
 
 
-my $foo = new Conf::Libconfig;
-$foo->read_file("/u/src/syncengine/conf/jsclient.cfg");
+my $conf = Conf::Libconfig::config_init();
+warn Dumper $conf;
+Conf::Libconfig::config_read_file($conf, "/home/cnangel/works/Conf-Libconfig/t/test.cfg");
+my $ret = Conf::Libconfig::config_lookup_int($conf, "application.ff");
+warn $ret;
 
 eval { use DBI; };
 ok(($@ ? 0 : 1), "init - status ok");
