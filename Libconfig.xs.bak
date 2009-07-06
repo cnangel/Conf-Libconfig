@@ -17,7 +17,7 @@ extern "C" {
 typedef struct config_t Conf_Libconfig;
 Conf_Libconfig *conf;
 
-MODULE = Conf::Libconfig     PACKAGE = Conf::Libconfig	PREFIX=libconfig_
+MODULE = Conf::Libconfig     PACKAGE = Conf::Libconfig	PREFIX=config_
 PROTOTYPES: DISABLE
 
 Conf_Libconfig *
