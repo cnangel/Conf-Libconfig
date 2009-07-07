@@ -19,8 +19,8 @@ build_requires      'Test::Base' => '0.01';
 
 cc_inc_paths		'/usr/include';
 #cc_files			(glob("./src/*.c"));
-cc_lib_paths		'/usr/lib';
-cc_lib_links		'config';
+cc_lib_paths		'/usr/lib, /usr/lib64';
+cc_lib_links		'config, config++';
 #can_cc or die 'This module requires C compiler.';
 
 use_test_base;

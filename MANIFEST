@@ -1,3 +1,4 @@
+.cvsignore
 Changes
 inc/Module/AutoInstall.pm
 inc/Module/Install.pm
@@ -31,6 +32,9 @@ t/02-read.t
 t/boilerplate.t
 t/pod-coverage.t
 t/pod.t
+t/test.cfg
+test.c
+test.cpp
 tools/Conf/Libconfig/ParseSource.pm
 tools/Conf/Libconfig/WrapXS.pm
 tools/ok.pl

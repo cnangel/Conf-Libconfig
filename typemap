@@ -19,6 +19,7 @@
 
 TYPEMAP
 
+Config *				O_OBJECT
 config_t *				T_PTROBJ_SPECIAL
 const config_t *		T_PTROBJ_SPECIAL
 Conf_Libconfig *		T_PTROBJ_SPECIAL

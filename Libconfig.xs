@@ -8,36 +8,47 @@ extern "C" {
 #include "perl.h"
 #include "XSUB.h"
 
-#include "libconfig.h"
-
 #ifdef __cplusplus
 }
 #endif
 
-typedef struct config_t Conf_Libconfig;
-Conf_Libconfig *conf;
+#define DDD(x)
 
-MODULE = Conf::Libconfig     PACKAGE = Conf::Libconfig	PREFIX=libconfig_
-PROTOTYPES: DISABLE
+#ifndef DDD
+#define DDD(x) fprintf(stderr, "%s\n", x);
+#endif
 
-Conf_Libconfig *
-config_init()
-	CODE:
-		config_init(conf);
-		RETVAL = conf;
-	OUTPUT:
-		RETVAL
+#ifndef NULL
+#define NULL (void*)0
+#endif
 
-int
-config_read_file(config, filename)
-	Conf_Libconfig *config
-	const char *filename
+#ifndef TRUE
+#define TRUE 1
+#endif
 
-int
-config_lookup_int(config, path, value)
-	const Conf_Libconfig *config
-	const char *path
-	long *value
+#ifndef FALSE
+#define FALSE 0
+#endif
 
+#ifndef BOOL
+#define BOOL short int
+#endif
+
+#include <libconfig.h++>
+using namespace libconfig;
+
+MODULE = Conf::Libconfig     PACKAGE = Conf::Libconfig
+
+Config *
+Config::new()
+
+void
+Config::DESTROY()
+
+void 
+Config::readFile(const char *filename)
+
+bool 
+Config::lookupValue(const char *path, int &value)
 
 

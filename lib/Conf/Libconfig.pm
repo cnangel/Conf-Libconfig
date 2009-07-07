@@ -57,7 +57,17 @@ Blah blah blah.
 
 None by default.
 
+=head2 config_init
 
+Init.
+
+=head2 config_read_file ($conf, $file)
+
+Read file.
+
+=head2 config_lookup_int ($conf, $path, $value)
+
+Get Value from function config_read_file.
 
 =head1 SEE ALSO
 
