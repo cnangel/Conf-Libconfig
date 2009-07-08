@@ -222,7 +222,6 @@ libconfig_setting_get_item(setting, i)
 		int itemBool;
 	CODE:
 	{
-
 		itemChar = config_setting_get_string_elem(setting, i);
 		RETVAL = newSVpvn(itemChar, strlen(itemChar));
 	}
