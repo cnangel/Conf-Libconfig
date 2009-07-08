@@ -38,59 +38,141 @@ __END__
 
 =head1 NAME
 
-Conf::Libconfig - Perl extension for blah blah blah
+Conf::Libconfig - Perl extension for libconfig
 
 =head1 SYNOPSIS
 
   use Conf::Libconfig;
-  blah blah blah
+  my $self = new Conf::Libconfig;
+  $self->read_file($cfg);
+  my $value = $self->lookup_value("abc.edf");
+  print $value;
 
 =head1 DESCRIPTION
 
-Stub documentation for Conf::Libconfig, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
+The module C<Conf::Libconfig> need use libconfig library:
 
-Blah blah blah.
+	http://www.hyperrealm.com/libconfig/
+
+You can use C<Conf::Libconfig> for perl config, and support Salar, Array and Hash data struction etc.
+like C or C++ function. C<Conf::Libconfig> could reduce your config file and quote by C/C++ transportability.
 
 =head2 EXPORT
 
 None by default.
 
-=head2 config_init
+=head2 $self->new()
 
-Init.
+Construct.
 
-=head2 config_read_file ($conf, $file)
+=head2 $self->delete()
 
-Read file.
+Destructor.
 
-=head2 config_lookup_int ($conf, $path, $value)
+=head2 $self->read_file ($file)
 
-Get Value from function config_read_file.
+Read config file.
+
+=head2 $self->lookup_value ($path)
+
+Autocheck and get value from config file, suggest use it.
+
+=head2 $self->lookup_bool ($path)
+
+Only get value type of bool from config file, please use lookup_value replace it.
+
+=head2 $self->lookup_int ($path)
+
+Only get value type of long int from config file, please use lookup_value replace it.
+
+=head2 $self->lookup_int64 ($path)
+
+Only get value type of long long int from config file, please use lookup_value replace it.
+
+=head2 $self->lookup_float ($path)
+
+Only get value type of float from config file, please use lookup_value replace it.
+
+=head2 $self->lookup_string ($path)
+
+Only get value type of string from config file, please use lookup_value replace it.
+
+=head1 PREREQUISITES
+
+This module uses libconfig.
+
+=head1 INSTALLATION
+
+If you are not soudoer or root, you need contact administrator.
+
+    perl Makefile.PL
+    make
+    make test
+    make install
+
+Win32 users should replace "make" with "nmake".
+
+=head1 SOURCE CONTROL
+
+You can always get the latest SSH::Batch source from its
+public Git repository:
+
+	http://github.com/cnangel/Conf-Libconfig/tree/master
+
+If you have a branch for me to pull, please let me know ;)
+
+=head1 TODO
+
+=over
+
+=item *
+
+Support xml config and yaml config.
+
+=back
 
 =head1 SEE ALSO
 
-Mention other useful documentation such as the documentation of
-related modules or operating system documentation (such as man pages
-in UNIX), or any relevant external documentation such as RFCs or
-standards.
+You can compare this module L<Conf::Libconfig> to L<Config>, L<Config::General>, L<Config::JSON>.
 
-If you have a mailing list set up for your module, mention it here.
-
-If you have a web site set up for your module, mention it here.
+http://my.huhoo.net/
 
 =head1 AUTHOR
 
-cnangel, E<lt>cnangel@localdomainE<gt>
+Cnangel, E<lt>cnangel@gmail.com<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
+This module as well as its programs are licensed under the BSD License.
+
+Copyright (c) 2009, Alibaba Search Center, Alibaba Inc. All rights reserved.
+
 Copyright (C) 2009 by cnangel
 
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.10.0 or,
-at your option, any later version of Perl 5 you may have available.
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
+=over
+
+=item *
+
+Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+
+=item *
+
+Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+
+=item *
+
+Neither the name of the Alibaba Search Center, Alibaba Inc. nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+
+=back
 
 =cut
+
+=head1 HISTORY
+
+I<Wed Jul 26 09:44:23 2009> B<v0.001> Build first version and use link config++.
+
+i<Wed 08 Jul 2009 04:07:46 PM CST> B<v0.002> use config replace config++.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.

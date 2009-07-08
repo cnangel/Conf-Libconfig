@@ -183,3 +183,4 @@ libconfig_lookup_value(conf, path)
 	OUTPUT:
 		RETVAL
 
+MODULE = Conf::Libconfig     PACKAGE = Conf::Libconfig::Settings	PREFIX = libconfig_

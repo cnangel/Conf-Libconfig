@@ -1,5 +1,7 @@
 Revision history for Conf-Libconfig
 
-0.01    Date/time
-        First version, released on an unsuspecting world.
+0.02	Wed 08 Jul 2009 04:13:37 PM CST
+        use config replace config++.
+0.01    Wed 08 Jul 2009 04:08:26 PM CST
+        Build first version and use link config++.
 

@@ -14,6 +14,28 @@ fixes for the module are worth downloading.
 
 INSTALLATION
 
+To prepare install, you should install libconfig, you can use yum for redhat,
+like this:
+
+	yum install libconfig libconfig-devel -y
+
+or apt-get for debian:
+
+	apt-get libconfig libconfig-devel
+
+for other platform, you can compiler libconfig from source:
+
+	http://www.hyperrealm.com/libconfig/
+
+you can use order like this:
+
+	wget http://www.hyperrealm.com/libconfig/libconfig-1.3.2.tar.gz
+	tar -zxf libconfig-1.3.2.tar.gz
+	cd libconfig-1.3.2
+	./configure --prefix=/usr
+	make
+	make install
+
 To install this module, run the following commands:
 
 	perl Makefile.PL
@@ -44,6 +66,8 @@ You can also look for information at:
 
 
 COPYRIGHT AND LICENCE
+
+Copyright (c) 2009, Alibaba Search Center, Alibaba Inc. All rights reserved.
 
 Copyright (C) 2009 cnangel
 

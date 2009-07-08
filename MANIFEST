@@ -10,16 +10,11 @@ inc/Module/Install/Fetch.pm
 inc/Module/Install/Include.pm
 inc/Module/Install/Makefile.pm
 inc/Module/Install/Metadata.pm
-inc/Module/Install/TestBase.pm
 inc/Module/Install/Win32.pm
 inc/Module/Install/WriteAll.pm
-inc/Spiffy.pm
-inc/Test/Base.pm
-inc/Test/Base/Filter.pm
-inc/Test/Builder.pm
-inc/Test/Builder/Module.pm
-inc/Test/More.pm
+jsclient.cfg
 lib/Conf/Libconfig.pm
+lib/Conf/Libconfig/Settings.pm
 Libconfig.xs
 Makefile.PL
 MANIFEST			This list of files
@@ -33,8 +28,8 @@ t/boilerplate.t
 t/pod-coverage.t
 t/pod.t
 t/test.cfg
-test.c
 test.cpp
+test.pl
 tools/Conf/Libconfig/ParseSource.pm
 tools/Conf/Libconfig/WrapXS.pm
 tools/ok.pl
