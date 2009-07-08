@@ -17,20 +17,21 @@ build_requires      'Test::Base' => '0.01';
 
 #test_requires		'Test::Pod::Coverage' => '0';
 
-makemaker_args       CC    => 'g++';
-makemaker_args       LD    => 'g++';
-makemaker_args       XSOPT => '-C++';
+#makemaker_args       CC    => 'g++';
+#makemaker_args       LD    => 'g++';
+#makemaker_args       XSOPT => '-C++';
 
-cc_inc_paths		'/usr/include';
+cc_inc_paths		'/usr/include', '/usr/local/include';
 #cc_files			(glob("./src/*.c"));
-cc_lib_paths		'/usr/lib, /usr/lib64';
-cc_lib_links		'config, config++';
-#can_cc or die 'This module requires C compiler.';
-can_cc              or die 'This module requires C++ compiler.';
+cc_lib_paths		'/usr/lib' , '/usr/lib64', '/usr/local/lib', '/usr/local/lib64';
+#cc_lib_links		'config', 'config++';
+cc_lib_links		'config';
+can_cc				or die 'This module requires C compiler.';
+#can_cc              or die 'This module requires C++ compiler.';
 
 use_test_base;
 
-auto_include_deps;
+#auto_include_deps;
 
 #no_index			( directory => qw< t inc xs xsbuilder src > );
 no_index			( directory => qw< t inc src > );

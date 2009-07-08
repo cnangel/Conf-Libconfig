@@ -34,21 +34,7 @@ extern "C" {
 #define BOOL short int
 #endif
 
-#include <libconfig.h++>
-using namespace libconfig;
+#include <libconfig.h>
 
 MODULE = Conf::Libconfig     PACKAGE = Conf::Libconfig
-
-Config *
-Config::new()
-
-void
-Config::DESTROY()
-
-void 
-Config::readFile(const char *filename)
-
-bool 
-Config::lookupValue(const char *path, int value)
-
 
