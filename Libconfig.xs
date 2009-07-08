@@ -44,6 +44,7 @@ extern "C" {
 #include <libconfig.h>
 
 typedef config_t *Conf__Libconfig;
+typedef config_setting_t *Conf__Libconfig__Settings;
 config_t config;
 
 MODULE = Conf::Libconfig     PACKAGE = Conf::Libconfig	PREFIX = libconfig_
@@ -183,4 +184,48 @@ libconfig_lookup_value(conf, path)
 	OUTPUT:
 		RETVAL
 
-MODULE = Conf::Libconfig     PACKAGE = Conf::Libconfig::Settings	PREFIX = libconfig_
+Conf::Libconfig::Settings
+libconfig_setting_lookup(conf, path)
+	Conf::Libconfig conf
+	const char *path
+	PREINIT:
+	CODE:
+	{
+		RETVAL = config_lookup(conf, path);
+	}
+	OUTPUT:
+		RETVAL
+
+
+MODULE = Conf::Libconfig     PACKAGE = Conf::Libconfig::Settings	PREFIX = libconfig_setting_
+
+int
+libconfig_setting_length(setting)
+	Conf::Libconfig::Settings setting
+	PREINIT:
+	CODE:
+	{
+		RETVAL = config_setting_length(setting); 
+	}
+	OUTPUT:
+		RETVAL
+
+SV *
+libconfig_setting_get_item(setting, i)
+	Conf::Libconfig::Settings setting
+	int i
+	PREINIT:
+		const char *itemChar;
+		double itemFloat;
+		long long itemBigint;
+		long itemInt;
+		int itemBool;
+	CODE:
+	{
+
+		itemChar = config_setting_get_string_elem(setting, i);
+		RETVAL = newSVpvn(itemChar, strlen(itemChar));
+	}
+	OUTPUT:
+		RETVAL
+

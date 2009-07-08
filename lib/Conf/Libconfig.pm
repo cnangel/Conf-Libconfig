@@ -25,7 +25,7 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 require XSLoader;
 XSLoader::load('Conf::Libconfig', $VERSION);
@@ -76,6 +76,18 @@ Read config file.
 =head2 $self->lookup_value ($path)
 
 Autocheck and get value from config file, suggest use it.
+
+=head2 $self->setting_lookup ($path)
+
+return setting resource.
+
+=head2 $setting->length ()
+
+return count of setting resource.
+
+=head2 $setting->get_item ($i)
+
+return value of the $i item.
 
 =head2 $self->lookup_bool ($path)
 
@@ -173,6 +185,8 @@ Neither the name of the Alibaba Search Center, Alibaba Inc. nor the names of its
 
 I<Wed Jul 26 09:44:23 2009> B<v0.001> Build first version and use link config++.
 
-i<Wed 08 Jul 2009 04:07:46 PM CST> B<v0.002> use config replace config++.
+i<Wed 08 Jul 2009 04:07:46 PM CST> B<v0.002> Use config replace config++.
+
+i<Wed 08 Jul 2009 05:32:50 PM CST> B<v0.003> Support Array list.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.

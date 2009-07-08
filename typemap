@@ -20,9 +20,9 @@
 TYPEMAP
 
 Conf::Libconfig			T_PTROBJ
+Conf::Libconfig::Settings T_PTROBJ
 Conf_Libconfig *		T_PTROBJ_SPECIAL
 long *					PTR
-long long				T_LONG
 
 HV *		T_HvRV
 AV *		T_AvRV

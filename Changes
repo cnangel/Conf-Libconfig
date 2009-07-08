@@ -1,7 +1,9 @@
 Revision history for Conf-Libconfig
 
-0.02	Wed 08 Jul 2009 04:13:37 PM CST
-        use config replace config++.
-0.01    Wed 08 Jul 2009 04:08:26 PM CST
+0.003	Wed 08 Jul 2009 05:33:41 PM CST
+        Support Array list.
+0.002	Wed 08 Jul 2009 04:13:37 PM CST
+        Use config replace config++.
+0.001   Wed 08 Jul 2009 04:08:26 PM CST
         Build first version and use link config++.
 
