@@ -49,6 +49,6 @@ void
 Config::readFile(const char *filename)
 
 bool 
-Config::lookupValue(const char *path, int &value)
+Config::lookupValue(const char *path, int value)
 
 
