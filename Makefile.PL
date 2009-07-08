@@ -28,8 +28,9 @@ cc_lib_paths		'/usr/lib' , '/usr/lib64', '/usr/local/lib', '/usr/local/lib64';
 cc_lib_links		'config';
 can_cc				or die 'This module requires C compiler.';
 #can_cc              or die 'This module requires C++ compiler.';
+#cc_optimize_flags	'-g -Wall';
 
-use_test_base;
+#use_test_base;
 
 #auto_include_deps;
 

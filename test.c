@@ -21,6 +21,9 @@ int main(int argc, char *argv[])
 	long intValue;
 	config_lookup_int(&config, "application.b", &intValue);
 	printf("intValue is %ld\n", intValue);
+	long long int64Value;
+	config_lookup_int64(&config, "misc.bigint", &int64Value);
+	printf("intValue is %lld\n", int64Value);
 	const config_setting_t *array;
 	array = config_lookup(&config, "application.group1.states");
 	if (array)
