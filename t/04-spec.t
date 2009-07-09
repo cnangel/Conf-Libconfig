@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More tests => 3;
+use Test::More tests => 5;
 
 use Conf::Libconfig;
 
@@ -22,8 +22,11 @@ my $v = $settings->get_item(0);
 ok(($v ? 1 : 0), "get item - status ok");
 
 my @arr = $foo->fetch_array("me.mar.family");
+ok((@arr ? 1 : 0), "fetch array - status ok");
 
-warn Dumper \@arr;
+my $ref = $foo->fetch_hashref("me.mar.check1");
+warn Dumper $ref;
 
+ok(1);
 
 

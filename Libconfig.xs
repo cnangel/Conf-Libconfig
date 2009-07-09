@@ -45,24 +45,39 @@ extern "C" {
 
 typedef config_t *Conf__Libconfig;
 typedef config_setting_t *Conf__Libconfig__Settings;
+typedef struct __hv_hash_st
+{
+	SV *name;
+	SV *value;
+} hv_hash_st;
+hv_hash_st hh;
 config_t config;
 
-SV * check_type(config_setting_t *);
-AV * get_array(config_setting_t *);
 
-SV * 
-check_type(config_setting_t *settings)
+SV * check_array_type(config_setting_t *);
+SV * check_hash_type(config_setting_t *);
+AV * get_array(config_setting_t *);
+HV * get_hash(config_setting_t *);
+
+/*SV * */
+/*check_array_type(config_setting_t *settings)*/
+hv_hash_st *
+get_settings_info(config_setting_t *settings)
 {
 	long long vBigint;
 	char vBigintArr[256];
 	size_t vBigintArrLen;
 	const char *vChar;
-	SV *sv = newSV(0);
+	// Init hh
+	char *name = config_setting_name(settings);
+	hh->name = sv_setpvn(name, strlen(name));
+	hh->value = newSV(0);
 	int settings_type = config_setting_type(settings);
 	switch (settings_type)
 	{
 		case CONFIG_TYPE_INT:
-			sv = newSViv(config_setting_get_int(settings));
+			hh->value = newSViv(config_setting_get_int(settings));
+			sv_setpvn(i)
 			break;
 		case CONFIG_TYPE_INT64:
 			vBigint = config_setting_get_int64(settings);
@@ -88,11 +103,12 @@ check_type(config_setting_t *settings)
 AV *
 get_array(config_setting_t *settings)
 {
-	//SV *sv = newSV(0);
+	/*SV *sv = newSV(0);*/
 	AV *av = newAV();
-	int settings_count;
+	AV *tmpav = newAV();
 	int i;
 	config_setting_t *settings_item;
+	int settings_count;
 
 	if (settings)
 	{
@@ -108,23 +124,80 @@ get_array(config_setting_t *settings)
 				case CONFIG_TYPE_BOOL:
 				case CONFIG_TYPE_FLOAT:
 				case CONFIG_TYPE_STRING:
-					av_push(av, check_type(settings_item));
+					av_push(av, check_array_type(settings_item));
 					break;
 				case CONFIG_TYPE_ARRAY:
-					av = get_array(settings_item);
+					tmpav = get_array(settings_item);
+					av_push(av, newRV_inc((SV*)tmpav));
 					break;
 				case CONFIG_TYPE_LIST:
-					Perl_croak(aTHX_ "List type!");
+					tmpav = get_array(settings_item);
+					av_push(av, newRV_noinc((SV*)tmpav));
 					break;
 				case CONFIG_TYPE_GROUP:
-					Perl_croak(aTHX_ "Group type!");
+					tmpav = get_array(settings_item);
+					av_push(av, newRV_noinc((SV*)tmpav));
 					break;
 				default:
+					/*Perl_warn(aTHX_ "Common type!");*/
 					Perl_croak(aTHX_ "Not this type!");
 			}
 		}
 	}
 	return av;
+}
+
+HV *
+get_hash(config_setting_t *settings)
+{
+	/*SV *sv = newSV(0);*/
+	HV *hv = newHV();
+	HV *tmphv = newHV();
+	int i;
+	config_setting_t *settings_item;
+	int settings_count;
+
+	if (settings)
+	{
+		settings_count = config_setting_length(settings);
+		for (i = 0; i < settings_count; i ++)
+		{
+			settings_item = config_setting_get_elem(settings, i);
+			int settings_item_type = config_setting_type(settings_item);
+			switch (settings_item_type)
+			{
+				case CONFIG_TYPE_INT:
+				case CONFIG_TYPE_INT64:
+				case CONFIG_TYPE_BOOL:
+				case CONFIG_TYPE_FLOAT:
+				case CONFIG_TYPE_STRING:
+					/*av_push(av, check_type(settings_item));*/
+					/*hv_store( hv, "foo", 2, newSV(0), 0 );*/
+					/*check_hash_type(settings_item);*/
+					hv_store( hv, "foo", 3, check_hash_type(settings_item), 1);
+					break;
+				case CONFIG_TYPE_ARRAY:
+					/*tmpav = get_array(settings_item);*/
+					/*av_push(av, newRV_inc((SV*)tmpav));*/
+					Perl_croak(aTHX_ "ARRAY this type!");
+					break;
+				case CONFIG_TYPE_LIST:
+					/*tmpav = get_array(settings_item);*/
+					/*av_push(av, newRV_noinc((SV*)tmpav));*/
+					Perl_croak(aTHX_ "LIST this type!");
+					break;
+				case CONFIG_TYPE_GROUP:
+					/*tmpav = get_array(settings_item);*/
+					/*av_push(av, newRV_noinc((SV*)tmpav));*/
+					Perl_croak(aTHX_ "GROUP this type!");
+					break;
+				default:
+					/*Perl_warn(aTHX_ "Common type!");*/
+					Perl_croak(aTHX_ "Not this type!");
+			}
+		}
+	}
+	return hv;
 }
 
 MODULE = Conf::Libconfig     PACKAGE = Conf::Libconfig	PREFIX = libconfig_
@@ -279,6 +352,23 @@ libconfig_fetch_array(conf, path)
 	}
 	OUTPUT:
 		RETVAL
+
+HV *
+libconfig_fetch_hashref(conf, path)
+	Conf::Libconfig conf
+	const char *path
+	PREINIT:
+		config_setting_t *settings;
+		HV *hv = newHV();
+	CODE:
+	{
+		settings = config_lookup(conf, path);
+		hv = get_hash(settings);
+		RETVAL = hv;
+	}
+	OUTPUT:
+		RETVAL
+
 
 Conf::Libconfig::Settings
 libconfig_setting_lookup(conf, path)

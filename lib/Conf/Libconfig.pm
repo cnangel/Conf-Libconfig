@@ -85,6 +85,10 @@ return setting resource.
 
 return array list from path.
 
+=head2 $self->fetch_hashref ($path)
+
+return hash refenrece from path.
+
 =head2 $setting->length ()
 
 return count of setting resource.
