@@ -184,6 +184,19 @@ libconfig_lookup_value(conf, path)
 	OUTPUT:
 		RETVAL
 
+AV *
+libconfig_fetch_array(conf, path)
+	Conf::Libconfig conf
+	const char *path
+	PREINIT:
+		AV *ret = newAV();
+	CODE:
+	{
+		RETVAL = ret;
+	}
+	OUTPUT:
+		RETVAL
+
 Conf::Libconfig::Settings
 libconfig_setting_lookup(conf, path)
 	Conf::Libconfig conf
@@ -195,7 +208,6 @@ libconfig_setting_lookup(conf, path)
 	}
 	OUTPUT:
 		RETVAL
-
 
 MODULE = Conf::Libconfig     PACKAGE = Conf::Libconfig::Settings	PREFIX = libconfig_setting_
 

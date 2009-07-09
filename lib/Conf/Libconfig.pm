@@ -81,6 +81,10 @@ Autocheck and get value from config file, suggest use it.
 
 return setting resource.
 
+=head2 $self->fetch_array ($path)
+
+return array list from path.
+
 =head2 $setting->length ()
 
 return count of setting resource.
