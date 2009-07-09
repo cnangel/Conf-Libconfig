@@ -1,5 +1,7 @@
 Revision history for Conf-Libconfig
 
+0.004	Thu 09 Jul 2009 09:47:20 PM CST
+        Support Hash and list dumper.
 0.003	Wed 08 Jul 2009 05:33:41 PM CST
         Support Array list.
 0.002	Wed 08 Jul 2009 04:13:37 PM CST
