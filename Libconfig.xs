@@ -49,9 +49,9 @@ config_t config;
 
 
 SV * check_array_type(config_setting_t *);
-SV * check_hash_type(config_setting_t *, const char **);
+SV * check_hash_type(config_setting_t *, char **);
 AV * get_array(config_setting_t *);
-HV * get_hash(config_setting_t *);
+HV * get_hash(config_setting_t *, char *);
 
 SV *
 check_array_type(config_setting_t *settings)
@@ -92,15 +92,14 @@ check_array_type(config_setting_t *settings)
 }
 
 SV *
-check_hash_type(config_setting_t *settings, const char **name)
+check_hash_type(config_setting_t *settings, char **name)
 {
 	long long vBigint;
 	char vBigintArr[256];
 	size_t vBigintArrLen;
 	const char *vChar;
 	SV *sv = newSV(0);
-	const char *svname = config_setting_name(settings);
-	name = &svname;
+	*name = config_setting_name(settings);
 	int settings_type = config_setting_type(settings);
 	switch (settings_type)
 	{
@@ -144,31 +143,34 @@ get_array(config_setting_t *settings)
 		for (i = 0; i < settings_count; i ++)
 		{
 			settings_item = config_setting_get_elem(settings, i);
-			int settings_item_type = config_setting_type(settings_item);
-			switch (settings_item_type)
+			if (settings_item)
 			{
-				case CONFIG_TYPE_INT:
-				case CONFIG_TYPE_INT64:
-				case CONFIG_TYPE_BOOL:
-				case CONFIG_TYPE_FLOAT:
-				case CONFIG_TYPE_STRING:
-					av_push(av, check_array_type(settings_item));
-					break;
-				case CONFIG_TYPE_ARRAY:
-					tmpav = get_array(settings_item);
-					av_push(av, newRV_inc((SV*)tmpav));
-					break;
-				case CONFIG_TYPE_LIST:
-					tmpav = get_array(settings_item);
-					av_push(av, newRV_noinc((SV*)tmpav));
-					break;
-				case CONFIG_TYPE_GROUP:
-					tmpav = get_array(settings_item);
-					av_push(av, newRV_noinc((SV*)tmpav));
-					break;
-				default:
-					/*Perl_warn(aTHX_ "Common type!");*/
-					Perl_croak(aTHX_ "Not this type!");
+				int settings_item_type = config_setting_type(settings_item);
+				switch (settings_item_type)
+				{
+					case CONFIG_TYPE_INT:
+					case CONFIG_TYPE_INT64:
+					case CONFIG_TYPE_BOOL:
+					case CONFIG_TYPE_FLOAT:
+					case CONFIG_TYPE_STRING:
+						av_push(av, check_array_type(settings_item));
+						break;
+					case CONFIG_TYPE_ARRAY:
+						tmpav = get_array(settings_item);
+						av_push(av, newRV_inc((SV*)tmpav));
+						break;
+					case CONFIG_TYPE_LIST:
+						tmpav = get_array(settings_item);
+						av_push(av, newRV_noinc((SV*)tmpav));
+						break;
+					case CONFIG_TYPE_GROUP:
+						tmpav = get_array(settings_item);
+						av_push(av, newRV_noinc((SV*)tmpav));
+						break;
+					default:
+						/*Perl_warn(aTHX_ "Common type!");*/
+						Perl_croak(aTHX_ "Not this type!");
+				}
 			}
 		}
 	}
@@ -176,56 +178,71 @@ get_array(config_setting_t *settings)
 }
 
 HV *
-get_hash(config_setting_t *settings)
+get_hash(config_setting_t *settings, char *name)
 {
 	SV *svvalue = newSV(0);
-	const char *name;
+	/*char *name = NULL;*/
 	HV *hv = newHV();
-	/*HV *tmphv = newHV();*/
+	AV *tmpav = newAV();
+	HV *tmphv = newHV();
 	int i;
 	config_setting_t *settings_item;
 	int settings_count;
+	char *tmpchar;
 
+			/*Perl_warn(aTHX_ "LIST this type!%s\n", settings->name);*/
 	if (settings)
 	{
 		settings_count = config_setting_length(settings);
 		for (i = 0; i < settings_count; i ++)
 		{
 			settings_item = config_setting_get_elem(settings, i);
-			int settings_item_type = config_setting_type(settings_item);
-			switch (settings_item_type)
+			Perl_warn(aTHX_ "[Note] %s | %s => %d\n", settings->name, settings_item->name, i);
+			if (settings_item)
 			{
-				case CONFIG_TYPE_INT:
-				case CONFIG_TYPE_INT64:
-				case CONFIG_TYPE_BOOL:
-				case CONFIG_TYPE_FLOAT:
-				case CONFIG_TYPE_STRING:
-					/*av_push(av, check_type(settings_item));*/
-					hv_store( hv, "foo", 3, newSV(0), 0 );
-					/*check_hash_type(settings_item);*/
-
-					/*svvalue = check_hash_type(settings_item, &name);*/
-					/*hv_store(hv, name, strlen(name), svvalue, 0);*/
-					/*hv_stores(hv, name, svvalue);*/
-					break;
-				case CONFIG_TYPE_ARRAY:
-					/*tmpav = get_array(settings_item);*/
-					/*av_push(av, newRV_inc((SV*)tmpav));*/
-					Perl_croak(aTHX_ "ARRAY this type!");
-					break;
-				case CONFIG_TYPE_LIST:
-					/*tmpav = get_array(settings_item);*/
-					/*av_push(av, newRV_noinc((SV*)tmpav));*/
-					Perl_croak(aTHX_ "LIST this type!");
-					break;
-				case CONFIG_TYPE_GROUP:
-					/*tmpav = get_array(settings_item);*/
-					/*av_push(av, newRV_noinc((SV*)tmpav));*/
-					Perl_croak(aTHX_ "GROUP this type!");
-					break;
-				default:
-					/*Perl_warn(aTHX_ "Common type!");*/
-					Perl_croak(aTHX_ "Not this type!");
+				int settings_item_type = config_setting_type(settings_item);
+				switch (settings_item_type)
+				{
+					case CONFIG_TYPE_INT:
+					case CONFIG_TYPE_INT64:
+					case CONFIG_TYPE_BOOL:
+					case CONFIG_TYPE_FLOAT:
+					case CONFIG_TYPE_STRING:
+						if (config_setting_name(settings_item))
+						{
+							svvalue = check_hash_type(settings_item, &name);
+							hv_store(hv, name, strlen(name), svvalue, 0);
+						}
+						else
+						{
+							Perl_croak(aTHX_ "Not anonymous this type!");
+							/*av_push(tmpav, check_array_type(settings_item));*/
+							/*tmpchar = sv_pv(check_array_type(settings_item));*/
+							/*hv_store(hv, tmpchar, strlen(tmpchar), 0, 0);*/
+							/*hv_store(hv, NULL, 0, newRV_inc((SV*)tmpav), 0);*/
+						}
+						// ??
+						/*hv_stores(hv, name, svvalue);*/
+						break;
+					case CONFIG_TYPE_ARRAY:
+						Perl_croak(aTHX_ "Not Array this type!");
+						/*tmphv = get_hash(settings_item, name);*/
+						/*hv_store(hv, name, strlen(name), newRV_inc((SV*)tmphv), 0);*/
+						break;
+					case CONFIG_TYPE_LIST:
+						/*tmpav = get_array(settings_item);*/
+						/*av_push(av, newRV_noinc((SV*)tmpav));*/
+						Perl_croak(aTHX_ "Not LIST this type!");
+						break;
+					case CONFIG_TYPE_GROUP:
+						/*tmpav = get_array(settings_item);*/
+						/*av_push(av, newRV_noinc((SV*)tmpav));*/
+						Perl_croak(aTHX_ "Not GROUP this type!");
+						break;
+					default:
+						/*Perl_warn(aTHX_ "Common type!");*/
+						Perl_croak(aTHX_ "Not this type!");
+				}
 			}
 		}
 	}
@@ -391,11 +408,12 @@ libconfig_fetch_hashref(conf, path)
 	const char *path
 	PREINIT:
 		config_setting_t *settings;
+		char name[256];
 		HV *hv = newHV();
 	CODE:
 	{
 		settings = config_lookup(conf, path);
-		hv = get_hash(settings);
+		hv = get_hash(settings, name);
 		RETVAL = hv;
 	}
 	OUTPUT:

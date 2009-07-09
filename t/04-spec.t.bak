@@ -25,8 +25,8 @@ my @arr = $foo->fetch_array("me.mar.family");
 #warn Dumper \@arr;
 ok((@arr ? 1 : 0), "fetch array - status ok");
 
-#my $ref = $foo->fetch_hashref("me.mar.check1");
-#warn Dumper $ref;
+my $ref = $foo->fetch_hashref("me.mar.check1");
+warn Dumper $ref;
 
 ok(1);
 
