@@ -143,7 +143,7 @@ get_hash(config_setting_t *settings)
 {
 	/*SV *sv = newSV(0);*/
 	HV *hv = newHV();
-	HV *tmphv = newHV();
+	/*HV *tmphv = newHV();*/
 	int i;
 	config_setting_t *settings_item;
 	int settings_count;
@@ -165,7 +165,7 @@ get_hash(config_setting_t *settings)
 					/*av_push(av, check_type(settings_item));*/
 					/*hv_store( hv, "foo", 2, newSV(0), 0 );*/
 					/*check_hash_type(settings_item);*/
-					hv_store( hv, "foo", 3, check_hash_type(settings_item), 1);
+					//hv_store( hv, "foo", 3, check_hash_type(settings_item), 1);
 					break;
 				case CONFIG_TYPE_ARRAY:
 					/*tmpav = get_array(settings_item);*/
@@ -354,7 +354,7 @@ libconfig_fetch_hashref(conf, path)
 	CODE:
 	{
 		settings = config_lookup(conf, path);
-		hv = get_hash(settings);
+//		hv = get_hash(settings);
 		RETVAL = hv;
 	}
 	OUTPUT:
