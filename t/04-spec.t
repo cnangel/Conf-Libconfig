@@ -22,7 +22,7 @@ my $v = $settings->get_item(0);
 ok(($v ? 1 : 0), "get item - status ok");
 
 my @arr = $foo->fetch_array("me.mar.family");
-warn Dumper \@arr;
+#warn Dumper \@arr;
 ok((@arr ? 1 : 0), "fetch array - status ok");
 
 my $ref = $foo->fetch_hashref("me.mar.check1");

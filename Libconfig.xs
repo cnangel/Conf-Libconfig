@@ -49,7 +49,7 @@ config_t config;
 
 
 SV * check_array_type(config_setting_t *);
-SV * check_hash_type(config_setting_t *);
+SV * check_hash_type(config_setting_t *, const char **);
 AV * get_array(config_setting_t *);
 HV * get_hash(config_setting_t *);
 
@@ -64,6 +64,43 @@ check_array_type(config_setting_t *settings)
 	// Init hh
 	/*char *name = config_setting_name(settings);*/
 	/*hh->name = sv_setpvn(name, strlen(name));*/
+	int settings_type = config_setting_type(settings);
+	switch (settings_type)
+	{
+		case CONFIG_TYPE_INT:
+			sv = newSViv(config_setting_get_int(settings));
+			break;
+		case CONFIG_TYPE_INT64:
+			vBigint = config_setting_get_int64(settings);
+			vBigintArrLen = sprintf(vBigintArr, "%lld", vBigint);
+			sv = newSVpv(vBigintArr, vBigintArrLen);
+			break;
+		case CONFIG_TYPE_BOOL:
+			sv = newSViv(config_setting_get_bool(settings));
+			break;
+		case CONFIG_TYPE_FLOAT:
+			sv = newSVnv(config_setting_get_float(settings));
+			break;
+		case CONFIG_TYPE_STRING:
+			vChar = config_setting_get_string(settings);
+			sv = newSVpvn(vChar, strlen(vChar));
+			break;
+		default:
+			Perl_croak(aTHX_ "Scalar have not this type!");
+	}
+	return sv;
+}
+
+SV *
+check_hash_type(config_setting_t *settings, const char **name)
+{
+	long long vBigint;
+	char vBigintArr[256];
+	size_t vBigintArrLen;
+	const char *vChar;
+	SV *sv = newSV(0);
+	const char *svname = config_setting_name(settings);
+	name = &svname;
 	int settings_type = config_setting_type(settings);
 	switch (settings_type)
 	{
@@ -141,7 +178,8 @@ get_array(config_setting_t *settings)
 HV *
 get_hash(config_setting_t *settings)
 {
-	/*SV *sv = newSV(0);*/
+	SV *svvalue = newSV(0);
+	const char *name;
 	HV *hv = newHV();
 	/*HV *tmphv = newHV();*/
 	int i;
@@ -163,9 +201,12 @@ get_hash(config_setting_t *settings)
 				case CONFIG_TYPE_FLOAT:
 				case CONFIG_TYPE_STRING:
 					/*av_push(av, check_type(settings_item));*/
-					/*hv_store( hv, "foo", 2, newSV(0), 0 );*/
+					hv_store( hv, "foo", 3, newSV(0), 0 );
 					/*check_hash_type(settings_item);*/
-					//hv_store( hv, "foo", 3, check_hash_type(settings_item), 1);
+
+					/*svvalue = check_hash_type(settings_item, &name);*/
+					/*hv_store(hv, name, strlen(name), svvalue, 0);*/
+					/*hv_stores(hv, name, svvalue);*/
 					break;
 				case CONFIG_TYPE_ARRAY:
 					/*tmpav = get_array(settings_item);*/
@@ -209,7 +250,7 @@ void
 libconfig_delete(conf)
 	Conf::Libconfig conf
 	CODE:
-		config_destroy(conf);
+	config_destroy(conf);
 
 int
 libconfig_read_file(conf, filename)
@@ -354,7 +395,7 @@ libconfig_fetch_hashref(conf, path)
 	CODE:
 	{
 		settings = config_lookup(conf, path);
-//		hv = get_hash(settings);
+		hv = get_hash(settings);
 		RETVAL = hv;
 	}
 	OUTPUT:
