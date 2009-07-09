@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More tests => 2;
+use Test::More tests => 3;
 
 use Conf::Libconfig;
 
@@ -19,7 +19,11 @@ ok(($settings ? 1 : 0), "setting lookup - status ok");
 my $len = $settings->length();
 
 my $v = $settings->get_item(0);
-diag $v;
+ok(($v ? 1 : 0), "get item - status ok");
+
+my @arr = $foo->fetch_array("me.mar.family");
+
+warn Dumper \@arr;
 
 
 
