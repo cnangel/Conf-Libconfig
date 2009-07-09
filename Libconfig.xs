@@ -45,12 +45,6 @@ extern "C" {
 
 typedef config_t *Conf__Libconfig;
 typedef config_setting_t *Conf__Libconfig__Settings;
-typedef struct __hv_hash_st
-{
-	SV *name;
-	SV *value;
-} hv_hash_st;
-hv_hash_st hh;
 config_t config;
 
 
@@ -59,25 +53,22 @@ SV * check_hash_type(config_setting_t *);
 AV * get_array(config_setting_t *);
 HV * get_hash(config_setting_t *);
 
-/*SV * */
-/*check_array_type(config_setting_t *settings)*/
-hv_hash_st *
-get_settings_info(config_setting_t *settings)
+SV *
+check_array_type(config_setting_t *settings)
 {
 	long long vBigint;
 	char vBigintArr[256];
 	size_t vBigintArrLen;
 	const char *vChar;
+	SV *sv = newSV(0);
 	// Init hh
-	char *name = config_setting_name(settings);
-	hh->name = sv_setpvn(name, strlen(name));
-	hh->value = newSV(0);
+	/*char *name = config_setting_name(settings);*/
+	/*hh->name = sv_setpvn(name, strlen(name));*/
 	int settings_type = config_setting_type(settings);
 	switch (settings_type)
 	{
 		case CONFIG_TYPE_INT:
-			hh->value = newSViv(config_setting_get_int(settings));
-			sv_setpvn(i)
+			sv = newSViv(config_setting_get_int(settings));
 			break;
 		case CONFIG_TYPE_INT64:
 			vBigint = config_setting_get_int64(settings);
