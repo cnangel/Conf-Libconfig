@@ -12,7 +12,7 @@ use Cwd;
 
 use base qw/ExtUtils::XSBuilder::ParseSource/;
 
-$VERSION = '0.001';
+$VERSION = '0.006';
 
 my $cwd = cwd;
 $cwd =~ m{^(.+/Conf-Libconfig).*$} or die "Can't find base directory";
