@@ -8,6 +8,15 @@ author				'cnangel <junliang.li@alibaba-inc.com>';
 perl_version        '5.006001';
 all_from			'lib/Conf/Libconfig.pm';
 
+my $lcf = system("pkg-config libconfig --libs > /dev/null 2>&1");
+if ($lcf != 0)
+{
+	printf("Please install libconfig from http://www.hyperrealm.com/libconfig/.\n");
+	printf("You can install this lib in /usr/lib or /usr/local/lib, even you can edit Makefile.PL, \nand modify variable cc_lib_paths and cc_inc_paths where libconfig install.\n");
+	printf("Default the Makefile.PL check this lib to use command: pkg-config, you could also instead it. \nCnangel (cnangel\@gmail.com)\n");
+	printf("No Makefile for Conf::Libconfig\n");
+	exit;
+}
 requires			'ExtUtils::XSBuilder' => 0;
 requires			'Cwd' => 1.00;
 requires			'File::Find' => 1.00;

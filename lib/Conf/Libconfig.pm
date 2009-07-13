@@ -25,7 +25,7 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '0.004';
+our $VERSION = '0.005';
 
 require XSLoader;
 XSLoader::load('Conf::Libconfig', $VERSION);
@@ -123,6 +123,28 @@ This module uses libconfig.
 
 =head1 INSTALLATION
 
+To prepare install, you should install libconfig, you can use yum for redhat,
+like this:
+
+	yum install libconfig libconfig-devel -y
+
+or apt-get for debian:
+
+	apt-get libconfig libconfig-devel
+
+for other platform, you can compiler libconfig from source:
+
+	http://www.hyperrealm.com/libconfig/
+
+you can use order like this:
+
+	wget http://www.hyperrealm.com/libconfig/libconfig-1.3.2.tar.gz
+	tar -zxf libconfig-1.3.2.tar.gz
+	cd libconfig-1.3.2
+	./configure --prefix=/usr
+	make
+	make install
+
 If you are not soudoer or root, you need contact administrator.
 
     perl Makefile.PL
@@ -198,5 +220,7 @@ i<Wed 08 Jul 2009 04:07:46 PM CST> B<v0.002> Use config replace config++.
 i<Wed 08 Jul 2009 05:32:50 PM CST> B<v0.003> Support Array list.
 
 i<Thu 09 Jul 2009 09:46:28 PM CST> B<v0.004> Support Hash and list dumper.
+
+i<Mon 13 Jul 2009 10:46:45 AM CST> B<v0.005> Check lib config and prompt.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
