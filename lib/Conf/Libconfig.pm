@@ -131,7 +131,7 @@ Win32 users should replace "make" with "nmake".
 
 =head1 SOURCE CONTROL
 
-You can always get the latest SSH::Batch source from its
+You can always get the latest Conf::Libconfig source from its
 public Git repository:
 
     http://github.com/cnangel/Conf-Libconfig/tree/master
