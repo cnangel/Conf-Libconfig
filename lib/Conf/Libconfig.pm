@@ -160,7 +160,7 @@ http://my.huhoo.net/
 
 =head1 AUTHOR
 
-Cnangel, E<lt>cnangel@gmail.com<gt>
+Cnangel, E<lt>cnangel@gmail.comE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
@@ -187,8 +187,6 @@ Redistributions in binary form must reproduce the above copyright notice, this l
 Neither the name of the Alibaba Search Center, Alibaba Inc. nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 
 =back
-
-=cut
 
 =head1 HISTORY
 
