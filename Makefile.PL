@@ -16,6 +16,7 @@ requires			'XSLoader' => 0.05;
 
 build_requires      'Test::Base' => '0.01';
 
+test_requires       'Test::Exception' => '0.27';
 #test_requires		'Test::Pod::Coverage' => '0';
 
 #makemaker_args       CC    => 'g++';
