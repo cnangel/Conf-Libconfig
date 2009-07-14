@@ -50,8 +50,6 @@ no_index			( directory => qw< t inc src > );
 #install_script      ('bin/WrapXSCheck.pl');
 #install_script      ('bin/WrapXSRun.pl');
 
-auto_install();
-
 WriteAll();
 
 #package MY;
