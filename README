@@ -8,31 +8,31 @@ INSTALLATION
 To prepare install, you should install libconfig, you can use yum for redhat,
 like this:
 
-	yum install libconfig libconfig-devel -y
+    yum install libconfig libconfig-devel -y
 
 or apt-get for debian:
 
-	apt-get libconfig libconfig-devel
+    apt-get libconfig libconfig-devel
 
 for other platform, you can compiler libconfig from source:
 
-	http://www.hyperrealm.com/libconfig/
+    http://www.hyperrealm.com/libconfig/
 
 you can use order like this:
 
-	wget http://www.hyperrealm.com/libconfig/libconfig-1.3.2.tar.gz
-	tar -zxf libconfig-1.3.2.tar.gz
-	cd libconfig-1.3.2
-	./configure --prefix=/usr
-	make
-	make install
+    wget http://www.hyperrealm.com/libconfig/libconfig-1.3.2.tar.gz
+    tar -zxf libconfig-1.3.2.tar.gz
+    cd libconfig-1.3.2
+    ./configure --prefix=/usr
+    make
+    make install
 
 To install this module, run the following commands:
 
-	perl Makefile.PL
-	make
-	make test
-	make install
+    perl Makefile.PL
+    make
+    make test
+    make install
 
 SUPPORT AND DOCUMENTATION
 
@@ -63,4 +63,3 @@ Copyright (c) 2009, Alibaba Search Center, Alibaba Inc. All rights reserved.
 Copyright (C) 2009 cnangel
 
 This program is released under the following license: bsd
-

@@ -12,17 +12,17 @@ our @ISA = qw(Exporter);
 # names by default without a very good reason. Use EXPORT_OK instead.
 # Do not simply export all your public functions/methods/constants.
 
-# This allows declaration	use Conf::Libconfig ':all';
+# This allows declaration   use Conf::Libconfig ':all';
 # If you do not need this, moving things directly into @EXPORT or @EXPORT_OK
 # will save memory.
 our %EXPORT_TAGS = ( 'all' => [ qw(
-	
+
 ) ] );
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
 our @EXPORT = qw(
-	
+
 );
 
 our $VERSION = '0.005';
@@ -52,7 +52,7 @@ Conf::Libconfig - Perl extension for libconfig
 
 The module C<Conf::Libconfig> need use libconfig library:
 
-	http://www.hyperrealm.com/libconfig/
+    http://www.hyperrealm.com/libconfig/
 
 You can use C<Conf::Libconfig> for perl config, and support Salar, Array and Hash data struction etc.
 like C or C++ function. C<Conf::Libconfig> could reduce your config file and quote by C/C++ transportability.
@@ -126,24 +126,24 @@ This module uses libconfig.
 To prepare install, you should install libconfig, you can use yum for redhat,
 like this:
 
-	yum install libconfig libconfig-devel -y
+    yum install libconfig libconfig-devel -y
 
 or apt-get for debian:
 
-	apt-get libconfig libconfig-devel
+    apt-get libconfig libconfig-devel
 
 for other platform, you can compiler libconfig from source:
 
-	http://www.hyperrealm.com/libconfig/
+    http://www.hyperrealm.com/libconfig/
 
 you can use order like this:
 
-	wget http://www.hyperrealm.com/libconfig/libconfig-1.3.2.tar.gz
-	tar -zxf libconfig-1.3.2.tar.gz
-	cd libconfig-1.3.2
-	./configure --prefix=/usr
-	make
-	make install
+    wget http://www.hyperrealm.com/libconfig/libconfig-1.3.2.tar.gz
+    tar -zxf libconfig-1.3.2.tar.gz
+    cd libconfig-1.3.2
+    ./configure --prefix=/usr
+    make
+    make install
 
 If you are not soudoer or root, you need contact administrator.
 
@@ -159,7 +159,7 @@ Win32 users should replace "make" with "nmake".
 You can always get the latest SSH::Batch source from its
 public Git repository:
 
-	http://github.com/cnangel/Conf-Libconfig/tree/master
+    http://github.com/cnangel/Conf-Libconfig/tree/master
 
 If you have a branch for me to pull, please let me know ;)
 
