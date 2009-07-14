@@ -14,8 +14,6 @@ requires            'Cwd' => 1.00;
 requires            'File::Find' => 1.00;
 requires            'XSLoader' => 0.05;
 
-build_requires      'Test::Base' => '0.01';
-
 test_requires       'Test::Exception' => '0.27';
 test_requires       'Test::Deep' => '0.104';
 #test_requires      'Test::Pod::Coverage' => '0';
