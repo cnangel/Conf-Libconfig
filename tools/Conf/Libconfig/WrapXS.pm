@@ -1,7 +1,4 @@
 package Conf::Libconfig::WrapXS;
-
-# export PERL5LIB=./lib
-
 use strict;
 use warnings;
 

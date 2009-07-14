@@ -9,12 +9,8 @@ our $VERSION = '0.005';
 require XSLoader;
 XSLoader::load('Conf::Libconfig', $VERSION);
 
-# Preloaded methods go here.
-
 1;
 __END__
-# Below is stub documentation for your module. You'd better edit it!
-
 =head1 NAME
 
 Conf::Libconfig - Perl extension for libconfig

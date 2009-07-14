@@ -1,7 +1,4 @@
 package Conf::Libconfig::ParseSource;
-
-# export PERL5LIB=./lib
-
 use strict;
 use warnings;
 use vars qw{@ISA $VERSION};
@@ -34,7 +31,6 @@ sub find_includes
     unless (-d $dirs[0]) {
         die "could not find include directory";
     }
-# print "Will search @dirs for include files...\n" if ($verbose) ;
     my @includes;
     my $unwanted = join '|', @{$self -> unwanted_includes} ;
 
