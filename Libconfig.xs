@@ -183,12 +183,12 @@ get_hash(config_setting_t *settings, char *name)
     SV *svvalue = newSV(0);
     /*char *name = NULL;*/
     HV *hv = newHV();
-    AV *tmpav = newAV();
-    HV *tmphv = newHV();
+    /*AV *tmpav = newAV();*/
+    /*HV *tmphv = newHV();*/
     int i;
     config_setting_t *settings_item;
     int settings_count;
-    char *tmpchar;
+    /*char *tmpchar;*/
 
             /*Perl_warn(aTHX_ "LIST this type!%s\n", settings->name);*/
     if (settings)
@@ -432,6 +432,26 @@ libconfig_setting_lookup(conf, path)
     OUTPUT:
         RETVAL
 
+void
+libconfig_write(conf, stream)
+	Conf::Libconfig conf
+	FILE *stream
+	PREINIT:
+	CODE:
+		config_write(conf, stream);
+
+int
+libconfig_write_file(conf, filename)
+	Conf::Libconfig conf
+	const char *filename
+	PREINIT:
+	CODE:
+	{
+		RETVAL = config_write_file(conf, filename);
+	}
+	OUTPUT:
+		RETVAL
+
 MODULE = Conf::Libconfig     PACKAGE = Conf::Libconfig::Settings    PREFIX = libconfig_setting_
 
 int
@@ -477,3 +497,4 @@ libconfig_setting_get_item(setting, i)
     }
     OUTPUT:
         RETVAL
+

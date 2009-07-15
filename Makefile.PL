@@ -5,7 +5,7 @@ use Devel::CheckLib qw(check_lib_or_exit);
 
 name                'Conf-Libconfig';
 license             'bsd';
-author              'cnangel <junliang.li@alibaba-inc.com>';
+author              'Cnangel <cnangel@gmail.com>';
 perl_version        '5.006001';
 all_from            'lib/Conf/Libconfig.pm';
 requires            'ExtUtils::XSBuilder' => 0;
@@ -13,11 +13,14 @@ requires            'Cwd' => 1.00;
 requires            'File::Find' => 1.00;
 requires            'XSLoader' => 0.05;
 test_requires       'Test::Exception' => '0.27';
-test_requires       'Test::Deep' => '0.104';
-check_lib_or_exit    lib => [qw(config)];
+test_requires       'Test::More' => 0,
+test_requires       'Test::Deep' => '0.103';
+test_requires       'Test::NoTabs' => '0.5';
+check_lib_or_exit   lib => [qw(config)];
 cc_inc_paths        '/usr/include', '/usr/local/include';
 cc_lib_paths        '/usr/lib' , '/usr/lib64', '/usr/local/lib', '/usr/local/lib64';
 cc_lib_links        'config';
 can_cc              or die 'This module requires C compiler.';
-no_index            directory => qw(t inc src);
+no_index            directory => qw(t inc);
+auto_install();
 WriteAll();

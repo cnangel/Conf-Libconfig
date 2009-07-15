@@ -1,4 +1,5 @@
 Changes
+inc/Devel/CheckLib.pm
 inc/Module/AutoInstall.pm
 inc/Module/Install.pm
 inc/Module/Install/AutoInstall.pm
@@ -24,12 +25,14 @@ t/02-read.t
 t/03-write.t
 t/04-spec.t
 t/boilerplate.t
+t/no-tabs.t
 t/pod-coverage.t
 t/pod.t
 t/spec.cfg
 t/test.cfg
 tools/Conf/Libconfig/ParseSource.pm
 tools/Conf/Libconfig/WrapXS.pm
+tools/coverage
 tools/ParseSource.pl
 tools/WrapXSCheck.pl
 tools/WrapXSRun.pl

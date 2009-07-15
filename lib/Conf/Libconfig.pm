@@ -4,7 +4,7 @@ use 5.006001;
 use strict;
 use warnings;
 
-our $VERSION = '0.005';
+our $VERSION = '0.006';
 
 require XSLoader;
 XSLoader::load('Conf::Libconfig', $VERSION);
@@ -22,6 +22,7 @@ Conf::Libconfig - Perl extension for libconfig
   $self->read_file($cfg);
   my $value = $self->lookup_value("abc.edf");
   print $value;
+  $self->delete();
 
 =head1 DESCRIPTION
 
@@ -47,6 +48,14 @@ Destructor.
 =head2 $self->read_file ($file)
 
 Read config file.
+
+=head2 $self->write($buffer)
+
+write to a handle buffer.
+
+=head2 $self->write_file($filename)
+
+write to a file.
 
 =head2 $self->lookup_value ($path)
 
