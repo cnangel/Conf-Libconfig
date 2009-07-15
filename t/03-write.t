@@ -8,7 +8,7 @@ use Conf::Libconfig;
 
 my $cfgfile = "./t/test.cfg";
 my $writecfgfile = "./t/newtest.cfg";
-my $foo = new Conf::Libconfig;
+my $foo = Conf::Libconfig->new;
 open my $fp, '>', $writecfgfile or die "Can't write the file: $!";
 
 TODO: {
