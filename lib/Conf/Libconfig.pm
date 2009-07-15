@@ -4,38 +4,13 @@ use 5.006001;
 use strict;
 use warnings;
 
-require Exporter;
-
-our @ISA = qw(Exporter);
-
-# Items to export into callers namespace by default. Note: do not export
-# names by default without a very good reason. Use EXPORT_OK instead.
-# Do not simply export all your public functions/methods/constants.
-
-# This allows declaration	use Conf::Libconfig ':all';
-# If you do not need this, moving things directly into @EXPORT or @EXPORT_OK
-# will save memory.
-our %EXPORT_TAGS = ( 'all' => [ qw(
-	
-) ] );
-
-our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
-
-our @EXPORT = qw(
-	
-);
-
 our $VERSION = '0.005';
 
 require XSLoader;
 XSLoader::load('Conf::Libconfig', $VERSION);
 
-# Preloaded methods go here.
-
 1;
 __END__
-# Below is stub documentation for your module. You'd better edit it!
-
 =head1 NAME
 
 Conf::Libconfig - Perl extension for libconfig
@@ -47,12 +22,13 @@ Conf::Libconfig - Perl extension for libconfig
   $self->read_file($cfg);
   my $value = $self->lookup_value("abc.edf");
   print $value;
+  $self->delete();
 
 =head1 DESCRIPTION
 
 The module C<Conf::Libconfig> need use libconfig library:
 
-	http://www.hyperrealm.com/libconfig/
+    http://www.hyperrealm.com/libconfig/
 
 You can use C<Conf::Libconfig> for perl config, and support Salar, Array and Hash data struction etc.
 like C or C++ function. C<Conf::Libconfig> could reduce your config file and quote by C/C++ transportability.
@@ -72,6 +48,14 @@ Destructor.
 =head2 $self->read_file ($file)
 
 Read config file.
+
+=head2 $self->write($buffer)
+
+write to a handle buffer.
+
+=head2 $self->write_file($filename)
+
+write to a file.
 
 =head2 $self->lookup_value ($path)
 
@@ -126,24 +110,24 @@ This module uses libconfig.
 To prepare install, you should install libconfig, you can use yum for redhat,
 like this:
 
-	yum install libconfig libconfig-devel -y
+    yum install libconfig libconfig-devel -y
 
 or apt-get for debian:
 
-	apt-get libconfig libconfig-devel
+    apt-get libconfig libconfig-devel
 
 for other platform, you can compiler libconfig from source:
 
-	http://www.hyperrealm.com/libconfig/
+    http://www.hyperrealm.com/libconfig/
 
 you can use order like this:
 
-	wget http://www.hyperrealm.com/libconfig/libconfig-1.3.2.tar.gz
-	tar -zxf libconfig-1.3.2.tar.gz
-	cd libconfig-1.3.2
-	./configure --prefix=/usr
-	make
-	make install
+    wget http://www.hyperrealm.com/libconfig/libconfig-1.3.2.tar.gz
+    tar -zxf libconfig-1.3.2.tar.gz
+    cd libconfig-1.3.2
+    ./configure --prefix=/usr
+    make
+    make install
 
 If you are not soudoer or root, you need contact administrator.
 
@@ -156,10 +140,10 @@ Win32 users should replace "make" with "nmake".
 
 =head1 SOURCE CONTROL
 
-You can always get the latest SSH::Batch source from its
+You can always get the latest Conf::Libconfig source from its
 public Git repository:
 
-	http://github.com/cnangel/Conf-Libconfig/tree/master
+    http://github.com/cnangel/Conf-Libconfig/tree/master
 
 If you have a branch for me to pull, please let me know ;)
 
@@ -181,7 +165,7 @@ http://my.huhoo.net/
 
 =head1 AUTHOR
 
-Cnangel, E<lt>cnangel@gmail.com<gt>
+Cnangel, E<lt>cnangel@gmail.comE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
@@ -209,18 +193,6 @@ Neither the name of the Alibaba Search Center, Alibaba Inc. nor the names of its
 
 =back
 
-=cut
-
-=head1 HISTORY
-
-I<Wed Jul 26 09:44:23 2009> B<v0.001> Build first version and use link config++.
-
-i<Wed 08 Jul 2009 04:07:46 PM CST> B<v0.002> Use config replace config++.
-
-i<Wed 08 Jul 2009 05:32:50 PM CST> B<v0.003> Support Array list.
-
-i<Thu 09 Jul 2009 09:46:28 PM CST> B<v0.004> Support Hash and list dumper.
-
-i<Mon 13 Jul 2009 10:46:45 AM CST> B<v0.005> Check lib config and prompt.
+=head2 DISCLAIMER OF WARRANTY
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.

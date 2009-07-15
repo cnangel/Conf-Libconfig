@@ -1,13 +1,10 @@
 package Conf::Libconfig::WrapXS;
-
-# export PERL5LIB=./lib
-
 use strict;
 use warnings;
 
 use Cwd;
 
-our @ISA	= qw( ExtUtils::XSBuilder::WrapXS );
+our @ISA    = qw( ExtUtils::XSBuilder::WrapXS );
 
 use base qw/ExtUtils::XSBuilder::WrapXS/;
 
@@ -22,8 +19,8 @@ my $mapdir = "$basedir/xsbuilder/maps";
 my @dirs = ("$basedir/src");
 unless (-d $mapdir)
 {
-	mkdir ($mapdir, 0755);
-	chmod (0755, $mapdir);
+    mkdir ($mapdir, 0755);
+    chmod (0755, $mapdir);
 }
 
 sub new_parsesource  { [ Conf::Libconfig::ParseSource->new ] }
@@ -36,8 +33,8 @@ sub xs_include_dir { $xsdir }
 
 sub xs_includes
 {
-	my $self = shift ;
-	return $self->SUPER::xs_includes;
+    my $self = shift ;
+    return $self->SUPER::xs_includes;
 }
 
 1;

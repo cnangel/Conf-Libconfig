@@ -1,13 +1,18 @@
 Revision history for Conf-Libconfig
 
-0.005	Mon 13 Jul 2009 10:45:18 AM CST
-        Check lib config and prompt.
-0.004	Thu 09 Jul 2009 09:47:20 PM CST
-        Support Hash and list dumper.
-0.003	Wed 08 Jul 2009 05:33:41 PM CST
-        Support Array list.
-0.002	Wed 08 Jul 2009 04:13:37 PM CST
-        Use config replace config++.
+0.006   Wed 15 Jul 2009 12:21:31 PM CST
+        * Changed tests to be more useful(daxim);
+		* Established author tests(daxim);
+		* Some code clean-up(daxim);
+		* Add function write and write_file.
+0.005   Mon 13 Jul 2009 10:45:18 AM CST
+        * Check lib config and prompt.
+0.004   Thu 09 Jul 2009 09:47:20 PM CST
+        * Support Hash and list dumper.
+0.003   Wed 08 Jul 2009 05:33:41 PM CST
+        * Support Array list.
+0.002   Wed 08 Jul 2009 04:13:37 PM CST
+        * Use config replace config++.
 0.001   Wed 08 Jul 2009 04:08:26 PM CST
-        Build first version and use link config++.
+        * Build first version and use link config++.
 
