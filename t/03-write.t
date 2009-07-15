@@ -26,3 +26,4 @@ is(
 }
 
 close($fp);
+unlink $writecfgfile;
