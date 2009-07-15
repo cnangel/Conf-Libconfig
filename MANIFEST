@@ -25,7 +25,6 @@ t/02-read.t
 t/03-write.t
 t/04-spec.t
 t/boilerplate.t
-t/newtest.cfg
 t/no-tabs.t
 t/pod-coverage.t
 t/pod.t
