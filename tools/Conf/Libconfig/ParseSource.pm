@@ -4,9 +4,7 @@ use warnings;
 use vars qw{@ISA};
 
 use Cwd;
-
 @ISA = qw( ExtUtils::XSBuilder::ParseSource );
-
 use base qw/ExtUtils::XSBuilder::ParseSource/;
 
 my $cwd = cwd;

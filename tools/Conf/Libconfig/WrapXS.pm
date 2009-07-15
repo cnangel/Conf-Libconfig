@@ -3,9 +3,7 @@ use strict;
 use warnings;
 
 use Cwd;
-
 our @ISA    = qw( ExtUtils::XSBuilder::WrapXS );
-
 use base qw/ExtUtils::XSBuilder::WrapXS/;
 
 my $cwd = cwd;
