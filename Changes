@@ -2,9 +2,9 @@ Revision history for Conf-Libconfig
 
 0.006   Wed 15 Jul 2009 12:21:31 PM CST
         * Changed tests to be more useful(daxim);
-		* Established author tests(daxim);
-		* Some code clean-up(daxim);
-		* Add function write and write_file.
+        * Established author tests(daxim);
+        * Some code clean-up(daxim);
+        * Add function write and write_file.
 0.005   Mon 13 Jul 2009 10:45:18 AM CST
         * Check lib config and prompt.
 0.004   Thu 09 Jul 2009 09:47:20 PM CST

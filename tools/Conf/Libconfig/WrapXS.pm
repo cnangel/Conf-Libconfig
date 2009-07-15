@@ -8,8 +8,6 @@ our @ISA    = qw( ExtUtils::XSBuilder::WrapXS );
 
 use base qw/ExtUtils::XSBuilder::WrapXS/;
 
-our $VERSION = '0.006';
-
 my $cwd = cwd;
 $cwd =~ m{^(.+/Conf-Libconfig).*$} or die "Can't find base directory";
 my $basedir = $1;

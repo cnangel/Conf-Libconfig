@@ -1,15 +1,13 @@
 package Conf::Libconfig::ParseSource;
 use strict;
 use warnings;
-use vars qw{@ISA $VERSION};
+use vars qw{@ISA};
 
 use Cwd;
 
 @ISA = qw( ExtUtils::XSBuilder::ParseSource );
 
 use base qw/ExtUtils::XSBuilder::ParseSource/;
-
-$VERSION = '0.006';
 
 my $cwd = cwd;
 $cwd =~ m{^(.+/Conf-Libconfig).*$} or die "Can't find base directory";
