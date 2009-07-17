@@ -15,7 +15,7 @@ inc/Module/Install/WriteAll.pm
 lib/Conf/Libconfig.pm
 Libconfig.xs
 Makefile.PL
-MANIFEST			This list of files
+MANIFEST            This list of files
 MANIFEST.SKIP
 META.yml
 README

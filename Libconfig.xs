@@ -432,7 +432,7 @@ libconfig_setting_lookup(conf, path)
     OUTPUT:
         RETVAL
 
-void 
+void
 libconfig_write(conf, stream)
 	Conf::Libconfig conf
 	FILE *stream
@@ -440,7 +440,7 @@ libconfig_write(conf, stream)
 	CODE:
 		config_write(conf, stream);
 
-int 
+int
 libconfig_write_file(conf, filename)
 	Conf::Libconfig conf
 	const char *filename
