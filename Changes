@@ -1,5 +1,7 @@
 Revision history for Conf-Libconfig
 
+0.007   2009年07月17日 星期五 10时14分14秒
+
 0.006   Wed 15 Jul 2009 12:21:31 PM CST
         * Changed tests to be more useful(daxim);
         * Established author tests(daxim);
