@@ -9,6 +9,14 @@ use Conf::Libconfig;
 
 my $cfgfile = "./t/spec.cfg";
 my $foo = Conf::Libconfig->new;
+my $hash;
+if ( $foo->read_file($cfgfile) )
+{
+	$hash = $foo->fetch_hashref("me.mar.check1");
+	warn Dumper $hash;
+}
+
+
 
 TODO: {
 local $TODO = 'fetch_* methods do not work yet';

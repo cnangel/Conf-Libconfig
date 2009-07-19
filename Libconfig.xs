@@ -52,6 +52,7 @@ SV * check_array_type(config_setting_t *);
 SV * check_hash_type(config_setting_t *, char **);
 AV * get_array(config_setting_t *);
 HV * get_hash(config_setting_t *, char *);
+int get_hash_1(config_setting_t *, HV *hv);
 
 SV *
 check_array_type(config_setting_t *settings)
@@ -211,7 +212,10 @@ get_hash(config_setting_t *settings, char *name)
                         if (config_setting_name(settings_item))
                         {
                             svvalue = check_hash_type(settings_item, &name);
-                            hv_store(hv, name, strlen(name), svvalue, 0);
+                            if (hv_store(hv, name, strlen(name), svvalue, 0))
+							{
+								 SvREFCNT_dec(svvalue);
+							}
                         }
                         else
                         {
@@ -247,6 +251,21 @@ get_hash(config_setting_t *settings, char *name)
         }
     }
     return hv;
+}
+
+
+int
+get_hash_1(config_setting_t *settings, HV *hv)
+{
+	if (settings == NULL) return 1;
+	const char *settings_name = config_setting_name(settings);
+	SV *val = newSVpv(settings_name, strlen(settings_name));
+	if (hv_store(hv, settings_name, strlen(settings_name), val, 0))
+	{
+		SvREFCNT_dec(val);
+	}
+	/*int settings_count = config_setting_length(settings);*/
+	return 1;
 }
 
 MODULE = Conf::Libconfig     PACKAGE = Conf::Libconfig  PREFIX = libconfig_
@@ -408,12 +427,11 @@ libconfig_fetch_hashref(conf, path)
     const char *path
     PREINIT:
         config_setting_t *settings;
-        char name[256];
         HV *hv = newHV();
     CODE:
     {
         settings = config_lookup(conf, path);
-        hv = get_hash(settings, name);
+        get_hash_1(settings, hv);
         RETVAL = hv;
     }
     OUTPUT:

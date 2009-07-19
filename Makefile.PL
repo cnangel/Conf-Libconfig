@@ -12,10 +12,10 @@ requires            'ExtUtils::XSBuilder' => 0;
 requires            'Cwd' => 1.00;
 requires            'File::Find' => 1.00;
 requires            'XSLoader' => 0.05;
-test_requires       'Test::Exception' => '0.27';
-test_requires       'Test::More' => 0,
-test_requires       'Test::Deep' => '0.103';
-test_requires       'Test::NoTabs' => '0.5';
+test_requires       'Test::Exception' => 0.27;
+#test_requires       'Test::More' => 0.8,
+test_requires       'Test::Deep' => 0.103;
+#test_requires       'Test::NoTabs' => 0.5;
 check_lib_or_exit   lib => [qw(config)];
 cc_inc_paths        '/usr/include', '/usr/local/include';
 cc_lib_paths        '/usr/lib' , '/usr/lib64', '/usr/local/lib', '/usr/local/lib64';
