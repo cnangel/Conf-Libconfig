@@ -253,18 +253,74 @@ get_hash(config_setting_t *settings, char *name)
     return hv;
 }
 
+void
+get_scalar(config_setting_t *settings, SV *sv);
+
+void
+get_scalar(config_setting_t *settings, SV *sv)
+{
+    long long vBigint;
+    char vBigintArr[256];
+    size_t vBigintArrLen;
+    const char *vChar;
+    switch (settings->type)
+    {
+        case CONFIG_TYPE_INT:
+            sv = newSViv(config_setting_get_int(settings));
+            break;
+        case CONFIG_TYPE_INT64:
+            vBigint = config_setting_get_int64(settings);
+            vBigintArrLen = sprintf(vBigintArr, "%lld", vBigint);
+            sv = newSVpv(vBigintArr, vBigintArrLen);
+            break;
+        case CONFIG_TYPE_BOOL:
+            sv = newSViv(config_setting_get_bool(settings));
+            break;
+        case CONFIG_TYPE_FLOAT:
+            sv = newSVnv(config_setting_get_float(settings));
+            break;
+        case CONFIG_TYPE_STRING:
+            vChar = config_setting_get_string(settings);
+            sv = newSVpvn(vChar, strlen(vChar));
+            break;
+        default:
+            Perl_croak(aTHX_ "Scalar have not this type!");
+    }
+}
 
 int
 get_hash_1(config_setting_t *settings, HV *hv)
 {
 	if (settings == NULL) return 1;
-	const char *settings_name = config_setting_name(settings);
-	SV *val = newSVpv(settings_name, strlen(settings_name));
-	if (hv_store(hv, settings_name, strlen(settings_name), val, 0))
+	int settings_count = config_setting_length(settings);
+
+	SV *sv = newSV(0);
+
+	config_setting_t *settings_item;
+	int i;
+	for (i = 0; i < settings_count; i ++)
 	{
-		SvREFCNT_dec(val);
+		settings_item = config_setting_get_elem(settings, i);
+		Perl_warn(aTHX_ "[Note] %s | %s => %d\n", settings->name, settings_item->name, i);
+		if (settings_item)
+		{
+			switch (settings_item->type)
+			{
+				case CONFIG_TYPE_INT:
+				case CONFIG_TYPE_INT64:
+				case CONFIG_TYPE_BOOL:
+				case CONFIG_TYPE_FLOAT:
+				case CONFIG_TYPE_STRING:
+					get_scalar(settings_item, sv);
+					Perl_warn(aTHX_ "[Notice] %d", (int)sv_iv(sv));
+					if (hv_store(hv, settings_item->name, strlen(settings_item->name), sv, 0))
+					{
+						SvREFCNT_dec(sv);
+					}
+				break;
+			}
+		}
 	}
-	/*int settings_count = config_setting_length(settings);*/
 	return 1;
 }
 
