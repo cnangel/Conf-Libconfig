@@ -12,8 +12,12 @@ my $foo = Conf::Libconfig->new;
 my $hash;
 if ( $foo->read_file($cfgfile) )
 {
-	$hash = $foo->fetch_hashref("me.mar.check1");
+	$hash = $foo->fetch_hashref("me.mar.check");
 	warn Dumper $hash;
+}
+else
+{
+	warn("Can't read file!");
 }
 
 

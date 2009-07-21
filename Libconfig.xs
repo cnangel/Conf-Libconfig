@@ -48,6 +48,9 @@ typedef config_setting_t *Conf__Libconfig__Settings;
 config_t config;
 
 void get_scalar(config_setting_t *, SV **);
+void get_array1(config_setting_t *, SV **);
+void get_list(config_setting_t *, SV **);
+void get_group(config_setting_t *, SV **);
 
 
 SV * check_array_type(config_setting_t *);
@@ -258,6 +261,10 @@ get_hash(config_setting_t *settings, char *name)
 void
 get_scalar(config_setting_t *settings, SV **svref)
 {
+	if (settings == NULL)
+	{
+		Perl_warn(aTHX_ "[WARN] Settings is null");
+	}
     long long vBigint;
     char vBigintArr[256];
     size_t vBigintArrLen;
@@ -288,6 +295,122 @@ get_scalar(config_setting_t *settings, SV **svref)
     }
 }
 
+
+void 
+get_array1(config_setting_t *settings, SV **svref)
+{
+	if (settings == NULL)
+	{
+		Perl_warn(aTHX_ "[WARN] Settings is null");
+	}
+	int settings_count = config_setting_length(settings);
+
+	SV *sv = newSV(0);
+    AV *av = newAV();
+
+	config_setting_t *settings_item;
+	int i;
+	for (i = 0; i < settings_count; i ++)
+	{
+		settings_item = config_setting_get_elem(settings, i);
+		if (settings_item->name != NULL)
+		{
+			Perl_warn(aTHX_ "[WARN] It is not array, skip.");
+		}
+		switch (settings_item->type)
+		{
+			case CONFIG_TYPE_INT:
+			case CONFIG_TYPE_INT64:
+			case CONFIG_TYPE_BOOL:
+			case CONFIG_TYPE_FLOAT:
+			case CONFIG_TYPE_STRING:
+				get_scalar(settings_item, &sv);
+				av_push(av, sv);
+				break;
+			case CONFIG_TYPE_ARRAY:
+				get_array1(settings_item, &sv);
+				av_push(av, sv);
+				break;
+			case CONFIG_TYPE_LIST:
+				get_list(settings_item, &sv);
+				av_push(av, sv);
+				break;
+			case CONFIG_TYPE_GROUP:
+				get_group(settings_item, &sv);
+				av_push(av, sv);
+				break;
+			default:
+				Perl_croak(aTHX_ "Not this type!");
+		}
+	}
+	*svref = newRV_noinc((SV *)av);
+}
+
+void
+get_list(config_setting_t *settings, SV **svref)
+{
+	get_array1(settings, svref);
+}
+
+void
+get_group(config_setting_t *settings, SV **svref)
+{
+	if (settings == NULL)
+	{
+		Perl_warn(aTHX_ "[WARN] Settings is null");
+	}
+	int settings_count = config_setting_length(settings);
+
+	SV *sv = newSV(0);
+    /*AV *av = newAV();*/
+	HV *hv = newHV();
+
+	config_setting_t *settings_item;
+	int i;
+	for (i = 0; i < settings_count; i ++)
+	{
+		settings_item = config_setting_get_elem(settings, i);
+		switch (settings_item->type)
+		{
+			case CONFIG_TYPE_INT:
+			case CONFIG_TYPE_INT64:
+			case CONFIG_TYPE_BOOL:
+			case CONFIG_TYPE_FLOAT:
+			case CONFIG_TYPE_STRING:
+				get_scalar(settings_item, &sv);
+				if (!hv_store(hv, settings_item->name, strlen(settings_item->name), sv, 0))
+				{
+					Perl_warn(aTHX_ "[Notice] it is some wrong with saving simple type in hv.");
+				}
+				break;
+			case CONFIG_TYPE_ARRAY:
+				get_array1(settings_item, &sv);
+				if (!hv_store(hv, settings_item->name, strlen(settings_item->name), sv, 0))
+				{
+					Perl_warn(aTHX_ "[Notice] it is some wrong with array type in hv.");
+				}
+				break;
+			case CONFIG_TYPE_LIST:
+				get_list(settings_item, &sv);
+				if (!hv_store(hv, settings_item->name, strlen(settings_item->name), sv, 0))
+				{
+					Perl_warn(aTHX_ "[Notice] it is some wrong with list type in hv.");
+				}
+				break;
+			case CONFIG_TYPE_GROUP:
+				get_group(settings_item, &sv);
+				if (!hv_store(hv, settings_item->name, strlen(settings_item->name), sv, 0))
+				{
+					Perl_warn(aTHX_ "[Notice] it is some wrong with group type in hv.");
+				}
+				break;
+			default:
+				Perl_croak(aTHX_ "Not this type!");
+		}
+	}
+	*svref = newRV_noinc((SV *)hv);
+}
+
 int
 get_hash_1(config_setting_t *settings, HV *hv)
 {
@@ -301,7 +424,7 @@ get_hash_1(config_setting_t *settings, HV *hv)
 	for (i = 0; i < settings_count; i ++)
 	{
 		settings_item = config_setting_get_elem(settings, i);
-		Perl_warn(aTHX_ "[Note] %s | %s => %d\n", settings->name, settings_item->name, i);
+		/*Perl_warn(aTHX_ "[Note] %s | %s => %d\n", settings->name, settings_item->name, i);*/
 		if (settings_item)
 		{
 			switch (settings_item->type)
@@ -312,13 +435,36 @@ get_hash_1(config_setting_t *settings, HV *hv)
 				case CONFIG_TYPE_FLOAT:
 				case CONFIG_TYPE_STRING:
 					get_scalar(settings_item, &sv);
-					Perl_warn(aTHX_ "[Notice] %ld", sv_iv(sv));
-					hv_store(hv, settings_item->name, strlen(settings_item->name), sv, 0);
-					if (hv_store(hv, settings_item->name, strlen(settings_item->name), sv, 0))
+					if (!hv_store(hv, settings_item->name, strlen(settings_item->name), sv, 0))
 					{
-//						SvREFCNT_dec(sv);
+						Perl_warn(aTHX_ "[Notice] it is some wrong with saving simple type in hv.");
 					}
-				break;
+					break;
+				case CONFIG_TYPE_ARRAY:
+					/*Perl_warn(aTHX_ "[WARN] This is array.");*/
+					get_array1(settings_item, &sv);
+					if (!hv_store(hv, settings_item->name, strlen(settings_item->name), sv, 0))
+					{
+						Perl_warn(aTHX_ "[Notice] it is some wrong with array type in hv.");
+					}
+					break;
+				case CONFIG_TYPE_LIST:
+					/*Perl_warn(aTHX_ "[WARN] This is list.");*/
+					get_list(settings_item, &sv);
+					if (!hv_store(hv, settings_item->name, strlen(settings_item->name), sv, 0))
+					{
+						Perl_warn(aTHX_ "[Notice] it is some wrong with list type in hv.");
+					}
+					break;
+				case CONFIG_TYPE_GROUP:
+					get_group(settings_item, &sv);
+					if (!hv_store(hv, settings_item->name, strlen(settings_item->name), sv, 0))
+					{
+						Perl_warn(aTHX_ "[Notice] it is some wrong with group type in hv.");
+					}
+					break;
+				default:
+					Perl_croak(aTHX_ "Not this type!");
 			}
 		}
 	}
@@ -329,13 +475,13 @@ MODULE = Conf::Libconfig     PACKAGE = Conf::Libconfig  PREFIX = libconfig_
 
 Conf::Libconfig
 libconfig_new(packname="Conf::Libconfig")
-    char *packname
-    PREINIT:
-    CODE:
-    {
-        config_init(&config);
-        RETVAL = &config;
-    }
+char *packname
+PREINIT:
+CODE:
+{
+	config_init(&config);
+	RETVAL = &config;
+}
     OUTPUT:
         RETVAL
 
