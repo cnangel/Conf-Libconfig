@@ -73,6 +73,26 @@ return array list from path.
 
 return hash refenrece from path.
 
+=head2 $self->add_scalar ($scalar)
+
+add scalar value to handle and return true if add succssfully.
+
+=head2 $self->add_array (\@array)
+
+add array value to handle and return true if add succssfully.
+
+=head2 $self->add_list (\@list)
+
+the same as B<add_array>, add list value to handle and return true if add succssfully.
+
+=head2 $self->add_hash (\%hash)
+
+add hash value to handle and return true if add succssfully.
+
+=head2 $self->delete_node ($path)
+
+return true if delete node or path succssfully.
+
 =head2 $setting->length ()
 
 return count of setting resource.

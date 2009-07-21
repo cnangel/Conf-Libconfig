@@ -516,6 +516,43 @@ libconfig_write_file(conf, filename)
 	OUTPUT:
 		RETVAL
 
+// TODO
+int 
+libconfig_add_scalar(conf, scalar)
+	Conf::Libconfig conf
+	SV *scalar
+	CODE:
+		RETVAL = 1;
+	OUTPUT:
+		RETVAL
+
+int 
+libconfig_add_array(conf, array)
+	Conf::Libconfig conf
+	AV *array
+	CODE:
+		RETVAL = 1;
+	OUTPUT:
+		RETVAL
+
+int 
+libconfig_add_hash(conf, hash)
+	Conf::Libconfig conf
+	HV *hash
+	CODE:
+		RETVAL = 1;
+	OUTPUT:
+		RETVAL
+
+int
+libconfig_delete_node(conf, path)
+    Conf::Libconfig conf
+    const char *path
+    CODE:
+		RETVAL = 1;
+    OUTPUT:
+        RETVAL
+
 MODULE = Conf::Libconfig     PACKAGE = Conf::Libconfig::Settings    PREFIX = libconfig_setting_
 
 int
