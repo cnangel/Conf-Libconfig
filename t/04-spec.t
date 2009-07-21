@@ -2,46 +2,39 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More tests => 2;
+use Test::More tests => 3;
 use Test::Deep;
 
 use Conf::Libconfig;
 
 my $cfgfile = "./t/spec.cfg";
 my $foo = Conf::Libconfig->new;
-my $hash;
-if ( $foo->read_file($cfgfile) )
-{
-	$hash = $foo->fetch_hashref("me.mar.check");
-	warn Dumper $hash;
-}
-else
-{
-	warn("Can't read file!");
-}
+ok($foo->read_file($cfgfile), "read file - status ok");
 
-
-
-TODO: {
-local $TODO = 'fetch_* methods do not work yet';
+#TODO: {
+#local $TODO = 'fetch_* methods do not work yet';
 
 cmp_deeply(
-    [$foo->fetch_array("me.mar.family")],
-    [
-        123, 456, 789, 0x111, undef, "xyz", [5, 2, 13],
-        (43434.00001, "abcd", 12355666),
-        { ok => "hello, world", b => [456, 0x456, undef], },
-    ],
-    "fetch array - status ok",
+	[$foo->fetch_array("me.mar.family")],
+	[
+		[ 123, 456, 789, 0x111, 0, "xyz", 
+			[ 5, 2, 13 ], [ 43434.00001, "abcd", 12355666 ], 
+			{ ok => "hello, world", b => [ 456, 0x456, 0 ] }
+			]
+	],
+	"fetch array - status ok",
 );
 
 cmp_deeply(
-    $foo->fetch_hashref("me.mar.check1"),
-    {
-        x => 0x20,
-        m => [ 1, 2, 332 ],
-    },
-    "fetch hash - status ok",
+	$foo->fetch_hashref("me.mar.check"),
+	{
+		main => [ 1, 2, 3, 4 ],
+		family => [ 
+		 [ "abc", 123, 1 ], 1.234, [], 
+		 [ 1, 2, 3 ], { a => [ 1, 2, 1 ] }
+		]
+	},
+	"fetch hash - status ok",
 );
 
-}
+#}
