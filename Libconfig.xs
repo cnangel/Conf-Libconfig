@@ -516,7 +516,6 @@ libconfig_write_file(conf, filename)
 	OUTPUT:
 		RETVAL
 
-// TODO
 int 
 libconfig_add_scalar(conf, scalar)
 	Conf::Libconfig conf
@@ -530,6 +529,15 @@ int
 libconfig_add_array(conf, array)
 	Conf::Libconfig conf
 	AV *array
+	CODE:
+		RETVAL = 1;
+	OUTPUT:
+		RETVAL
+
+int 
+libconfig_add_list(conf, list)
+	Conf::Libconfig conf
+	AV *list
 	CODE:
 		RETVAL = 1;
 	OUTPUT:

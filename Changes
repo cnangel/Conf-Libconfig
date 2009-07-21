@@ -1,8 +1,9 @@
 Revision history for Conf-Libconfig
 
 0.007   Wed 22 Jul 2009 01:47:42 AM CST
-        * fix array list and hash ref(recognize group)
-		* modify some todo test. 
+        * fix array list and hash ref(recognize group);
+		* modify some todo test;
+		* function add_* and delete_* interface TODO.
 0.006   Wed 15 Jul 2009 12:21:31 PM CST
         * Changed tests to be more useful(daxim);
         * Established author tests(daxim);
