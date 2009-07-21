@@ -47,12 +47,14 @@ typedef config_t *Conf__Libconfig;
 typedef config_setting_t *Conf__Libconfig__Settings;
 config_t config;
 
+void get_scalar(config_setting_t *, SV **);
+
 
 SV * check_array_type(config_setting_t *);
 SV * check_hash_type(config_setting_t *, char **);
 AV * get_array(config_setting_t *);
 HV * get_hash(config_setting_t *, char *);
-int get_hash_1(config_setting_t *, HV *hv);
+int get_hash_1(config_setting_t *, HV *);
 
 SV *
 check_array_type(config_setting_t *settings)
@@ -254,10 +256,7 @@ get_hash(config_setting_t *settings, char *name)
 }
 
 void
-get_scalar(config_setting_t *settings, SV *sv);
-
-void
-get_scalar(config_setting_t *settings, SV *sv)
+get_scalar(config_setting_t *settings, SV **svref)
 {
     long long vBigint;
     char vBigintArr[256];
@@ -266,22 +265,23 @@ get_scalar(config_setting_t *settings, SV *sv)
     switch (settings->type)
     {
         case CONFIG_TYPE_INT:
-            sv = newSViv(config_setting_get_int(settings));
+            *svref = newSViv(config_setting_get_int(settings));
+			/*Perl_warn(aTHX_ "[WARN]: %ld", sv_iv(sv));*/
             break;
         case CONFIG_TYPE_INT64:
             vBigint = config_setting_get_int64(settings);
             vBigintArrLen = sprintf(vBigintArr, "%lld", vBigint);
-            sv = newSVpv(vBigintArr, vBigintArrLen);
+            *svref = newSVpv(vBigintArr, vBigintArrLen);
             break;
         case CONFIG_TYPE_BOOL:
-            sv = newSViv(config_setting_get_bool(settings));
+            *svref = newSViv(config_setting_get_bool(settings));
             break;
         case CONFIG_TYPE_FLOAT:
-            sv = newSVnv(config_setting_get_float(settings));
+            *svref = newSVnv(config_setting_get_float(settings));
             break;
         case CONFIG_TYPE_STRING:
             vChar = config_setting_get_string(settings);
-            sv = newSVpvn(vChar, strlen(vChar));
+            *svref = newSVpvn(vChar, strlen(vChar));
             break;
         default:
             Perl_croak(aTHX_ "Scalar have not this type!");
@@ -311,11 +311,12 @@ get_hash_1(config_setting_t *settings, HV *hv)
 				case CONFIG_TYPE_BOOL:
 				case CONFIG_TYPE_FLOAT:
 				case CONFIG_TYPE_STRING:
-					get_scalar(settings_item, sv);
-					Perl_warn(aTHX_ "[Notice] %d", (int)sv_iv(sv));
+					get_scalar(settings_item, &sv);
+					Perl_warn(aTHX_ "[Notice] %ld", sv_iv(sv));
+					hv_store(hv, settings_item->name, strlen(settings_item->name), sv, 0);
 					if (hv_store(hv, settings_item->name, strlen(settings_item->name), sv, 0))
 					{
-						SvREFCNT_dec(sv);
+//						SvREFCNT_dec(sv);
 					}
 				break;
 			}
@@ -488,7 +489,8 @@ libconfig_fetch_hashref(conf, path)
     {
         settings = config_lookup(conf, path);
         get_hash_1(settings, hv);
-        RETVAL = hv;
+		/*sv_bless (newRV_noinc ((SV*) *hvref), gv_stashpv ("Conf::Libconfig", TRUE));*/
+		RETVAL = hv;
     }
     OUTPUT:
         RETVAL
