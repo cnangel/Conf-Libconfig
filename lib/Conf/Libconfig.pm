@@ -123,39 +123,6 @@ Only get value type of string from config file, please use lookup_value replace 
 This module requires the libconfig library from
 L<http://www.hyperrealm.com/libconfig/>.
 
-=head1 INSTALLATION
-
-To prepare install, you should install libconfig, you can use yum for Redhat,
-like this:
-
-    yum install libconfig libconfig-devel -y
-
-or apt-get for Debian:
-
-    apt-get libconfig libconfig-devel
-
-for other platform, you can compiler libconfig from source:
-
-    http://www.hyperrealm.com/libconfig/
-
-you can use order like this:
-
-    wget http://www.hyperrealm.com/libconfig/libconfig-1.3.2.tar.gz
-    tar -zxf libconfig-1.3.2.tar.gz
-    cd libconfig-1.3.2
-    ./configure --prefix=/usr
-    make
-    make install
-
-If you do not have sudo or root privileges, you need contact administrator.
-
-    perl Makefile.PL
-    make
-    make test
-    make install
-
-Win32 users should replace "make" with "nmake".
-
 =head1 SOURCE CONTROL
 
 You can always get the latest Conf::Libconfig source from its
