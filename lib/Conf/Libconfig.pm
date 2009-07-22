@@ -11,6 +11,7 @@ XSLoader::load('Conf::Libconfig', $VERSION);
 
 1;
 __END__
+
 =head1 NAME
 
 Conf::Libconfig - Perl extension for libconfig
@@ -30,7 +31,7 @@ The module C<Conf::Libconfig> need use libconfig library:
 
     http://www.hyperrealm.com/libconfig/
 
-You can use C<Conf::Libconfig> for perl config, and support Salar, Array and Hash data struction etc.
+You can use C<Conf::Libconfig> for perl config, and support Scalar, Array and Hash data structures etc.
 like C or C++ function. C<Conf::Libconfig> could reduce your config file and quote by C/C++ transportability.
 
 =head2 EXPORT
@@ -59,7 +60,7 @@ write to a file.
 
 =head2 $self->lookup_value ($path)
 
-Autocheck and get value from config file, suggest use it.
+Automatically check and get value from config file, suggest use it.
 
 =head2 $self->setting_lookup ($path)
 
@@ -71,27 +72,27 @@ return array list from path.
 
 =head2 $self->fetch_hashref ($path)
 
-return hash refenrece from path.
+return hash reference from path.
 
 =head2 $self->add_scalar ($scalar)
 
-add scalar value to handle and return true if add succssfully.
+add scalar value to handle and return true if add successfully.
 
 =head2 $self->add_array (\@array)
 
-add array value to handle and return true if add succssfully.
+add array value to handle and return true if add successfully.
 
 =head2 $self->add_list (\@list)
 
-the same as B<add_array>, add list value to handle and return true if add succssfully.
+the same as B<add_array>, add list value to handle and return true if add successfully.
 
 =head2 $self->add_hash (\%hash)
 
-add hash value to handle and return true if add succssfully.
+add hash value to handle and return true if add successfully.
 
 =head2 $self->delete_node ($path)
 
-return true if delete node or path succssfully.
+return true if delete node or path successfully.
 
 =head2 $setting->length ()
 
@@ -127,12 +128,12 @@ This module uses libconfig.
 
 =head1 INSTALLATION
 
-To prepare install, you should install libconfig, you can use yum for redhat,
+To prepare install, you should install libconfig, you can use yum for Redhat,
 like this:
 
     yum install libconfig libconfig-devel -y
 
-or apt-get for debian:
+or apt-get for Debian:
 
     apt-get libconfig libconfig-devel
 
@@ -149,7 +150,7 @@ you can use order like this:
     make
     make install
 
-If you are not soudoer or root, you need contact administrator.
+If you do not have sudo or root privileges, you need contact administrator.
 
     perl Makefile.PL
     make
@@ -167,7 +168,7 @@ public Git repository:
 
 If you have a branch for me to pull, please let me know ;)
 
-=head1 TODO
+=head1 TO DO
 
 =over
 
