@@ -27,10 +27,6 @@ Conf::Libconfig - Perl extension for libconfig
 
 =head1 DESCRIPTION
 
-The module C<Conf::Libconfig> need use libconfig library:
-
-    http://www.hyperrealm.com/libconfig/
-
 You can use C<Conf::Libconfig> for perl config, and support Scalar, Array and Hash data structures etc.
 like C or C++ function. C<Conf::Libconfig> could reduce your config file and quote by C/C++ transportability.
 
@@ -124,7 +120,8 @@ Only get value type of string from config file, please use lookup_value replace 
 
 =head1 PREREQUISITES
 
-This module uses libconfig.
+This module requires the libconfig library from
+L<http://www.hyperrealm.com/libconfig/>.
 
 =head1 INSTALLATION
 
