@@ -24,6 +24,8 @@ t/01-init.t
 t/02-read.t
 t/03-write.t
 t/04-spec.t
+t/05-add.t
+t/06-delete.t
 t/boilerplate.t
 t/no-tabs.t.txt
 t/pod-coverage.t
