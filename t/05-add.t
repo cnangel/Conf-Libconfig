@@ -17,7 +17,7 @@ ok($foo->read_file($cfgfile), "read file - status ok");
 
 my $key = "node1";
 my $value = "hello, world";
-ok($foo->add_scalar("me.mar.node1", $key, $value), "add scalar - status ok");
+ok($foo->add_scalar("me.mar", $key, $value), "add scalar - status ok");
 ok($foo->modify_scalar("me.mar.many", $value), "modify scalar - status ok");
 
 $key = "node2";

@@ -99,7 +99,15 @@ add hash value to handle and return true if add successfully.
 
 =head2 $self->delete_node ($path)
 
-return true if delete node or path successfully.
+return true if delete node of path successfully.
+
+=head2 $self->delete_node_key ($path, $key)
+
+return true if delete node key of path successfully.
+
+=head2 $self->delete_node_elem ($path, $idx)
+
+return true if delete node element of path successfully.
 
 =head2 $setting->length ()
 

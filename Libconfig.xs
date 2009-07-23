@@ -528,26 +528,34 @@ libconfig_add_scalar(conf, path, key, value)
 		int type;
 		int ret = 0;
 	CODE:
+	{
         settings = config_lookup(conf, path);
-		type = (int)(log(SvIOK(value) + SvNOK(value) + SvPOK(value))/log(2)) - 5;
-		settings_item = config_setting_add(settings, key, type);
-		switch (type)
+		if (settings)
 		{
-			case 3:
-				ret = config_setting_set_int64(settings_item, SvUV(value));
-				break;
-			case 4:
-				ret = config_setting_set_float(settings_item, SvNV(value));
-				break;
-			case 5:
-				ret = config_setting_set_string(settings_item, SvPV_nolen(value));
-				break;
+			type = (int)(log(SvIOK(value) + SvNOK(value) + SvPOK(value))/log(2)) - 5;
+			settings_item = config_setting_add(settings, key, type);
+			if (settings_item)
+			{
+				switch (type)
+				{
+					case 3:
+						ret = config_setting_set_int64(settings_item, SvUV(value));
+						break;
+					case 4:
+						ret = config_setting_set_float(settings_item, SvNV(value));
+						break;
+					case 5:
+						ret = config_setting_set_string(settings_item, SvPV_nolen(value));
+						break;
+				}
+			}
 		}
 		if (!ret)
 		{
 			Perl_warn(aTHX_ "Set value not match!");
 		}
 		RETVAL = ret;
+	}
 	OUTPUT:
 		RETVAL
 
@@ -561,25 +569,29 @@ libconfig_modify_scalar(conf, path, value)
 		int type;
 		int ret = 0;
 	CODE:
+	{
         settings = config_lookup(conf, path);
-		type = (int)(log(SvIOK(value) + SvNOK(value) + SvPOK(value))/log(2)) - 5;
-		switch (type)
+		if (settings)
 		{
-			case 3:
-				ret = config_setting_set_int64(settings, SvUV(value));
-				break;
-			case 4:
-				ret = config_setting_set_float(settings, SvNV(value));
-				break;
-			case 5:
-				ret = config_setting_set_string(settings, SvPV_nolen(value));
-				break;
+			type = (int)(log(SvIOK(value) + SvNOK(value) + SvPOK(value))/log(2)) - 5;
+			switch (type)
+			{
+				case 3:
+					ret = config_setting_set_int64(settings, SvUV(value));
+					break;
+				case 4:
+					ret = config_setting_set_float(settings, SvNV(value));
+					break;
+				case 5:
+					ret = config_setting_set_string(settings, SvPV_nolen(value));
+					break;
+			}
+			if (!ret)
+			{
+				Perl_warn(aTHX_ "Set value not match!");
+			}
+			RETVAL = ret;
 		}
-		if (!ret)
-		{
-			Perl_warn(aTHX_ "Set value not match!");
-		}
-		RETVAL = ret;
 	OUTPUT:
 		RETVAL
 
@@ -588,14 +600,18 @@ libconfig_add_array(conf, path, key, value)
 	Conf::Libconfig conf
     const char *path
 	const char *key
-	AV *value
+	SV *value
     PREINIT:
         config_setting_t *settings;
         config_setting_t *settings_item;
 	CODE:
-        settings = config_lookup(conf, path);
-		settings_item = config_setting_add(settings, key, CONFIG_TYPE_ARRAY);
-		// cricle
+		settings = config_lookup(conf, path);
+		if (settings)
+		{
+			settings_item = config_setting_add(settings, key, CONFIG_TYPE_ARRAY);
+			// cricle
+			SvTYPE(SvRV(value));
+		}
 		RETVAL = 1;
 	OUTPUT:
 		RETVAL
@@ -645,6 +661,10 @@ libconfig_delete_node(conf, path)
 		key = strrchr(path, '.') + 1;
 		sprintf(parentpath, "%.*s", strlen(path) - strlen(key) - 1, path);
         settings = config_lookup(conf, parentpath);
+		if (!settings)
+		{
+			Perl_croak (aTHX_ "Not the node of path.!");
+		}
 		RETVAL = config_setting_remove(settings, key);
 	}
     OUTPUT:
@@ -659,6 +679,10 @@ libconfig_delete_node_key(conf, path, key)
         config_setting_t *settings;
     CODE:
         settings = config_lookup(conf, path);
+		if (!settings)
+		{
+			Perl_croak (aTHX_ "Not the node of path.!");
+		}
 		RETVAL = config_setting_remove(settings, key);
     OUTPUT:
         RETVAL
@@ -672,6 +696,10 @@ libconfig_delete_node_elem(conf, path, idx)
         config_setting_t *settings;
     CODE:
         settings = config_lookup(conf, path);
+		if (!settings)
+		{
+			Perl_croak (aTHX_ "Not the node of path.!");
+		}
 		RETVAL = config_setting_remove_elem(settings, idx);
     OUTPUT:
         RETVAL
