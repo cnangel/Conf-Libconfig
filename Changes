@@ -1,14 +1,16 @@
 Revision history for Conf-Libconfig
 
+0.009   Thu 23 Jul 2009 11:13:32 PM CST
+        * Implement function add_* TODO;
 0.008   Thu 23 Jul 2009 09:45:21 AM CST
-        * fix a test failure involving float numbers(daxim);
-        * some documentation improvements(daxim);
-        * add spell test(daxim);
-        * function add_* and delete_* interface adjust.
+        * Fix a test failure involving float numbers(daxim);
+        * Some documentation improvements(daxim);
+        * Add spell test(daxim);
+        * Function add_* and delete_* interface adjust.
 0.007   Wed 22 Jul 2009 01:47:42 AM CST
-        * fix array list and hash ref(recognize group);
-        * modify some todo test;
-        * function add_* and delete_* interface TODO.
+        * Fix array list and hash ref(recognize group);
+        * Modify some todo test;
+        * Function add_* and delete_* interface TODO.
 0.006   Wed 15 Jul 2009 12:21:31 PM CST
         * Changed tests to be more useful(daxim);
         * Established author tests(daxim);

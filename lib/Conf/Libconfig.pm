@@ -4,7 +4,7 @@ use 5.006001;
 use strict;
 use warnings;
 
-our $VERSION = '0.008';
+our $VERSION = '0.009';
 
 require XSLoader;
 XSLoader::load('Conf::Libconfig', $VERSION);
@@ -77,9 +77,13 @@ return array list from path.
 
 return hash reference from path.
 
-=head2 $self->add_scalar ($path, $scalar)
+=head2 $self->add_scalar ($path, $key, $value)
 
-add scalar value to handle and return true if add successfully.
+add a pair of key and value node to handle and return true if add successfully.
+
+=head2 $self->modify_scalar ($path, $value)
+
+modify new value to handle and return true if add successfully.
 
 =head2 $self->add_array ($path, \@array)
 

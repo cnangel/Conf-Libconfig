@@ -517,41 +517,117 @@ libconfig_write_file(conf, filename)
 		RETVAL
 
 int 
-libconfig_add_scalar(conf, path, scalar)
+libconfig_add_scalar(conf, path, key, value)
 	Conf::Libconfig conf
     const char *path
-	SV *scalar
+	const char *key
+	SV *value
+    PREINIT:
+        config_setting_t *settings;
+        config_setting_t *settings_item;
+		int type;
+		int ret = 0;
 	CODE:
+        settings = config_lookup(conf, path);
+		type = (int)(log(SvIOK(value) + SvNOK(value) + SvPOK(value))/log(2)) - 5;
+		settings_item = config_setting_add(settings, key, type);
+		switch (type)
+		{
+			case 3:
+				ret = config_setting_set_int64(settings_item, SvUV(value));
+				break;
+			case 4:
+				ret = config_setting_set_float(settings_item, SvNV(value));
+				break;
+			case 5:
+				ret = config_setting_set_string(settings_item, SvPV_nolen(value));
+				break;
+		}
+		if (!ret)
+		{
+			Perl_warn(aTHX_ "Set value not match!");
+		}
+		RETVAL = ret;
+	OUTPUT:
+		RETVAL
+
+int 
+libconfig_modify_scalar(conf, path, value)
+	Conf::Libconfig conf
+    const char *path
+	SV *value
+    PREINIT:
+        config_setting_t *settings;
+		int type;
+		int ret = 0;
+	CODE:
+        settings = config_lookup(conf, path);
+		type = (int)(log(SvIOK(value) + SvNOK(value) + SvPOK(value))/log(2)) - 5;
+		switch (type)
+		{
+			case 3:
+				ret = config_setting_set_int64(settings, SvUV(value));
+				break;
+			case 4:
+				ret = config_setting_set_float(settings, SvNV(value));
+				break;
+			case 5:
+				ret = config_setting_set_string(settings, SvPV_nolen(value));
+				break;
+		}
+		if (!ret)
+		{
+			Perl_warn(aTHX_ "Set value not match!");
+		}
+		RETVAL = ret;
+	OUTPUT:
+		RETVAL
+
+int 
+libconfig_add_array(conf, path, key, value)
+	Conf::Libconfig conf
+    const char *path
+	const char *key
+	AV *value
+    PREINIT:
+        config_setting_t *settings;
+        config_setting_t *settings_item;
+	CODE:
+        settings = config_lookup(conf, path);
+		settings_item = config_setting_add(settings, key, CONFIG_TYPE_ARRAY);
+		// cricle
 		RETVAL = 1;
 	OUTPUT:
 		RETVAL
 
 int 
-libconfig_add_array(conf, path, array)
+libconfig_add_list(conf, path, key, value)
 	Conf::Libconfig conf
     const char *path
-	AV *array
+	const char *key
+	AV *value
+    PREINIT:
+        config_setting_t *settings;
+        config_setting_t *settings_item;
 	CODE:
+        settings = config_lookup(conf, path);
+		settings_item = config_setting_add(settings, key, CONFIG_TYPE_LIST);
 		RETVAL = 1;
 	OUTPUT:
 		RETVAL
 
 int 
-libconfig_add_list(conf, path, list)
+libconfig_add_hash(conf, path, key, value)
 	Conf::Libconfig conf
     const char *path
-	AV *list
+	const char *key
+	HV *value
+    PREINIT:
+        config_setting_t *settings;
+        config_setting_t *settings_item;
 	CODE:
-		RETVAL = 1;
-	OUTPUT:
-		RETVAL
-
-int 
-libconfig_add_hash(conf, path, hash)
-	Conf::Libconfig conf
-    const char *path
-	HV *hash
-	CODE:
+        settings = config_lookup(conf, path);
+		settings_item = config_setting_add(settings, key, CONFIG_TYPE_GROUP);
 		RETVAL = 1;
 	OUTPUT:
 		RETVAL
@@ -560,8 +636,43 @@ int
 libconfig_delete_node(conf, path)
     Conf::Libconfig conf
     const char *path
+    PREINIT:
+        config_setting_t *settings;
+		char *key;
+		char parentpath[256];
     CODE:
-		RETVAL = 1;
+	{
+		key = strrchr(path, '.') + 1;
+		sprintf(parentpath, "%.*s", strlen(path) - strlen(key) - 1, path);
+        settings = config_lookup(conf, parentpath);
+		RETVAL = config_setting_remove(settings, key);
+	}
+    OUTPUT:
+        RETVAL
+
+int
+libconfig_delete_node_key(conf, path, key)
+    Conf::Libconfig conf
+    const char *path
+	const char *key
+    PREINIT:
+        config_setting_t *settings;
+    CODE:
+        settings = config_lookup(conf, path);
+		RETVAL = config_setting_remove(settings, key);
+    OUTPUT:
+        RETVAL
+
+int
+libconfig_delete_node_elem(conf, path, idx)
+    Conf::Libconfig conf
+    const char *path
+	unsigned int idx
+    PREINIT:
+        config_setting_t *settings;
+    CODE:
+        settings = config_lookup(conf, path);
+		RETVAL = config_setting_remove_elem(settings, idx);
     OUTPUT:
         RETVAL
 
