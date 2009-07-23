@@ -3,7 +3,7 @@ Revision history for Conf-Libconfig
 0.008   Thu 23 Jul 2009 09:45:21 AM CST
         * fix a test failure involving float numbers(daxim);
         * some documentation improvements(daxim);
-		* add spell test(daxim);
+        * add spell test(daxim);
         * function add_* and delete_* interface adjust.
 0.007   Wed 22 Jul 2009 01:47:42 AM CST
         * fix array list and hash ref(recognize group);
