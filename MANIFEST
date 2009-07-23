@@ -29,6 +29,7 @@ t/06-delete.t
 t/boilerplate.t
 t/no-tabs.t.txt
 t/pod-coverage.t
+t/pod-spell.t
 t/pod.t
 t/spec.cfg
 t/test.cfg

@@ -4,7 +4,7 @@ use 5.006001;
 use strict;
 use warnings;
 
-our $VERSION = '0.007';
+our $VERSION = '0.008';
 
 require XSLoader;
 XSLoader::load('Conf::Libconfig', $VERSION);
@@ -23,6 +23,13 @@ Conf::Libconfig - Perl extension for libconfig
   $self->read_file($cfg);
   my $value = $self->lookup_value("abc.edf");
   print $value;
+
+  use Data::Dumper;
+  my $arrayref = $self->fetch_array("cdef.abcd.arrayref");
+  print Dumper $arrayref;
+  my $hashref = $self->fetch_hashref("cdef.abcd.hashref");
+  print Dumper $hashref;
+
   $self->delete();
 
 =head1 DESCRIPTION
@@ -70,19 +77,19 @@ return array list from path.
 
 return hash reference from path.
 
-=head2 $self->add_scalar ($scalar)
+=head2 $self->add_scalar ($path, $scalar)
 
 add scalar value to handle and return true if add successfully.
 
-=head2 $self->add_array (\@array)
+=head2 $self->add_array ($path, \@array)
 
 add array value to handle and return true if add successfully.
 
-=head2 $self->add_list (\@list)
+=head2 $self->add_list ($path, \@list)
 
 the same as B<add_array>, add list value to handle and return true if add successfully.
 
-=head2 $self->add_hash (\%hash)
+=head2 $self->add_hash ($path, \%hash)
 
 add hash value to handle and return true if add successfully.
 

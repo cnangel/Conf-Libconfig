@@ -517,8 +517,9 @@ libconfig_write_file(conf, filename)
 		RETVAL
 
 int 
-libconfig_add_scalar(conf, scalar)
+libconfig_add_scalar(conf, path, scalar)
 	Conf::Libconfig conf
+    const char *path
 	SV *scalar
 	CODE:
 		RETVAL = 1;
@@ -526,8 +527,9 @@ libconfig_add_scalar(conf, scalar)
 		RETVAL
 
 int 
-libconfig_add_array(conf, array)
+libconfig_add_array(conf, path, array)
 	Conf::Libconfig conf
+    const char *path
 	AV *array
 	CODE:
 		RETVAL = 1;
@@ -535,8 +537,9 @@ libconfig_add_array(conf, array)
 		RETVAL
 
 int 
-libconfig_add_list(conf, list)
+libconfig_add_list(conf, path, list)
 	Conf::Libconfig conf
+    const char *path
 	AV *list
 	CODE:
 		RETVAL = 1;
@@ -544,8 +547,9 @@ libconfig_add_list(conf, list)
 		RETVAL
 
 int 
-libconfig_add_hash(conf, hash)
+libconfig_add_hash(conf, path, hash)
 	Conf::Libconfig conf
+    const char *path
 	HV *hash
 	CODE:
 		RETVAL = 1;
