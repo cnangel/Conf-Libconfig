@@ -15,15 +15,14 @@ ok($foo->read_file($cfgfile), "read file - status ok");
 my $key = "node1";
 my $value = "hello, world";
 ok($foo->add_scalar("me.mar", $key, $value), "add scalar - status ok");
-#ok($foo->modify_scalar("me.mar.float", $value), "modify scalar - status ok");
-ok(1);
-
-TODO: {
-local $TODO = 'add_* methods do not work yet';
+ok($foo->modify_scalar("me.mar.float", $value), "modify scalar - status ok");
 
 $key = "node2";
 my @arr = (1, 2, 3);
 ok($foo->add_array("me.arr", $key, \@arr), "add array - status ok");
+
+TODO: {
+local $TODO = 'add_* methods do not work yet';
 
 # like add_array
 my @list = ("abc", 456, 0x888);

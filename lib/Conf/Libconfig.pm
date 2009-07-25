@@ -117,6 +117,10 @@ return count of setting resource.
 
 return value of the $i item.
 
+=head2 $setting->get_type ()
+
+return value type of setting resource.
+
 =head2 $self->lookup_bool ($path)
 
 Only get value type of bool from config file, please use lookup_value replace it.

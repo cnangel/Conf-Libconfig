@@ -12,12 +12,14 @@ extern "C" {
 
 #include <libconfig.h>
 
+#define UINTNUM 2147483647
+
 typedef config_t *Conf__Libconfig;
 typedef config_setting_t *Conf__Libconfig__Settings;
 config_t config;
 
-void set_scalar();
-int set_scalarvalue(config_setting_t *, const char *, SV *);
+void set_scalar(config_setting_t *, SV *, int , int *);
+int set_scalarvalue(config_setting_t *, const char *, SV *, int);
 
 void get_value(Conf__Libconfig, const char *, SV **);
 void get_scalar(config_setting_t *, SV **);
@@ -27,45 +29,90 @@ void get_group(config_setting_t *, SV **);
 int get_hashvalue(config_setting_t *, HV *);
 int get_arrayvalue(config_setting_t *, AV *);
 
+void remove_scalar_node(config_setting_t *, const char *, int, int *);
 
 void 
-set_scalar()
+set_scalar(config_setting_t *settings, SV *value, int valueType, int *status)
 {
-
+	if (settings == NULL) {
+		Perl_warn(aTHX_ "[WARN] Settings is null");
+	}
+	switch (valueType) {
+        case CONFIG_TYPE_INT:
+			*status = config_setting_set_int(settings, SvIV(value));
+            break;
+        case CONFIG_TYPE_INT64:
+			*status = config_setting_set_int64(settings, SvUV(value));
+            break;
+        case CONFIG_TYPE_BOOL:
+			*status = config_setting_set_bool(settings, SvIV(value));
+            break;
+        case CONFIG_TYPE_FLOAT:
+			*status = config_setting_set_float(settings, SvNV(value));
+            break;
+        case CONFIG_TYPE_STRING:
+			*status = config_setting_set_string(settings, SvPV_nolen(value));
+			/*Perl_warn(aTHX_ "[STATUS] %d", *status);*/
+            break;
+		default:
+            Perl_croak(aTHX_ "Scalar have not this type!");
+	}
 }
 
 int 
-set_scalarvalue(config_setting_t *settings, const char *key, SV *value);
+set_scalarvalue(config_setting_t *settings, const char *key, SV *value, int flag)
 {
 	if (settings == NULL) {
 		Perl_warn(aTHX_ "[WARN] Settings is null");
 		return 1;
 	}
-
-	config_setting_t *settings_item;
-	int type;
-	if (settings) {
-		type = (int)(log(SvIOK(value) + SvNOK(value) + SvPOK(value))/log(2)) - 5;
-		settings_item = config_setting_add(settings, key, type);
-		if (settings_item) {
-			switch (type) {
-				case 3:
-					ret = config_setting_set_int64(settings_item, SvUV(value));
-					break;
-				case 4:
-					ret = config_setting_set_float(settings_item, SvNV(value));
-					break;
-				case 5:
-					ret = config_setting_set_string(settings_item, SvPV_nolen(value));
-					break;
-			}
+	int type = (int)(log(SvIOK(value) + SvNOK(value) + SvPOK(value))/log(2)) - 5;
+	if (type == 3) {
+		if (SvUV(value) <= UINTNUM) {
+			type = 2;
+		}
+		if (SvUV(value) == 0 || SvUV(value) == 1) {
+			type = 6;
 		}
 	}
-	if (!ret) {
-		Perl_warn(aTHX_ "Set value not match!");
+	int returnStatus;
+	config_setting_t *settings_item;
+	config_setting_t *settings_parent = settings->parent;
+	switch (flag) {
+		case 1:
+			if (settings->type == type) {
+				set_scalar(settings, value, type, &returnStatus);
+			} else {
+				size_t nameLength = strlen(settings->name);
+				char *name = (char *)malloc(nameLength + 1);
+				strncpy(name, settings->name, nameLength);
+				name[nameLength] = 0;
+				remove_scalar_node(settings_parent, settings->name, settings->type, &returnStatus);
+				set_scalarvalue(settings_parent, name, value, 0);
+				free(name);
+			}
+			break;
+		default:
+			settings_item = config_setting_add(settings, key, type);
+			set_scalar(settings_item, value, type, &returnStatus);
 	}
-
+	return returnStatus;
 }
+
+/* {{{ */
+void
+remove_scalar_node(config_setting_t *settings, const char *name, int type, int *status)
+{
+	if (type == CONFIG_TYPE_INT || type == CONFIG_TYPE_INT64 || type == CONFIG_TYPE_FLOAT
+			|| type == CONFIG_TYPE_STRING || type == CONFIG_TYPE_BOOL) {
+		*status = config_setting_remove(settings, name);
+	}
+	else
+	{
+		Perl_croak(aTHX_ "[ERROR] Only can remove scalar setttings!");
+	}
+}
+/* }}} */
 
 /* {{{ */
 void
@@ -548,7 +595,7 @@ libconfig_add_scalar(conf, path, key, value)
 	CODE:
 	{
         settings = config_lookup(conf, path);
-		RETVAL = !set_scalarvalue(settings, key, value);
+		RETVAL = set_scalarvalue(settings, key, value, 0);
 	}
 	OUTPUT:
 		RETVAL
@@ -560,30 +607,10 @@ libconfig_modify_scalar(conf, path, value)
 	SV *value
     PREINIT:
         config_setting_t *settings;
-		int type;
-		int ret = 0;
 	CODE:
 	{
         settings = config_lookup(conf, path);
-		if (settings) {
-			type = (int)(log(SvIOK(value) + SvNOK(value) + SvPOK(value))/log(2)) - 5;
-			/*Perl_warn(aTHX_ "[YYY]%d %d", type, settings->type);*/
-			switch(settings->type) {
-				case 3:
-					ret = config_setting_set_int64(settings, SvUV(value));
-					break;
-				case 4:
-					ret = config_setting_set_float(settings, SvNV(value));
-					break;
-				case 5:
-					ret = config_setting_set_string(settings, SvPV_nolen(value));
-					break;
-			}
-			if (!ret) {
-				Perl_warn(aTHX_ "Set value not match!");
-			}
-		}
-		RETVAL = ret;
+		RETVAL = set_scalarvalue(settings, settings->name, value, 1);
 	}
 	OUTPUT:
 		RETVAL
@@ -705,6 +732,37 @@ libconfig_setting_length(setting)
     }
     OUTPUT:
         RETVAL
+
+SV *
+libconfig_setting_get_type(setting)
+	Conf::Libconfig::Settings setting
+    PREINIT:
+        SV *sv = newSV(0);
+	CODE:
+	{
+		switch(setting->type)
+		{
+			case CONFIG_TYPE_INT:
+			case CONFIG_TYPE_INT64:
+			case CONFIG_TYPE_FLOAT:
+			case CONFIG_TYPE_STRING:
+			case CONFIG_TYPE_BOOL:
+				sv_setpv(sv, "SCALAR");
+				break;
+			case CONFIG_TYPE_ARRAY:
+			case CONFIG_TYPE_LIST:
+				sv_setpv(sv, "ARRAY");
+				break;
+			case CONFIG_TYPE_GROUP:
+				sv_setpv(sv, "HASH");
+				break;
+			default:
+				sv_setsv(sv, &PL_sv_undef);
+		}
+		RETVAL = sv;
+	}
+	OUTPUT:
+		RETVAL
 
 SV *
 libconfig_setting_get_item(setting, i)
