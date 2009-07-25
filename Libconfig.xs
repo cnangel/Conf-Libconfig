@@ -181,8 +181,14 @@ get_arrayvalue(config_setting_t *settings, AV *av)
 	}
 	SV *sv = newSV(0);
 	int settings_count = config_setting_length(settings);
-	if (settings_count == 0) {
+	if (settings->type == CONFIG_TYPE_INT || settings->type == CONFIG_TYPE_INT64 || settings->type == CONFIG_TYPE_FLOAT
+			|| settings->type == CONFIG_TYPE_STRING || settings->type == CONFIG_TYPE_BOOL) {
 		get_scalar(settings, &sv);
+		av_push(av, sv);
+		return 0;
+	}
+	if (settings->type == CONFIG_TYPE_GROUP) {
+		get_group(settings, &sv);
 		av_push(av, sv);
 		return 0;
 	}
@@ -230,14 +236,15 @@ get_hashvalue(config_setting_t *settings, HV *hv)
 	}
 	SV *sv = newSV(0);
 	int settings_count = config_setting_length(settings);
-	if (settings_count == 0) {
+	if (settings->type == CONFIG_TYPE_INT || settings->type == CONFIG_TYPE_INT64 || settings->type == CONFIG_TYPE_FLOAT
+			|| settings->type == CONFIG_TYPE_STRING || settings->type == CONFIG_TYPE_BOOL) {
 		get_scalar(settings, &sv);
 		if (!hv_store(hv, settings->name, strlen(settings->name), sv, 0)) {
 			Perl_warn(aTHX_ "[Notice] it is some wrong with saving simple type in hv.");
 		}
 		return 0;
 	}
-	if (settings->type == 7 || settings->type == 8) {
+	if (settings->type == CONFIG_TYPE_ARRAY || settings->type == CONFIG_TYPE_LIST) {
 		get_array(settings, &sv);
 		if (!hv_store(hv, settings->name, strlen(settings->name), sv, 0)) {
 			Perl_warn(aTHX_ "[Notice] it is some wrong with saving simple type in hv.");
