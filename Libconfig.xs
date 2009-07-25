@@ -16,6 +16,10 @@ typedef config_t *Conf__Libconfig;
 typedef config_setting_t *Conf__Libconfig__Settings;
 config_t config;
 
+void set_scalar();
+int set_scalarvalue(config_setting_t *, const char *, SV *);
+
+void get_value(Conf__Libconfig, const char *, SV **);
 void get_scalar(config_setting_t *, SV **);
 void get_array(config_setting_t *, SV **);
 void get_list(config_setting_t *, SV **);
@@ -23,7 +27,6 @@ void get_group(config_setting_t *, SV **);
 int get_hashvalue(config_setting_t *, HV *);
 int get_arrayvalue(config_setting_t *, AV *);
 
-void set_scalar();
 
 void 
 set_scalar()
@@ -31,7 +34,64 @@ set_scalar()
 
 }
 
+int 
+set_scalarvalue(config_setting_t *settings, const char *key, SV *value);
+{
+	if (settings == NULL) {
+		Perl_warn(aTHX_ "[WARN] Settings is null");
+		return 1;
+	}
+
+	config_setting_t *settings_item;
+	int type;
+	if (settings) {
+		type = (int)(log(SvIOK(value) + SvNOK(value) + SvPOK(value))/log(2)) - 5;
+		settings_item = config_setting_add(settings, key, type);
+		if (settings_item) {
+			switch (type) {
+				case 3:
+					ret = config_setting_set_int64(settings_item, SvUV(value));
+					break;
+				case 4:
+					ret = config_setting_set_float(settings_item, SvNV(value));
+					break;
+				case 5:
+					ret = config_setting_set_string(settings_item, SvPV_nolen(value));
+					break;
+			}
+		}
+	}
+	if (!ret) {
+		Perl_warn(aTHX_ "Set value not match!");
+	}
+
+}
+
 /* {{{ */
+void
+get_value(Conf__Libconfig conf, const char *path, SV **svref)
+{
+	long valueInt;
+	long long valueBigint;
+	char valueBigintArr[256];
+	STRLEN valueBigintArrLen;
+	int valueBool;
+	char *valueChar;
+	double valueFloat;
+	if (config_lookup_int(conf, path, &valueInt))
+		*svref = newSViv((int)valueInt);
+	else if (config_lookup_string(conf, path, (const char **)&valueChar))
+		*svref = newSVpvn(valueChar, strlen(valueChar));
+	else if (config_lookup_float(conf, path, &valueFloat))
+		*svref = newSVnv(valueFloat);
+	else if (config_lookup_bool(conf, path, &valueBool))
+		*svref = newSViv(valueBool);
+	else if (config_lookup_int64(conf, path, &valueBigint)) {
+		valueBigintArrLen = sprintf(valueBigintArr, "%lld", valueBigint);
+		*svref = newSVpv(valueBigintArr, valueBigintArrLen);
+	}
+}
+
 void
 get_scalar(config_setting_t *settings, SV **svref)
 {
@@ -403,28 +463,10 @@ libconfig_lookup_value(conf, path)
     Conf::Libconfig conf
     const char *path
     PREINIT:
-        long valueInt;
-        long long valueBigint;
-        char valueBigintArr[256];
-        STRLEN valueBigintArrLen;
-        int valueBool;
-        char *valueChar;
-        double valueFloat;
         SV *sv = newSV(0);
     CODE:
     {
-        if (config_lookup_int(conf, path, &valueInt))
-            sv = newSViv((int)valueInt);
-        else if (config_lookup_string(conf, path, (const char **)&valueChar))
-            sv = newSVpvn(valueChar, strlen(valueChar));
-        else if (config_lookup_float(conf, path, &valueFloat))
-            sv = newSVnv(valueFloat);
-        else if (config_lookup_bool(conf, path, &valueBool))
-            sv = newSViv(valueBool);
-        else if (config_lookup_int64(conf, path, &valueBigint)) {
-            valueBigintArrLen = sprintf(valueBigintArr, "%lld", valueBigint);
-            sv = newSVpv(valueBigintArr, valueBigintArrLen);
-        }
+		get_value(conf, path, &sv);
         RETVAL = sv;
     }
     OUTPUT:
@@ -503,33 +545,10 @@ libconfig_add_scalar(conf, path, key, value)
 	SV *value
     PREINIT:
         config_setting_t *settings;
-        config_setting_t *settings_item;
-		int type;
-		int ret = 0;
 	CODE:
 	{
         settings = config_lookup(conf, path);
-		if (settings) {
-			type = (int)(log(SvIOK(value) + SvNOK(value) + SvPOK(value))/log(2)) - 5;
-			settings_item = config_setting_add(settings, key, type);
-			if (settings_item) {
-				switch (type) {
-					case 3:
-						ret = config_setting_set_int64(settings_item, SvUV(value));
-						break;
-					case 4:
-						ret = config_setting_set_float(settings_item, SvNV(value));
-						break;
-					case 5:
-						ret = config_setting_set_string(settings_item, SvPV_nolen(value));
-						break;
-				}
-			}
-		}
-		if (!ret) {
-			Perl_warn(aTHX_ "Set value not match!");
-		}
-		RETVAL = ret;
+		RETVAL = !set_scalarvalue(settings, key, value);
 	}
 	OUTPUT:
 		RETVAL
