@@ -15,6 +15,7 @@ ok($foo->read_file($cfgfile), "read file - status ok");
 my $key = "node1";
 my $value = "hello, world";
 ok($foo->add_scalar("me.mar", $key, $value), "add scalar - status ok");
+ok($foo->add_scalar("", $key, $value), "add scalar - status ok");
 ok($foo->modify_scalar("me.mar.many", $value), "modify scalar - status ok");
 
 $key = "node2";
@@ -35,4 +36,4 @@ ok($foo->add_hash("me.mar.check1", \%hash), "add hash - status ok");
 
 }
 
-unlink($newcfgfile);
+#unlink($newcfgfile);
