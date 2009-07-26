@@ -93,7 +93,7 @@ add array value to handle and return true if add successfully.
 
 the same as B<add_array>, add list value to handle and return true if add successfully.
 
-=head2 $self->add_hash ($path, \%hash)
+=head2 $self->add_hash ($path, $key, \%hash)
 
 add hash value to handle and return true if add successfully.
 

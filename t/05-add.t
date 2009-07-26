@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More tests => 10;
+use Test::More tests => 11;
 use Test::Deep;
 
 use Conf::Libconfig;
@@ -16,30 +16,34 @@ my $key = "node1";
 my $value = "hello, world";
 my @arr = (1, 2, 3);
 my @list = ("abc", 456, 0x888);
-my %hash = (1, 2, 3, 4);
-
-#TODO: {
-#local $TODO = 'add_* methods do not work yet';
+my %hash = ("online", "玄幻小说", "story", "杀魂逆天");
 
 # scalar test
 ok($foo->add_scalar("me.mar", $key, $value), "add scalar - status ok");
 ok($foo->modify_scalar("me.mar.float", $value), "modify scalar - status ok");
 # array test
 $key = "node2";
-ok($foo->add_array("me.arr", $key,  \@arr), "add array - status ok");
-ok($foo->add_array("me.mar", $key,  \@arr), "add array - status ok");
+ok($foo->add_array("me.arr", $key,  \@arr), "add array into array - status ok");
+ok($foo->add_array("me.mar", $key,  \@arr), "add array into hash - status ok");
 # list test, like add_array
 $key = "node3";
-ok($foo->add_list("me.mar.family1", $key, \@list), "add list - status ok");
-ok($foo->add_list("me.mar.check2", $key, \@list), "add list - status ok");
+ok($foo->add_list("me.mar.family1", $key, \@list), "add list into list - status ok");
+ok($foo->add_list("me.mar.check2", $key, \@list), "add list into hash - status ok");
 
 # hash test
 $key = "node4";
-ok($foo->add_hash("books", $key, \%hash), "add hash - status ok");
-#ok($foo->add_hash("me.mar.check1", $key, \%hash), "add hash - status ok");
+ok($foo->add_hash("books", $key, \%hash), "add hash into list - status ok");
+ok($foo->add_hash("me.mar.check1", $key, \%hash), "add hash into hash - status ok");
+
+TODO: {
+local $TODO = 'add hard hash methods do not work yet';
+
+undef %hash;
+%hash = ( "app", { "a", "b", "c", "d" }  );
+#ok($foo->add_hash("me.mar.check1", $key, \%hash), "add hard hash - status ok");
 ok(1);
 
-#}
+}
 
 ok($foo->write_file($newcfgfile), "write file - status ok");
-#unlink($newcfgfile);
+unlink($newcfgfile);

@@ -129,16 +129,21 @@ set_hash(config_setting_t *settings, HV *value, int *status)
 	HE* he;
 	I32 keyLen;
 	char *key;
+	int elemStatus;
+	int allStatus;
 	SV* sv = newSV(0);
 
+	allStatus = 1;
 	hv_iterinit(value);
 	while ((he = hv_iternext(value))) 
 	{
 		key = hv_iterkey(he, &keyLen);
 		sv = hv_iterval(value, he);
 		// Only support simple hash
-		set_scalarvalue(settings, key, sv, 0);
+		elemStatus = set_scalarvalue(settings, key, sv, 0);
+		allStatus = allStatus | elemStatus;
 	}
+	*status = allStatus;
 }
 
 int 
@@ -174,9 +179,7 @@ set_scalarvalue(config_setting_t *settings, const char *key, SV *value, int flag
 			}
 			break;
 		default:
-			Perl_warn(aTHX_ "%s %d", key, type);
 			settings_item = config_setting_add(settings, key, type);
-			Perl_warn(aTHX_ "%s %d", key, settings_item->type);
 			set_scalar(settings_item, value, type, &returnStatus);
 	}
 	return returnStatus;
