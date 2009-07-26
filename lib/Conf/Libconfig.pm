@@ -85,11 +85,11 @@ add a pair of key and value node to handle and return true if add successfully.
 
 modify new value to handle and return true if add successfully.
 
-=head2 $self->add_array ($path, \@array)
+=head2 $self->add_array ($path, $key, \@array)
 
 add array value to handle and return true if add successfully.
 
-=head2 $self->add_list ($path, \@list)
+=head2 $self->add_list ($path, $key, \@list)
 
 the same as B<add_array>, add list value to handle and return true if add successfully.
 

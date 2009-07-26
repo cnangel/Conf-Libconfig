@@ -104,14 +104,17 @@ set_array(config_setting_t *settings, AV *value, int *status)
 
 	allStatus = 1;
 	valueMaxIndex = av_len(value);
+	/*Perl_warn(aTHX_ "[INDEX] %d", valueMaxIndex);*/
 	for (i = 0; i <= valueMaxIndex; i ++)
 	{
-		sv = av_shift(value);
+		/*sv = av_shift(value);*/
+		sv = *(av_fetch(value, i, 0));
 		type = (int)(log(SvIOK(sv) + SvNOK(sv) + SvPOK(sv))/log(2)) - 5;
-		/*if (type == 3) {*/
-			/*if (SvUV(sv) <= UINTNUM) type = 2;*/
+		if (type == 3) {
+			if (SvUV(sv) <= UINTNUM) type = 2;
 			/*if (SvUV(sv) == 0 || SvUV(sv) == 1) type = 6;*/
-		/*}*/
+		}
+		/*Perl_warn(aTHX_ "[NUM] %s %d", settings->name, (int)SvIV(sv));*/
 		set_scalar_elem(settings, -1, sv, type, &elemStatus);
 		allStatus = allStatus | elemStatus; 
 	}
@@ -171,18 +174,24 @@ set_arrayvalue(config_setting_t *settings, const char *key, AV *value, int flag)
 		/*Perl_warn(aTHX_ "[WARN] Value is not array");*/
 		/*return 0;*/
 	/*}*/
+	/*Perl_warn(aTHX_ "[TYPE] %d", settings->type);*/
 	switch (settings->type) {
 		case CONFIG_TYPE_INT:
 		case CONFIG_TYPE_INT64:
 		case CONFIG_TYPE_FLOAT:
 		case CONFIG_TYPE_BOOL:
 		case CONFIG_TYPE_STRING:
+			Perl_croak(aTHX_ "Scalar can't add array node!");
 			break;
 		case CONFIG_TYPE_ARRAY:
 		case CONFIG_TYPE_LIST:
+			/*Perl_warn(aTHX_ "new list");*/
+			settings_item = config_setting_add(settings, NULL, (flag ? CONFIG_TYPE_LIST : CONFIG_TYPE_ARRAY));
+			set_array(settings_item, value, &returnStatus);
 			break;
 		case CONFIG_TYPE_GROUP:
-			settings_item = config_setting_add(settings, key, CONFIG_TYPE_ARRAY);
+			/*Perl_warn(aTHX_ "new group");*/
+			settings_item = config_setting_add(settings, key, (flag ? CONFIG_TYPE_LIST : CONFIG_TYPE_ARRAY));
 			set_array(settings_item, value, &returnStatus);
 			break;
 	}
@@ -717,17 +726,16 @@ libconfig_add_array(conf, path, key, value)
 		RETVAL
 
 int 
-libconfig_add_list(conf, path, value)
+libconfig_add_list(conf, path, key, value)
 	Conf::Libconfig conf
     const char *path
+	const char *key
 	AV *value
     PREINIT:
         config_setting_t *settings;
-        config_setting_t *settings_item;
 	CODE:
         settings = config_lookup(conf, path);
-		settings_item = config_setting_add(settings, NULL, CONFIG_TYPE_LIST);
-		RETVAL = 1;
+		RETVAL = set_arrayvalue(settings, key, value, 1);
 	OUTPUT:
 		RETVAL
 
@@ -739,11 +747,9 @@ libconfig_add_hash(conf, path, key, value)
 	HV *value
     PREINIT:
         config_setting_t *settings;
-        config_setting_t *settings_item;
 	CODE:
         settings = config_lookup(conf, path);
-		settings_item = config_setting_add(settings, key, CONFIG_TYPE_GROUP);
-		RETVAL = 1;
+		RETVAL = set_hashvalue(settings, key, value, 0);
 	OUTPUT:
 		RETVAL
 
