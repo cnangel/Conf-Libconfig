@@ -35,7 +35,7 @@ ok($foo->add_list("me.mar.check2", $key, \@list), "add list - status ok");
 
 # hash test
 $key = "node4";
-ok($foo->add_hash("me.arr", $key, \%hash), "add hash - status ok");
+ok($foo->add_hash("books", $key, \%hash), "add hash - status ok");
 #ok($foo->add_hash("me.mar.check1", $key, \%hash), "add hash - status ok");
 ok(1);
 
