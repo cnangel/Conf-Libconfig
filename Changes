@@ -3,7 +3,7 @@ Revision history for Conf-Libconfig
 0.009   Thu 23 Jul 2009 11:13:32 PM CST
         * Add some useful test case;
         * Implement function add_* and modify scalar.
-		* Split some code which is lookup_value of method alone.
+        * Split some code which is lookup_value of method alone.
 0.008   Thu 23 Jul 2009 09:45:21 AM CST
         * Fix a test failure involving float numbers(daxim);
         * Some documentation improvements(daxim);
