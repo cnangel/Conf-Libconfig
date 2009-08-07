@@ -575,6 +575,12 @@ libconfig_delete(conf)
     CODE:
     config_destroy(conf);
 
+void
+libconfig_DESTORY(conf)
+    Conf::Libconfig conf
+    CODE:
+    config_destroy(conf);
+
 int
 libconfig_read_file(conf, filename)
     Conf::Libconfig conf

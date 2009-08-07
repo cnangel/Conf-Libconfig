@@ -4,7 +4,7 @@ use 5.006001;
 use strict;
 use warnings;
 
-our $VERSION = '0.009';
+our $VERSION = '0.010';
 
 require XSLoader;
 XSLoader::load('Conf::Libconfig', $VERSION);
@@ -30,6 +30,7 @@ Conf::Libconfig - Perl extension for libconfig
   my $hashref = $self->fetch_hashref("cdef.abcd.hashref");
   print Dumper $hashref;
 
+  # you can ignore it, if program is over, DESTORY can auto exit.
   $self->delete();
 
 =head1 DESCRIPTION
@@ -48,6 +49,10 @@ Construct.
 =head2 $self->delete()
 
 Destructor.
+
+=head2 $self->DESTORY()
+
+Destructor, and auto release memery.
 
 =head2 $self->read_file ($file)
 
