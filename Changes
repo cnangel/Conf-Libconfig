@@ -1,7 +1,7 @@
 Revision history for Conf-Libconfig
 
 0.010   Fri 07 Aug 2009 04:10:09 PM CST
-        * Add DESTORY can auto release memery.
+        * Add DESTROY can auto release memory.
 0.009   Thu 23 Jul 2009 11:13:32 PM CST
         * Add some useful test case;
         * Implement function add_* and modify scalar.

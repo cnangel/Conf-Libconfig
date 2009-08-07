@@ -36,7 +36,7 @@ int get_arrayvalue(config_setting_t *, AV *);
 
 void remove_scalar_node(config_setting_t *, const char *, int, int *);
 
-void 
+void
 set_scalar(config_setting_t *settings, SV *value, int valueType, int *status)
 {
 	if (settings == NULL) {
@@ -64,7 +64,7 @@ set_scalar(config_setting_t *settings, SV *value, int valueType, int *status)
 	}
 }
 
-void 
+void
 set_scalar_elem(config_setting_t *settings, int idx, SV *value, int valueType, int *status)
 {
 	if (settings == NULL) {
@@ -94,7 +94,7 @@ set_scalar_elem(config_setting_t *settings, int idx, SV *value, int valueType, i
 	/*config_setting_set_format(settings_item, CONFIG_FORMAT_DEFAULT);*/
 }
 
-void 
+void
 set_array(config_setting_t *settings, AV *value, int *status)
 {
 	SV *sv = newSV(0);
@@ -118,7 +118,7 @@ set_array(config_setting_t *settings, AV *value, int *status)
 		}
 		/*Perl_warn(aTHX_ "[NUM] %s %d", settings->name, (int)SvIV(sv));*/
 		set_scalar_elem(settings, -1, sv, type, &elemStatus);
-		allStatus = allStatus | elemStatus; 
+		allStatus = allStatus | elemStatus;
 	}
 	*status = allStatus;
 }
@@ -135,7 +135,7 @@ set_hash(config_setting_t *settings, HV *value, int *status)
 
 	allStatus = 1;
 	hv_iterinit(value);
-	while ((he = hv_iternext(value))) 
+	while ((he = hv_iternext(value)))
 	{
 		key = hv_iterkey(he, &keyLen);
 		sv = hv_iterval(value, he);
@@ -146,7 +146,7 @@ set_hash(config_setting_t *settings, HV *value, int *status)
 	*status = allStatus;
 }
 
-int 
+int
 set_scalarvalue(config_setting_t *settings, const char *key, SV *value, int flag)
 {
 	int type;
@@ -185,7 +185,7 @@ set_scalarvalue(config_setting_t *settings, const char *key, SV *value, int flag
 	return returnStatus;
 }
 
-int 
+int
 set_arrayvalue(config_setting_t *settings, const char *key, AV *value, int flag)
 {
 	int returnStatus;
@@ -260,7 +260,7 @@ set_hashvalue(config_setting_t *settings, const char *key, HV *value, int flag)
 void
 remove_scalar_node(config_setting_t *settings, const char *name, int type, int *status)
 {
-	if (type == CONFIG_TYPE_INT || type == CONFIG_TYPE_INT64 || type == CONFIG_TYPE_FLOAT || type == CONFIG_TYPE_STRING || type == CONFIG_TYPE_BOOL) 
+	if (type == CONFIG_TYPE_INT || type == CONFIG_TYPE_INT64 || type == CONFIG_TYPE_FLOAT || type == CONFIG_TYPE_STRING || type == CONFIG_TYPE_BOOL)
 		*status = config_setting_remove(settings, name);
 	else
 		Perl_croak(aTHX_ "[ERROR] Only can remove scalar setttings!");
@@ -327,7 +327,7 @@ get_scalar(config_setting_t *settings, SV **svref)
     }
 }
 
-void 
+void
 get_array(config_setting_t *settings, SV **svref)
 {
 	if (settings == NULL) {
@@ -433,7 +433,7 @@ get_group(config_setting_t *settings, SV **svref)
 }
 /* }}} */
 
-int 
+int
 get_arrayvalue(config_setting_t *settings, AV *av)
 {
 	if (settings == NULL) {
@@ -576,7 +576,7 @@ libconfig_delete(conf)
     config_destroy(conf);
 
 void
-libconfig_DESTORY(conf)
+libconfig_DESTROY(conf)
     Conf::Libconfig conf
     CODE:
     config_destroy(conf);
@@ -744,7 +744,7 @@ libconfig_write_file(conf, filename)
 	OUTPUT:
 		RETVAL
 
-int 
+int
 libconfig_add_scalar(conf, path, key, value)
 	Conf::Libconfig conf
     const char *path
@@ -760,7 +760,7 @@ libconfig_add_scalar(conf, path, key, value)
 	OUTPUT:
 		RETVAL
 
-int 
+int
 libconfig_modify_scalar(conf, path, value)
 	Conf::Libconfig conf
     const char *path
@@ -775,7 +775,7 @@ libconfig_modify_scalar(conf, path, value)
 	OUTPUT:
 		RETVAL
 
-int 
+int
 libconfig_add_array(conf, path, key, value)
 	Conf::Libconfig conf
     const char *path
@@ -789,7 +789,7 @@ libconfig_add_array(conf, path, key, value)
 	OUTPUT:
 		RETVAL
 
-int 
+int
 libconfig_add_list(conf, path, key, value)
 	Conf::Libconfig conf
     const char *path
@@ -803,7 +803,7 @@ libconfig_add_list(conf, path, key, value)
 	OUTPUT:
 		RETVAL
 
-int 
+int
 libconfig_add_hash(conf, path, key, value)
 	Conf::Libconfig conf
     const char *path
