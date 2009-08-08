@@ -30,7 +30,7 @@ Conf::Libconfig - Perl extension for libconfig
   my $hashref = $self->fetch_hashref("cdef.abcd.hashref");
   print Dumper $hashref;
 
-  # you can ignore it, if program is over, DESTROY can auto exit.
+  # if program is over, DESTROY can auto exit, and you can ignore function delete. 
   $self->delete();
 
 =head1 DESCRIPTION

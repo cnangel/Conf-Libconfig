@@ -2,6 +2,8 @@ Revision history for Conf-Libconfig
 
 0.010   Fri 07 Aug 2009 04:10:09 PM CST
         * Add DESTROY can auto release memory.
+        * Some small spelling fixes(daxim), and add documents about libconfig.pm.
+        * Reverted the change that made every file executable(daxim).
 0.009   Thu 23 Jul 2009 11:13:32 PM CST
         * Add some useful test case;
         * Implement function add_* and modify scalar.
