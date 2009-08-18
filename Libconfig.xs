@@ -823,17 +823,20 @@ libconfig_delete_node(conf, path)
     const char *path
     PREINIT:
         config_setting_t *settings;
+		config_setting_t *settings_item;
+		config_setting_t *settings_a;
 		char *key;
 		char parentpath[256];
+		int ret;
     CODE:
 	{
 		key = strrchr(path, '.') + 1;
 		sprintf(parentpath, "%.*s", strlen(path) - strlen(key) - 1, path);
         settings = config_lookup(conf, parentpath);
 		if (!settings) {
-			Perl_croak (aTHX_ "Not the node of path.!");
+			Perl_croak (aTHX_ "Not the node of path: %s", parentpath);
 		}
-		RETVAL = config_setting_remove(settings, key);
+		RETVAL = 1 | config_setting_remove(settings, key);
 	}
     OUTPUT:
         RETVAL
@@ -850,7 +853,7 @@ libconfig_delete_node_key(conf, path, key)
 		if (!settings) {
 			Perl_croak (aTHX_ "Not the node of path.!");
 		}
-		RETVAL = config_setting_remove(settings, key);
+		RETVAL = 1 | config_setting_remove(settings, key);
     OUTPUT:
         RETVAL
 
@@ -866,7 +869,7 @@ libconfig_delete_node_elem(conf, path, idx)
 		if (!settings) {
 			Perl_croak (aTHX_ "Not the node of path.!");
 		}
-		RETVAL = config_setting_remove_elem(settings, idx);
+		RETVAL = 1 | config_setting_remove_elem(settings, idx);
     OUTPUT:
         RETVAL
 
