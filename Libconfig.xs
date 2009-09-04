@@ -823,7 +823,6 @@ libconfig_delete_node(conf, path)
     const char *path
     PREINIT:
         config_setting_t *settings;
-		config_setting_t *settings_item;
 		char *key;
 		char parentpath[256];
     CODE:
