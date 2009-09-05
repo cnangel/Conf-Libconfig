@@ -6,7 +6,6 @@ use inc::Module::Install;
 name                'Conf-Libconfig';
 license             'bsd';
 author              'Cnangel <cnangel@gmail.com>';
-perl_version        '5.006001';
 all_from            'lib/Conf/Libconfig.pm';
 requires            'ExtUtils::XSBuilder' => 0;
 requires            'Cwd' => 1.00;
