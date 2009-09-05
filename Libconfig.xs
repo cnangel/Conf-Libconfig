@@ -97,7 +97,7 @@ set_scalar_elem(config_setting_t *settings, int idx, SV *value, int valueType, i
 void
 set_array(config_setting_t *settings, AV *value, int *status)
 {
-	SV *sv = newSV(0);
+	SV *sv;// = newSV(0);
 	int valueMaxIndex;
 	int i;
 	int type;
@@ -131,7 +131,7 @@ set_hash(config_setting_t *settings, HV *value, int *status)
 	char *key;
 	int elemStatus;
 	int allStatus;
-	SV* sv = newSV(0);
+	SV* sv;// = newSV(0);
 
 	allStatus = 1;
 	hv_iterinit(value);
@@ -171,11 +171,12 @@ set_scalarvalue(config_setting_t *settings, const char *key, SV *value, int flag
 			else {
 				size_t nameLength = strlen(settings->name);
 				char *name = (char *)malloc(nameLength + 1);
+				if (!name) Perl_croak(aTHX_ "[ERROR] malloc is fail!!");
 				strncpy(name, settings->name, nameLength);
 				name[nameLength] = 0;
 				remove_scalar_node(settings_parent, settings->name, settings->type, &returnStatus);
 				set_scalarvalue(settings_parent, name, value, 0);
-				free(name);
+				if (name) free(name);
 			}
 			break;
 		default:
@@ -498,7 +499,7 @@ get_hashvalue(config_setting_t *settings, HV *hv)
 		Perl_warn(aTHX_ "[WARN] Settings is null in get_hashvalue");
 		return 1;
 	}
-	SV *sv = newSV(0);
+	SV *sv;// = newSV(0);
 	int settings_count = config_setting_length(settings);
 	if (settings->type == CONFIG_TYPE_INT || settings->type == CONFIG_TYPE_INT64 || settings->type == CONFIG_TYPE_FLOAT
 			|| settings->type == CONFIG_TYPE_STRING || settings->type == CONFIG_TYPE_BOOL) {
