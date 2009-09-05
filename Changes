@@ -2,6 +2,7 @@ Revision history for Conf-Libconfig
 
 0.013   Sat 05 Sep 2009 02:00:35 PM CST
         * Use Module::Install::CheckLib replace Devel::CheckLib. 
+        * Fix some increase memory.
 0.012   Tue 18 Aug 2009 08:09:09 PM CST
         * Fix delete node bug.
 0.011   Tue 08 Aug 2009 10:06:17 PM CST

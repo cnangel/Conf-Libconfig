@@ -5,6 +5,7 @@ inc/Module/Install.pm
 inc/Module/Install/AutoInstall.pm
 inc/Module/Install/Base.pm
 inc/Module/Install/Can.pm
+inc/Module/Install/CheckLib.pm
 inc/Module/Install/Compiler.pm
 inc/Module/Install/Fetch.pm
 inc/Module/Install/Include.pm
@@ -26,6 +27,7 @@ t/03-write.t
 t/04-spec.t
 t/05-add.t
 t/06-delete.t
+t/07-memory.t
 t/boilerplate.t
 t/no-tabs.t.txt
 t/pod-coverage.t

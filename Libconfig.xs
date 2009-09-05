@@ -289,6 +289,8 @@ get_value(Conf__Libconfig conf, const char *path, SV **svref)
 	else if (config_lookup_int64(conf, path, &valueBigint)) {
 		valueBigintArrLen = sprintf(valueBigintArr, "%lld", valueBigint);
 		*svref = newSVpv(valueBigintArr, valueBigintArrLen);
+	} else {
+		*svref = newSV(0);
 	}
 }
 
@@ -323,6 +325,7 @@ get_scalar(config_setting_t *settings, SV **svref)
             *svref = newSVpvn(vChar, strlen(vChar));
             break;
         default:
+			*svref = newSV(0);
             Perl_croak(aTHX_ "Scalar have not this type!");
     }
 }
@@ -333,7 +336,7 @@ get_array(config_setting_t *settings, SV **svref)
 	if (settings == NULL) {
 		Perl_warn(aTHX_ "[WARN] Settings is null in get_array!");
 	}
-	SV *sv = newSV(0);
+	SV *sv;
     AV *av = newAV();
 	int settings_count = config_setting_length(settings);
 
@@ -386,7 +389,7 @@ get_group(config_setting_t *settings, SV **svref)
 	if (settings == NULL) {
 		Perl_warn(aTHX_ "[WARN] Settings is null in get_group!");
 	}
-	SV *sv = newSV(0);
+	SV *sv;
 	HV *hv = newHV();
 	int settings_count = config_setting_length(settings);
 
@@ -440,17 +443,17 @@ get_arrayvalue(config_setting_t *settings, AV *av)
 		Perl_warn(aTHX_ "[WARN] Settings is null in get_arrayvalue");
 		return 1;
 	}
-	SV *sv = newSV(0);
+	SV *sv;
 	int settings_count = config_setting_length(settings);
 	if (settings->type == CONFIG_TYPE_INT || settings->type == CONFIG_TYPE_INT64 || settings->type == CONFIG_TYPE_FLOAT
 			|| settings->type == CONFIG_TYPE_STRING || settings->type == CONFIG_TYPE_BOOL) {
 		get_scalar(settings, &sv);
-		av_push(av, sv);
+		av_push(av, sv_2mortal(sv));
 		return 0;
 	}
 	if (settings->type == CONFIG_TYPE_GROUP) {
 		get_group(settings, &sv);
-		av_push(av, sv);
+		av_push(av, sv_2mortal(sv));
 		return 0;
 	}
 
@@ -466,19 +469,19 @@ get_arrayvalue(config_setting_t *settings, AV *av)
 				case CONFIG_TYPE_FLOAT:
 				case CONFIG_TYPE_STRING:
 					get_scalar(settings_item, &sv);
-					av_push(av, sv);
+					av_push(av, sv_2mortal(sv));
 					break;
 				case CONFIG_TYPE_ARRAY:
 					get_array(settings_item, &sv);
-					av_push(av, sv);
+					av_push(av, sv_2mortal(sv));
 					break;
 				case CONFIG_TYPE_LIST:
 					get_list(settings_item, &sv);
-					av_push(av, sv);
+					av_push(av, sv_2mortal(sv));
 					break;
 				case CONFIG_TYPE_GROUP:
 					get_group(settings_item, &sv);
-					av_push(av, sv);
+					av_push(av, sv_2mortal(sv));
 					break;
 				default:
 					Perl_croak(aTHX_ "Not this type!");
@@ -670,7 +673,7 @@ libconfig_lookup_value(conf, path)
     Conf::Libconfig conf
     const char *path
     PREINIT:
-        SV *sv = newSV(0);
+        SV *sv;
     CODE:
     {
 		get_value(conf, path, &sv);
@@ -691,6 +694,8 @@ libconfig_fetch_array(conf, path)
         settings = config_lookup(conf, path);
         get_arrayvalue(settings, av);
         RETVAL = av;
+//		ST(0) = sv_2mortal(newRV((SV *)av));
+//        RETVAL = (AV*)sv_2mortal(newRV_noinc((SV *)av));
     }
     OUTPUT:
         RETVAL
@@ -926,7 +931,7 @@ libconfig_setting_get_item(setting, i)
         STRLEN itemBigintArrLen;
         long itemInt;
         int itemBool;
-        SV *sv = newSV(0);
+        SV *sv;
     CODE:
     {
         if ((itemInt = config_setting_get_int_elem(setting, i)))
@@ -940,6 +945,8 @@ libconfig_setting_get_item(setting, i)
             sv = newSVnv(itemFloat);
         else if ((itemChar = config_setting_get_string_elem(setting, i)))
             sv = newSVpvn(itemChar, strlen(itemChar));
+		else
+			sv = newSV(0);
         RETVAL = sv;
     }
     OUTPUT:
