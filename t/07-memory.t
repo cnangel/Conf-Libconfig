@@ -6,7 +6,7 @@ use Test::More;
 use Conf::Libconfig;
 
 my $cfgfile = "./t/test.cfg";
-my $difftime = 3600;
+my $difftime = 3;
 my $conf = Conf::Libconfig->new;
 
 ok($conf->read_file($cfgfile), "read file - status ok");
