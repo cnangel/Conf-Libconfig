@@ -449,12 +449,12 @@ get_arrayvalue(config_setting_t *settings, AV *av)
 	if (settings->type == CONFIG_TYPE_INT || settings->type == CONFIG_TYPE_INT64 || settings->type == CONFIG_TYPE_FLOAT
 			|| settings->type == CONFIG_TYPE_STRING || settings->type == CONFIG_TYPE_BOOL) {
 		get_scalar(settings, &sv);
-		av_push(av, sv_2mortal(sv));
+		av_push(av, sv);
 		return 0;
 	}
 	if (settings->type == CONFIG_TYPE_GROUP) {
 		get_group(settings, &sv);
-		av_push(av, sv_2mortal(sv));
+		av_push(av, sv);
 		return 0;
 	}
 
@@ -470,19 +470,19 @@ get_arrayvalue(config_setting_t *settings, AV *av)
 				case CONFIG_TYPE_FLOAT:
 				case CONFIG_TYPE_STRING:
 					get_scalar(settings_item, &sv);
-					av_push(av, sv_2mortal(sv));
+					av_push(av, sv);
 					break;
 				case CONFIG_TYPE_ARRAY:
 					get_array(settings_item, &sv);
-					av_push(av, sv_2mortal(sv));
+					av_push(av, sv);
 					break;
 				case CONFIG_TYPE_LIST:
 					get_list(settings_item, &sv);
-					av_push(av, sv_2mortal(sv));
+					av_push(av, sv);
 					break;
 				case CONFIG_TYPE_GROUP:
 					get_group(settings_item, &sv);
-					av_push(av, sv_2mortal(sv));
+					av_push(av, sv);
 					break;
 				default:
 					Perl_croak(aTHX_ "Not this type!");
@@ -622,7 +622,7 @@ libconfig_lookup_int64(conf, path)
     {
         config_lookup_int64(conf, path, &value);
         valueArrLen = sprintf(valueArr, "%lld", value);
-        RETVAL = newSVpv(valueArr, valueArrLen);
+        RETVAL = sv_2mortal(newSVpv(valueArr, valueArrLen));
     }
     OUTPUT:
         RETVAL
@@ -694,9 +694,9 @@ libconfig_fetch_array(conf, path)
     {
         settings = config_lookup(conf, path);
         get_arrayvalue(settings, av);
-        RETVAL = av;
-//		ST(0) = sv_2mortal(newRV((SV *)av));
-//        RETVAL = (AV*)sv_2mortal(newRV_noinc((SV *)av));
+//		ST(0) = sv_2mortal((SV *)av);
+        RETVAL = (AV *)sv_2mortal((SV *)av);
+//		XPUSHs(sv_2mortal((SV *)av));
     }
     OUTPUT:
         RETVAL
@@ -712,7 +712,7 @@ libconfig_fetch_hashref(conf, path)
     {
         settings = config_lookup(conf, path);
 		get_hashvalue(settings, hv);
-		RETVAL = hv;
+		RETVAL = (HV *)sv_2mortal((SV *)hv);
     }
     OUTPUT:
         RETVAL
