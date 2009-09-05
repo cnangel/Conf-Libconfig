@@ -915,7 +915,7 @@ libconfig_setting_get_type(setting)
 			default:
 				sv_setsv(sv, &PL_sv_undef);
 		}
-		RETVAL = sv;
+		RETVAL = sv_2mortal(sv);
 	}
 	OUTPUT:
 		RETVAL
