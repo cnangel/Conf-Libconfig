@@ -1,4 +1,5 @@
 use strict;
+use lib '.';
 use inc::Module::Install;
 #use Devel::CheckLib qw(check_lib_or_exit);
 
