@@ -1,7 +1,6 @@
 use strict;
-use lib qw(. inc);
 use inc::Module::Install;
-use Devel::CheckLib qw(check_lib_or_exit);
+#use Devel::CheckLib qw(check_lib_or_exit);
 
 name                'Conf-Libconfig';
 license             'bsd';
@@ -14,7 +13,8 @@ requires            'File::Find' => 1.00;
 requires            'XSLoader' => 0.05;
 test_requires       'Test::Exception' => 0.27;
 test_requires       'Test::Deep' => 0.103;
-check_lib_or_exit   lib => [qw(config)];
+#check_lib_or_exit   lib => [qw(config)];
+checklibs			lib => [qw(config)], header => [qw(libconfig.h)];
 cc_inc_paths        '/usr/include', '/usr/local/include';
 cc_lib_paths        '/usr/lib' , '/usr/lib64', '/usr/local/lib', '/usr/local/lib64';
 cc_lib_links        'config';
