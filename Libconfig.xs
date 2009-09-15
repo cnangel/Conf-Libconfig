@@ -67,10 +67,10 @@ set_scalar(config_setting_t *settings, SV *value, int valueType, int *status)
 void
 set_scalar_elem(config_setting_t *settings, int idx, SV *value, int valueType, int *status)
 {
+	config_setting_t *settings_item;
 	if (settings == NULL) {
 		Perl_warn(aTHX_ "[WARN] Settings is null in set_scalar_elem!");
 	}
-	config_setting_t *settings_item;
 	switch (valueType) {
         case CONFIG_TYPE_INT:
 			settings_item = config_setting_set_int_elem(settings, idx, SvIV(value));
@@ -334,15 +334,18 @@ get_scalar(config_setting_t *settings, SV **svref)
 void
 get_array(config_setting_t *settings, SV **svref)
 {
+	SV *sv;
+	AV *av;
+	int settings_count;
+	int i;
+	config_setting_t *settings_item;
+
 	if (settings == NULL) {
 		Perl_warn(aTHX_ "[WARN] Settings is null in get_array!");
 	}
-	SV *sv;
-    AV *av = newAV();
-	int settings_count = config_setting_length(settings);
+    av = newAV();
+	settings_count = config_setting_length(settings);
 
-	config_setting_t *settings_item;
-	int i;
 	for (i = 0; i < settings_count; i ++) {
 		settings_item = config_setting_get_elem(settings, i);
 		if (settings_item) {
@@ -387,15 +390,17 @@ get_list(config_setting_t *settings, SV **svref)
 void
 get_group(config_setting_t *settings, SV **svref)
 {
+	SV *sv;
+	HV *hv = newHV();
+	int settings_count;
+	int i;
+	config_setting_t *settings_item;
+
 	if (settings == NULL) {
 		Perl_warn(aTHX_ "[WARN] Settings is null in get_group!");
 	}
-	SV *sv;
-	HV *hv = newHV();
-	int settings_count = config_setting_length(settings);
+	settings_count = config_setting_length(settings);
 
-	config_setting_t *settings_item;
-	int i;
 	for (i = 0; i < settings_count; i ++) {
 		settings_item = config_setting_get_elem(settings, i);
 		if (settings_item) {
@@ -440,12 +445,16 @@ get_group(config_setting_t *settings, SV **svref)
 int
 get_arrayvalue(config_setting_t *settings, AV *av)
 {
+	SV *sv;
+	int settings_count;
+	int i;
+	config_setting_t *settings_item;
+
 	if (settings == NULL) {
 		Perl_warn(aTHX_ "[WARN] Settings is null in get_arrayvalue");
 		return 1;
 	}
-	SV *sv;
-	int settings_count = config_setting_length(settings);
+	settings_count = config_setting_length(settings);
 	if (settings->type == CONFIG_TYPE_INT || settings->type == CONFIG_TYPE_INT64 || settings->type == CONFIG_TYPE_FLOAT
 			|| settings->type == CONFIG_TYPE_STRING || settings->type == CONFIG_TYPE_BOOL) {
 		get_scalar(settings, &sv);
@@ -458,8 +467,6 @@ get_arrayvalue(config_setting_t *settings, AV *av)
 		return 0;
 	}
 
-	config_setting_t *settings_item;
-	int i;
 	for (i = 0; i < settings_count; i ++) {
 		settings_item = config_setting_get_elem(settings, i);
 		if (settings_item) {
@@ -495,12 +502,16 @@ get_arrayvalue(config_setting_t *settings, AV *av)
 int
 get_hashvalue(config_setting_t *settings, HV *hv)
 {
+	SV *sv;// = newSV(0);
+	int settings_count;
+	int i;
+	config_setting_t *settings_item;
+
 	if (settings == NULL) {
 		Perl_warn(aTHX_ "[WARN] Settings is null in get_hashvalue");
 		return 1;
 	}
-	SV *sv;// = newSV(0);
-	int settings_count = config_setting_length(settings);
+	settings_count = config_setting_length(settings);
 	if (settings->type == CONFIG_TYPE_INT || settings->type == CONFIG_TYPE_INT64 || settings->type == CONFIG_TYPE_FLOAT
 			|| settings->type == CONFIG_TYPE_STRING || settings->type == CONFIG_TYPE_BOOL) {
 		get_scalar(settings, &sv);
@@ -517,8 +528,6 @@ get_hashvalue(config_setting_t *settings, HV *hv)
 		return 0;
 	}
 
-	config_setting_t *settings_item;
-	int i;
 	for (i = 0; i < settings_count; i ++) {
 		settings_item = config_setting_get_elem(settings, i);
 		if (settings_item) {
