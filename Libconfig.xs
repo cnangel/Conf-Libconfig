@@ -910,7 +910,7 @@ SV *
 libconfig_setting_get_type(setting)
 	Conf::Libconfig::Settings setting
     PREINIT:
-        SV *sv;
+        SV *sv = newSV(0);
 	CODE:
 	{
 		switch(setting->type)
