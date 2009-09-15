@@ -116,6 +116,10 @@ set_array(config_setting_t *settings, AV *value, int *status)
 			if (SvUV(sv) <= UINTNUM) type = 2;
 			/*if (SvUV(sv) == 0 || SvUV(sv) == 1) type = 6;*/
 		}
+		// For x86_64
+		if (type == 11) type = 2;
+		if (type == 13) type = 5;
+		//Perl_warn(aTHX_ "[DEBUG] %d | %d\n", SvPOK(value), type);
 		/*Perl_warn(aTHX_ "[NUM] %s %d", settings->name, (int)SvIV(sv));*/
 		set_scalar_elem(settings, -1, sv, type, &elemStatus);
 		allStatus = allStatus | elemStatus;
@@ -163,6 +167,10 @@ set_scalarvalue(config_setting_t *settings, const char *key, SV *value, int flag
 		if (SvUV(value) <= UINTNUM) type = 2;
 		/*if (SvUV(value) == 0 || SvUV(value) == 1) type = 6;*/
 	}
+	// for x86_64
+	if (type == 11) type = 2;
+	if (type == 13) type = 5;
+	// Perl_warn(aTHX_ "[DEBUG] %d | %d\n", SvPOK(value), type);
 	settings_parent = settings->parent;
 	switch (flag) {
 		case 1:
@@ -902,7 +910,7 @@ SV *
 libconfig_setting_get_type(setting)
 	Conf::Libconfig::Settings setting
     PREINIT:
-        SV *sv = newSV(0);
+        SV *sv;
 	CODE:
 	{
 		switch(setting->type)
@@ -924,7 +932,7 @@ libconfig_setting_get_type(setting)
 			default:
 				sv_setsv(sv, &PL_sv_undef);
 		}
-		RETVAL = sv_2mortal(sv);
+		RETVAL = sv;
 	}
 	OUTPUT:
 		RETVAL

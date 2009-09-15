@@ -9,6 +9,7 @@ my $cfgfile = "./t/test.cfg";
 my $difftime = 3;
 my $conf = Conf::Libconfig->new;
 
+
 ok($conf->read_file($cfgfile), "read file - status ok");
 
 my ($settings, $setting_item, $test1, $test2, $test3, $test4, $test5, $test6, $test7, $test8);

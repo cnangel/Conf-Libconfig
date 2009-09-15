@@ -34,6 +34,7 @@ To install this module, run the following commands:
     # or if you use a self-compiled libconfig as above:
     # perl Makefile.PL LIBS=-L$MYPREFIX/lib INC=-I$MYPREFIX/include
     make
+	# If not using en_US system, you must set export LC_ALL=en_US.UTF-8 
     make test
     make install
 

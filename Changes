@@ -1,20 +1,24 @@
 Revision history for Conf-Libconfig
 
+0.015   Tue 15 Sep 2009 09:45:05 PM CST
+        * Fix SvPOK return value in x86_64;
+        * Fix aspell fail in LC_ALL=zh_CN.UTF-8;
+        * Modify positions of some variables which are error. 
 0.014   Sat 05 Sep 2009 04:31:00 PM CST
         * Fix av and hv about memory.
 0.013   Sat 05 Sep 2009 02:00:35 PM CST
-        * Use Module::Install::CheckLib replace Devel::CheckLib. 
+        * Use Module::Install::CheckLib replace Devel::CheckLib;
         * Fix some increase memory.
 0.012   Tue 18 Aug 2009 08:09:09 PM CST
         * Fix delete node bug.
 0.011   Tue 08 Aug 2009 10:06:17 PM CST
         * Add DESTROY can auto release memory.
 0.010   Fri 07 Aug 2009 04:10:09 PM CST
-        * Some small spelling fixes(daxim), and add documents about libconfig.pm.
+        * Some small spelling fixes(daxim), and add documents about libconfig.pm;
         * Reverted the change that made every file executable(daxim).
 0.009   Thu 23 Jul 2009 11:13:32 PM CST
         * Add some useful test case;
-        * Implement function add_* and modify scalar.
+        * Implement function add_* and modify scalar;
         * Split some code which is lookup_value of method alone.
 0.008   Thu 23 Jul 2009 09:45:21 AM CST
         * Fix a test failure involving float numbers(daxim);

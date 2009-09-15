@@ -13,6 +13,8 @@ requires            'File::Find' => 1.00;
 requires            'XSLoader' => 0.05;
 test_requires       'Test::Exception' => 0.27;
 test_requires       'Test::Deep' => 0.103;
+test_requires       'Test::More' => 0.94;
+test_requires       'Test::Spelling' => 0.10;
 #check_lib_or_exit   lib => [qw(config)];
 checklibs			lib => [qw(config)], header => [qw(libconfig.h)];
 cc_inc_paths        '/usr/include', '/usr/local/include';
