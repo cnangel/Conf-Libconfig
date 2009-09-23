@@ -171,6 +171,7 @@ set_scalarvalue(config_setting_t *settings, const char *key, SV *value, int flag
 	if (type == 11) type = 2;
 	if (type == 13) type = 5;
 	// Perl_warn(aTHX_ "[DEBUG] %d | %d\n", SvPOK(value), type);
+	returnStatus = 0;
 	settings_parent = settings->parent;
 	switch (flag) {
 		case 1:
@@ -209,6 +210,7 @@ set_arrayvalue(config_setting_t *settings, const char *key, AV *value, int flag)
 		/*return 0;*/
 	/*}*/
 	/*Perl_warn(aTHX_ "[TYPE] %d", settings->type);*/
+	returnStatus = 0;
 	switch (settings->type) {
 		case CONFIG_TYPE_INT:
 		case CONFIG_TYPE_INT64:
@@ -242,6 +244,7 @@ set_hashvalue(config_setting_t *settings, const char *key, HV *value, int flag)
 		Perl_warn(aTHX_ "[WARN] Settings is null in set_hashvalue!");
 		return 0;
 	}
+	returnStatus = 0;
 	switch (settings->type) {
 		case CONFIG_TYPE_INT:
 		case CONFIG_TYPE_INT64:
@@ -793,7 +796,13 @@ libconfig_modify_scalar(conf, path, value)
 	CODE:
 	{
         settings = config_lookup(conf, path);
-		RETVAL = set_scalarvalue(settings, settings->name, value, 1);
+		if (settings != NULL)
+			RETVAL = set_scalarvalue(settings, settings->name, value, 1);
+		else
+		{
+			Perl_warn(aTHX_ "[WARN] Path is null!");
+			RETVAL = 0;
+		}
 	}
 	OUTPUT:
 		RETVAL
