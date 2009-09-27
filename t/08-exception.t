@@ -3,6 +3,10 @@ use strict;
 use warnings;
 use Data::Dumper;
 use Test::More;
+#eval "use Test::Warn";
+#plan skip_all => "Test::Warn required for testing" if $@;
+#eval "use Test::Exception";
+#plan skip_all => "Test::Exception required for testing" if $@;
 use Test::Warn;
 use Test::Exception;
 
