@@ -26,9 +26,9 @@ while (1) {
     push @items, $settings->get_item($_) for 0 .. $settings->length - 1;
 	undef @items;
 	$test5 = $settings->get_type();
-	last if (time() - $time > $difftime); 
 	$test6 = $conf->fetch_array("application.group1.my_array");
 	$test7 = $conf->fetch_hashref("application.group1"),
+	last if (time() - $time > $difftime); 
 }
 
 # Destructor

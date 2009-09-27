@@ -39,6 +39,6 @@ throws_ok { $foo->delete_node_elem("no.nodes", 0) }
 
 ok($foo->write_file($newcfgfile), "write file - status ok");
 
-done_testing();
+unlink($newcfgfile);
 
-#unlink($newcfgfile);
+done_testing();
