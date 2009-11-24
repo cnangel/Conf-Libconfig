@@ -10,7 +10,7 @@ pm_to_blib*
 .lwpcookies
 Conf-Libconfig-*
 cover_db
-MANIFEST.bak
+*.bak
 Libconfig.bs
 Libconfig.c
 Libconfig.o
