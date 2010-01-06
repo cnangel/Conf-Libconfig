@@ -24,5 +24,5 @@ cc_lib_links        'config';
 can_cc              or die 'This module requires C compiler.';
 no_index            directory => qw(t inc);
 auto_install();
-repository 'http://github.com/cnangel/Conf-Libconfig';
+repository			'http://github.com/cnangel/Conf-Libconfig';
 WriteAll();
