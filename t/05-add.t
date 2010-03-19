@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More tests => 11;
+use Test::More tests => 12;
 use Test::Deep;
 
 use Conf::Libconfig;
@@ -41,6 +41,7 @@ local $TODO = 'add hard hash methods do not work yet';
 undef %hash;
 %hash = ( "app", { "a", "b", "c", "d" }  );
 #ok($foo->add_hash("me.mar.check1", $key, \%hash), "add hard hash - status ok");
+ok($foo->add("me.mar.check1", $key, \%hash), "add hard hash using generic add - status ok");
 ok(1);
 
 }

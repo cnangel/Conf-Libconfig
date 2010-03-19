@@ -9,6 +9,28 @@ our $VERSION = '0.016';
 require XSLoader;
 XSLoader::load('Conf::Libconfig', $VERSION);
 
+sub add {
+   my ($self, $path, $key, $item) = @_;
+   return unless defined $item;
+   my $ref = ref $item;
+   my $subpath = join '.', grep { $_ ne '' } $path, $key;
+   if (!$ref) {
+      $self->add_scalar($path, $key, $item);
+   }
+   elsif ($ref eq 'ARRAY') {
+      $self->add_list($path, $key, []);
+      for my $ii (0 .. $#{$item}) {
+         $self->add($subpath, "[$ii]", $item->[$ii]);
+      }
+   }
+   elsif ($ref eq 'HASH') {
+      $self->add_hash($path, $key, {});
+      for my $subkey (keys %$item) {
+         $self->add($subpath, $key, $item->{$key});
+      }
+   }
+}
+
 1;
 __END__
 
