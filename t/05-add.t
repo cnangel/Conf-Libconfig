@@ -40,11 +40,20 @@ local $TODO = 'add hard hash methods do not work yet';
 
 undef %hash;
 %hash = ( "app", { "a", "b", "c", "d" }  );
+$key = "node5";
 #ok($foo->add_hash("me.mar.check1", $key, \%hash), "add hard hash - status ok");
-ok($foo->add("me.mar.check1", $key, \%hash), "add hard hash using generic add - status ok");
 ok(1);
-
 }
 
+{
+# Instead of adding hard hash using add_hash, try generic add..
+undef %hash;
+%hash = ( "app", { "a", "b", "c", "d" }  );
+$key = "node5";
+ok($foo->add("me.mar.check1", $key, \%hash), "add hard hash using generic add - status ok");
+}
+
+
+$foo->write(*STDOUT);
 ok($foo->write_file($newcfgfile), "write file - status ok");
 unlink($newcfgfile);

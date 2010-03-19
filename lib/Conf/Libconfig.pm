@@ -26,9 +26,13 @@ sub add {
    elsif ($ref eq 'HASH') {
       $self->add_hash($path, $key, {});
       for my $subkey (keys %$item) {
-         $self->add($subpath, $key, $item->{$key});
+         $self->add($subpath, $subkey, $item->{$subkey});
       }
    }
+   else {
+      return;
+   }
+   return 1;
 }
 
 1;
