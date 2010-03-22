@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More tests => 3;
+use Test::More tests => 5;
 use Test::Deep;
 
 use Conf::Libconfig;
@@ -39,6 +39,7 @@ TODO: {
 # nested hash-array-hash
 my $c = { a => [ { b => 'c' } ], d => 'e' };
 $expected->{complex} = $c;
+ok($foo->add_hash('', 'c', {}), "ok - add hash key");
 ok($foo->add('c', complex => $c), "ok - nested structure");
 TODO: {
    local $TODO = "get not implemented";
