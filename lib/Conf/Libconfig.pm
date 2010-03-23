@@ -108,6 +108,10 @@ return array list from path.
 
 return hash reference from path.
 
+=head2 $self->add($path, $key, $item)
+
+add a struct data for $key.
+
 =head2 $self->add_scalar ($path, $key, $value)
 
 add a pair of key and value node to handle and return true if add successfully.
