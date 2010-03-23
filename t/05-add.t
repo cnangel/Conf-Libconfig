@@ -53,7 +53,5 @@ $key = "node5";
 ok($foo->add("me.mar.check1", $key, \%hash), "add hard hash using generic add - status ok");
 }
 
-
-$foo->write(*STDOUT);
 ok($foo->write_file($newcfgfile), "write file - status ok");
 unlink($newcfgfile);
