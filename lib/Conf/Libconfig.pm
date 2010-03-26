@@ -70,19 +70,19 @@ None by default.
 
 =head2 $self->new()
 
-Construct.
+construct.
 
 =head2 $self->delete()
 
-Destructor.
+destructor.
 
 =head2 $self->DESTROY()
 
-Destructor, and auto release memory.
+destructor, and auto release memory.
 
 =head2 $self->read_file ($file)
 
-Read config file.
+read config file.
 
 =head2 $self->write($buffer)
 
@@ -94,7 +94,7 @@ write to a file.
 
 =head2 $self->lookup_value ($path)
 
-Automatically check and get value from config file, suggest use it.
+automatically check and get value from config file, suggest use it.
 
 =head2 $self->setting_lookup ($path)
 
@@ -158,23 +158,23 @@ return value type of setting resource.
 
 =head2 $self->lookup_bool ($path)
 
-Only get value type of bool from config file, please use lookup_value replace it.
+only get value type of bool from config file, please use lookup_value replace it.
 
 =head2 $self->lookup_int ($path)
 
-Only get value type of long int from config file, please use lookup_value replace it.
+only get value type of long int from config file, please use lookup_value replace it.
 
 =head2 $self->lookup_int64 ($path)
 
-Only get value type of long long int from config file, please use lookup_value replace it.
+only get value type of long long int from config file, please use lookup_value replace it.
 
 =head2 $self->lookup_float ($path)
 
-Only get value type of float from config file, please use lookup_value replace it.
+only get value type of float from config file, please use lookup_value replace it.
 
 =head2 $self->lookup_string ($path)
 
-Only get value type of string from config file, please use lookup_value replace it.
+only get value type of string from config file, please use lookup_value replace it.
 
 =head1 PREREQUISITES
 
