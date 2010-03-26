@@ -74,11 +74,11 @@ construct.
 
 =head2 $self->delete()
 
-destructor.
+destruct.
 
 =head2 $self->DESTROY()
 
-destructor, and auto release memory.
+destruct and auto release memory.
 
 =head2 $self->read_file ($file)
 
