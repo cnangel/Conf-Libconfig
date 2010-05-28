@@ -283,7 +283,11 @@ remove_scalar_node(config_setting_t *settings, const char *name, int type, int *
 void
 get_value(Conf__Libconfig conf, const char *path, SV **svref)
 {
+#if LIBCONFIG_VER_MINOR == 4
+	int valueInt;
+#else
 	long valueInt;
+#endif
 	long long valueBigint;
 	char valueBigintArr[256];
 	STRLEN valueBigintArrLen;
@@ -621,7 +625,11 @@ libconfig_lookup_int(conf, path)
     Conf::Libconfig conf
     const char *path
     PREINIT:
+#if LIBCONFIG_VER_MINOR == 4
+		int value;
+#else
         long value;
+#endif
     CODE:
     {
         config_lookup_int(conf, path, &value);
@@ -860,7 +868,7 @@ libconfig_delete_node(conf, path)
     CODE:
 	{
 		key = strrchr(path, '.') + 1;
-		sprintf(parentpath, "%.*s", strlen(path) - strlen(key) - 1, path);
+		sprintf(parentpath, "%.*s", (int)(strlen(path) - strlen(key) - 1), path);
         settings = config_lookup(conf, parentpath);
 		if (!settings) {
 			Perl_croak (aTHX_ "Not the node of path: %s", parentpath);
