@@ -1,5 +1,7 @@
 Revision history for Conf-Libconfig
 
+0.019   Thu 10 Jun 2010 02:57:05 PM CST
+        * Add ExtUtils::PkgConfig by Diab Jerius
 0.018   Fri 28 May 2010 11:30:21 AM CST
         * Support libconfig-1.4.x
 0.017   Wed 31 Mar 2010 01:00:45 PM CST

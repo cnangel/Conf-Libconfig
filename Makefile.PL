@@ -28,7 +28,7 @@ my @lib_paths = map { s/-L//; $_ } split(' ', ExtUtils::PkgConfig->libs_only_L('
 cc_inc_paths        @inc_paths;
 cc_lib_paths        @lib_paths;
 cc_lib_links        'config';
-checklibs	    lib => [qw(config)], header => [qw(libconfig.h)],
+checklibs		    lib => [qw(config)], header => [qw(libconfig.h)],
                     incpath => \@inc_paths, libpath => \@lib_paths;
 can_cc              or die 'This module requires C compiler.';
 no_index            directory => qw(t inc);
