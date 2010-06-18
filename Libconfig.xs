@@ -283,7 +283,8 @@ remove_scalar_node(config_setting_t *settings, const char *name, int type, int *
 void
 get_value(Conf__Libconfig conf, const char *path, SV **svref)
 {
-#if LIBCONFIG_VER_MINOR == 4
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 4)) \
+		               || (LIBCONFIG_VER_MAJOR > 1))
 	int valueInt;
 #else
 	long valueInt;
@@ -625,7 +626,8 @@ libconfig_lookup_int(conf, path)
     Conf::Libconfig conf
     const char *path
     PREINIT:
-#if LIBCONFIG_VER_MINOR == 4
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 4)) \
+		               || (LIBCONFIG_VER_MAJOR > 1))
 		int value;
 #else
         long value;
@@ -964,7 +966,12 @@ libconfig_setting_get_item(setting, i)
         long long itemBigint;
         char itemBigintArr[256];
         STRLEN itemBigintArrLen;
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 4)) \
+		               || (LIBCONFIG_VER_MAJOR > 1))
         long itemInt;
+#else
+		int itemInt;
+#endif
         int itemBool;
         SV *sv;
     CODE:
