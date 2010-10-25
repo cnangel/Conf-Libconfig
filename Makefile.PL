@@ -1,6 +1,9 @@
 use strict;
 use lib '.';
 use inc::Module::Install;
+
+test_requires		'ExtUtils::PkgConfig' => 0;
+
 use ExtUtils::PkgConfig;
 #use Devel::CheckLib qw(check_lib_or_exit);
 
