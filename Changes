@@ -1,11 +1,13 @@
 Revision history for Conf-Libconfig
 
+0.021	Wed 27 Oct 2010 10:39:25 AM CST
+        * Auto setup ExtUtils::PkgConfig.
 0.019   Thu 10 Jun 2010 02:57:05 PM CST
-        * Add ExtUtils::PkgConfig by Diab Jerius
+        * Add ExtUtils::PkgConfig by Diab Jerius.
 0.018   Fri 28 May 2010 11:30:21 AM CST
-        * Support libconfig-1.4.x
+        * Support libconfig-1.4.x.
 0.017   Wed 31 Mar 2010 01:00:45 PM CST
-        * Add add method and some tests for libconfig 
+        * Add add method and some tests for libconfig.
 0.016   Sun 27 Sep 2009 01:45:47 PM CST
         * Fix memory alloc in method of get_type;
         * Cover 79% test case.
