@@ -1,10 +1,6 @@
 use strict;
 use lib '.';
 use inc::Module::Install;
-
-test_requires		'ExtUtils::PkgConfig' => 0;
-
-use ExtUtils::PkgConfig;
 #use Devel::CheckLib qw(check_lib_or_exit);
 
 name                'Conf-Libconfig';
@@ -22,11 +18,17 @@ test_requires       'Test::Deep' => 0.10;
 test_requires       'Test::More' => 0.90;
 test_requires       'Test::Warn' => 0.20;
 test_requires       'Test::Exception' => 0.25;
+test_requires       'ExtUtils::PkgConfig' => 0;
 #test_requires       'Test::Spelling' => 0.10;
 #check_lib_or_exit   lib => [qw(config)];
 
-my @inc_paths = map { s/-I//; $_ } split(' ', ExtUtils::PkgConfig->cflags_only_I('libconfig'));
-my @lib_paths = map { s/-L//; $_ } split(' ', ExtUtils::PkgConfig->libs_only_L('libconfig'));
+eval("use ExtUtils::PkgConfig;");
+my @inc_paths;
+my @lib_paths;
+eval {
+	@inc_paths = map { s/-I//; $_ } split(' ', ExtUtils::PkgConfig->cflags_only_I('libconfig'));
+	@lib_paths = map { s/-L//; $_ } split(' ', ExtUtils::PkgConfig->libs_only_L('libconfig'));
+};
 cc_inc_paths        @inc_paths;
 cc_lib_paths        @lib_paths;
 cc_lib_links        'config';
