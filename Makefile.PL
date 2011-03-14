@@ -16,7 +16,7 @@ test_requires       'Test::Warn' => 0.20;
 test_requires       'Test::Exception' => 0.25;
 test_requires       'ExtUtils::PkgConfig' => 0;
 
-build_subdirs		'libconfig';
+#build_subdirs		'libconfig';
 
 eval("use ExtUtils::PkgConfig;");
 my @inc_paths;
@@ -29,9 +29,9 @@ cc_inc_paths        @inc_paths;
 cc_lib_paths        @lib_paths;
 cc_lib_links        'config';
 checklibs           lib => [qw(config)], 
-                    libpath => \@lib_paths;
-                    header => [qw(libconfig.h)],
-                    incpath => \@inc_paths, 
+					libpath => \@lib_paths,
+					header => [qw(libconfig.h)],
+					incpath => \@inc_paths; 
 can_cc              or die 'This module requires C compiler.';
 no_index            directory => qw(t inc);
 auto_install();
