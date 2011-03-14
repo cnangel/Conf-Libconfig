@@ -16,7 +16,6 @@ extern "C" {
 
 typedef config_t *Conf__Libconfig;
 typedef config_setting_t *Conf__Libconfig__Settings;
-config_t config;
 
 void set_scalar(config_setting_t *, SV *, int , int *);
 void set_scalar_elem(config_setting_t *, int, SV *, int, int *);
@@ -589,12 +588,14 @@ MODULE = Conf::Libconfig     PACKAGE = Conf::Libconfig  PREFIX = libconfig_
 Conf::Libconfig
 libconfig_new(packname="Conf::Libconfig")
 char *packname
-PREINIT:
-CODE:
-{
-	config_init(&config);
-	RETVAL = &config;
-}
+	PREINIT:
+	CODE:
+	{
+		config_t *pConf = (config_t *)malloc(sizeof(config_t));
+		if (pConf)
+			config_init(pConf);
+		RETVAL = pConf;
+	}
     OUTPUT:
         RETVAL
 
@@ -602,13 +603,20 @@ void
 libconfig_delete(conf)
     Conf::Libconfig conf
     CODE:
-    config_destroy(conf);
+	{
+		config_destroy(conf);
+	}
 
 void
 libconfig_DESTROY(conf)
     Conf::Libconfig conf
     CODE:
-    config_destroy(conf);
+	{
+		if (conf) {
+			config_destroy(conf);
+//			if (conf) free(conf);
+		}
+	}
 
 int
 libconfig_read_file(conf, filename)

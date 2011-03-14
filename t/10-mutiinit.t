@@ -26,5 +26,5 @@ ok($foo2->read_file($cfgfile3), "read file - status ok");
 is(
     $foo2->lookup_value("me.mar.check1.x"),
     32,
-    "bool test - status ok",
+    "hex test - status ok",
 );
