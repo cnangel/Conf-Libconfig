@@ -5,6 +5,8 @@ use Test::More;
 eval "use Test::Spelling";
 plan skip_all => "Test::Spelling required for testing" if $@;
 
+$ENV{'LC_ALL'} = "en_US.UTF-8";
+
 my @stopwords;
 for (<DATA>) {
     chomp;

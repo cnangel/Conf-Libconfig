@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use bigint;
 use Data::Dumper;
-use Test::More tests => 10;
+use Test::More tests => 5;
 
 use Conf::Libconfig;
 
