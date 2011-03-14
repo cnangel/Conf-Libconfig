@@ -591,7 +591,7 @@ char *packname
 	PREINIT:
 	CODE:
 	{
-		config_t *pConf = (config_t *)malloc(sizeof(config_t));
+		config_t *pConf = (config_t *)safemalloc(sizeof(config_t));
 		if (pConf)
 			config_init(pConf);
 		RETVAL = pConf;
