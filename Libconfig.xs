@@ -603,20 +603,13 @@ void
 libconfig_delete(conf)
     Conf::Libconfig conf
     CODE:
-	{
 		config_destroy(conf);
-	}
 
 void
 libconfig_DESTROY(conf)
     Conf::Libconfig conf
     CODE:
-	{
-		if (conf) {
-			config_destroy(conf);
-//			if (conf) free(conf);
-		}
-	}
+		config_destroy(conf);
 
 int
 libconfig_read_file(conf, filename)
