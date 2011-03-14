@@ -7,7 +7,7 @@ use File::Spec;
 use base qw(Module::Install::Base);
 use vars qw($VERSION);
 
-$VERSION = '0.02';
+$VERSION = '0.08';
 
 sub checklibs {
   my $self = shift;
@@ -17,6 +17,20 @@ sub checklibs {
   unless ( $Module::Install::AUTHOR ) {
      require Devel::CheckLib;
      Devel::CheckLib::check_lib_or_exit( @parms );
+     return;
+  }
+
+  _author_side();
+}
+
+sub assertlibs {
+  my $self = shift;
+  my @parms = @_;
+  return unless scalar @parms;
+
+  unless ( $Module::Install::AUTHOR ) {
+     require Devel::CheckLib;
+     Devel::CheckLib::assert_lib( @parms );
      return;
   }
 
@@ -46,5 +60,4 @@ sub _author_side {
 
 __END__
 
-#line 104
-
+#line 126
