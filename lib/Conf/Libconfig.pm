@@ -4,7 +4,7 @@ use 5.006001;
 use strict;
 use warnings;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 require XSLoader;
 XSLoader::load('Conf::Libconfig', $VERSION);
@@ -15,7 +15,8 @@ sub add {
    my $ref = ref $item;
    my $subpath = join '.', grep { $_ ne '' } $path, $key;
    if (!$ref) {
-      $self->add_scalar($path, $key, $item);
+	  $item !~ m'^0b0?[0-1]$' ?  $self->add_scalar($path, $key, $item)
+		  : $self->add_boolscalar($path, $key, eval $item);
    }
    elsif ($ref eq 'ARRAY') {
       $self->add_list($path, $key, []);
@@ -55,6 +56,9 @@ Conf::Libconfig - Perl extension for libconfig
   print Dumper $arrayref;
   my $hashref = $self->fetch_hashref("cdef.abcd.hashref");
   print Dumper $hashref;
+
+  $self->add("fghj.rtyu", "binarykey", "0b1");
+  $self->add_boolscalar("fghj.rtyu", "binarykey", 0);
 
   # if program is over, DESTROY can auto exit, and you can ignore function delete. 
   $self->delete();
@@ -111,6 +115,10 @@ return hash reference from path.
 =head2 $self->add($path, $key, $item)
 
 add a struct data for $key.
+
+=head2 $self->add_boolscalar($path, $key, $boolvalue)
+
+add a bool value for $key.
 
 =head2 $self->add_scalar ($path, $key, $value)
 

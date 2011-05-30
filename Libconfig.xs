@@ -102,6 +102,7 @@ set_array(config_setting_t *settings, AV *value, int *status)
 	int type;
 	int elemStatus;
 	int allStatus;
+	SV *g_v = newSViv(2);
 
 	allStatus = 1;
 	valueMaxIndex = av_len(value);
@@ -110,14 +111,11 @@ set_array(config_setting_t *settings, AV *value, int *status)
 	{
 		/*sv = av_shift(value);*/
 		sv = *(av_fetch(value, i, 0));
-		type = (int)(log(SvIOK(sv) + SvNOK(sv) + SvPOK(sv))/log(2)) - 5;
+		type = (int)(log(SvIOK(sv) + SvNOK(sv) + SvPOK(sv))/log(2)) - (SvIOK(g_v) == 256 ? 5 : 13);
 		if (type == 3) {
 			if (SvUV(sv) <= UINTNUM) type = 2;
-			/*if (SvUV(sv) == 0 || SvUV(sv) == 1) type = 6;*/
+//			if ((SvUV(value) == 0 || SvUV(value) == 1) && flag == 2) type = 6;
 		}
-		// For x86_64
-		if (type == 11) type = 2;
-		if (type == 13) type = 5;
 		//Perl_warn(aTHX_ "[DEBUG] %d | %d\n", SvPOK(value), type);
 		/*Perl_warn(aTHX_ "[NUM] %s %d", settings->name, (int)SvIV(sv));*/
 		set_scalar_elem(settings, -1, sv, type, &elemStatus);
@@ -156,20 +154,19 @@ set_scalarvalue(config_setting_t *settings, const char *key, SV *value, int flag
 	int returnStatus;
 	config_setting_t *settings_item;
 	config_setting_t *settings_parent;
+	SV *g_v = newSViv(2);
 
 	if (settings == NULL) {
 		Perl_warn(aTHX_ "[WARN] Settings is null in set_scalarvalue!");
 		return 0;
 	}
-	type = (int)(log(SvIOK(value) + SvNOK(value) + SvPOK(value))/log(2)) - 5;
+	type = (int)(log(SvIOK(value) + SvNOK(value) + SvPOK(value))/log(2)) - (SvIOK(g_v) == 256 ? 5 : 13);
+//	Perl_warn(aTHX_ "[DEBUG] %d | %d | %d | %f | %d | %d\n", (int)SvPOK(value), (int)SvIOK(value), (int)SvNOK(value), log(SvIOK(value) + SvNOK(value) + SvPOK(value)), type, (int)SvIOK(g_v));
 	if (type == 3) {
 		if (SvUV(value) <= UINTNUM) type = 2;
-		/*if (SvUV(value) == 0 || SvUV(value) == 1) type = 6;*/
+		if ((SvUV(value) == 0 || SvUV(value) == 1) && flag == 2) type = 6;
 	}
-	// for x86_64
-	if (type == 11) type = 2;
-	if (type == 13) type = 5;
-	// Perl_warn(aTHX_ "[DEBUG] %d | %d\n", SvPOK(value), type);
+//	Perl_warn(aTHX_ "[DEBUG] %d | %d\n", (int)SvPOK(value), type);
 	returnStatus = 0;
 	settings_parent = settings->parent;
 	switch (flag) {
@@ -793,6 +790,22 @@ libconfig_add_scalar(conf, path, key, value)
 	{
         settings = config_lookup(conf, path);
 		RETVAL = set_scalarvalue(settings, key, value, 0);
+	}
+	OUTPUT:
+		RETVAL
+
+int
+libconfig_add_boolscalar(conf, path, key, value)
+	Conf::Libconfig conf
+    const char *path
+	const char *key
+	SV *value
+    PREINIT:
+        config_setting_t *settings;
+	CODE:
+	{
+        settings = config_lookup(conf, path);
+		RETVAL = set_scalarvalue(settings, key, value, 2);
 	}
 	OUTPUT:
 		RETVAL

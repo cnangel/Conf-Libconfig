@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More tests => 12;
+use Test::More tests => 16;
 use Test::Deep;
 
 use Conf::Libconfig;
@@ -13,14 +13,21 @@ my $foo = Conf::Libconfig->new;
 ok($foo->read_file($cfgfile), "read file - status ok");
 
 my $key = "node1";
-my $value = "hello, world";
+my $boolkey = "b";
+my $floatkey = "floatkey";
+my $longkey = "longkey";
+my $binarykey = "binarykey";
 my @arr = (1, 2, 3);
 my @list = ("abc", 456, 0x888);
 my %hash = ("online", "玄幻小说", "story", "杀魂逆天");
 
 # scalar test
-ok($foo->add_scalar("me.mar", $key, $value), "add scalar - status ok");
-ok($foo->modify_scalar("me.mar.float", $value), "modify scalar - status ok");
+ok($foo->add("me.mar", $binarykey, "0b0"), "add bool scalar - status ok");
+ok($foo->add_boolscalar("me.mar", $boolkey, 1), "add bool scalar - status ok");
+ok($foo->add_scalar("me.mar", $floatkey, 5.5), "add float scalar - status ok");
+ok($foo->add_scalar("me.mar", $longkey, 21111111113333), "add long scalar - status ok");
+ok($foo->add_scalar("me.mar", $key, "hello, world"), "add string scalar - status ok");
+ok($foo->modify_scalar("me.mar.float", "float string"), "modify scalar - status ok");
 # array test
 $key = "node2";
 ok($foo->add_array("me.arr", $key,  \@arr), "add array into array - status ok");
