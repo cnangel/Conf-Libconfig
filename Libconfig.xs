@@ -20,8 +20,8 @@ typedef config_setting_t *Conf__Libconfig__Settings;
 void set_scalar(config_setting_t *, SV *, int , int *);
 void set_scalar_elem(config_setting_t *, int, SV *, int, int *);
 void set_array(config_setting_t *, AV *, int *);
-void set_hash(config_setting_t *, HV *, int *);
-int set_scalarvalue(config_setting_t *, const char *, SV *, int);
+void set_hash(config_setting_t *, HV *, int *, int);
+int set_scalarvalue(config_setting_t *, const char *, SV *, int, int);
 int set_arrayvalue(config_setting_t *, const char *, AV *, int);
 int set_hashvalue(config_setting_t *, const char *, HV *, int);
 
@@ -125,7 +125,7 @@ set_array(config_setting_t *settings, AV *value, int *status)
 }
 
 void
-set_hash(config_setting_t *settings, HV *value, int *status)
+set_hash(config_setting_t *settings, HV *value, int *status, int booldefinedflag)
 {
 	HE* he;
 	I32 keyLen;
@@ -141,14 +141,14 @@ set_hash(config_setting_t *settings, HV *value, int *status)
 		key = hv_iterkey(he, &keyLen);
 		sv = hv_iterval(value, he);
 		// Only support simple hash
-		elemStatus = set_scalarvalue(settings, key, sv, 0);
+		elemStatus = set_scalarvalue(settings, key, sv, 0, booldefinedflag);
 		allStatus = allStatus | elemStatus;
 	}
 	*status = allStatus;
 }
 
 int
-set_scalarvalue(config_setting_t *settings, const char *key, SV *value, int flag)
+set_scalarvalue(config_setting_t *settings, const char *key, SV *value, int flag, int booldefined)
 {
 	int type;
 	int returnStatus;
@@ -160,13 +160,17 @@ set_scalarvalue(config_setting_t *settings, const char *key, SV *value, int flag
 		Perl_warn(aTHX_ "[WARN] Settings is null in set_scalarvalue!");
 		return 0;
 	}
-	type = (int)(log(SvIOK(value) + SvNOK(value) + SvPOK(value))/log(2)) - (SvIOK(g_v) == 256 ? 5 : 13);
-//	Perl_warn(aTHX_ "[DEBUG] %d | %d | %d | %f | %d | %d\n", (int)SvPOK(value), (int)SvIOK(value), (int)SvNOK(value), log(SvIOK(value) + SvNOK(value) + SvPOK(value)), type, (int)SvIOK(g_v));
+	if (SvIOK(value) + SvNOK(value) + SvPOK(value) == 0) {
+		type = (int)(log(SvROK(value))/log(2)) - (SvIOK(g_v) == 256 ? 10 : 18);
+	} else {
+		type = (int)(log(SvIOK(value) + SvNOK(value) + SvPOK(value) + SvROK(value))/log(2)) - (SvIOK(g_v) == 256 ? 5 : 13);
+	}
+//	Perl_warn(aTHX_ "[DEBUG] %d | %d | %d | %d | %f | %d | %d\n", (int)SvPOK(value), (int)SvIOK(value), (int)SvNOK(value), (int)SvROK(value), log(SvIOK(value) + SvNOK(value) + SvPOK(value)), type, (int)SvIOK(g_v));
 	if (type == 3) {
 		if (SvUV(value) <= UINTNUM) type = 2;
-		if ((SvUV(value) == 0 || SvUV(value) == 1) && flag == 2) type = 6;
+		if ((SvUV(value) == 0 || SvUV(value) == 1) && booldefined == 2) type = 6;
 	}
-//	Perl_warn(aTHX_ "[DEBUG] %d | %d\n", (int)SvPOK(value), type);
+//	Perl_warn(aTHX_ "[DEBUG] %d | %d | %p\n", (int)SvPOK(value), type, value);
 	returnStatus = 0;
 	settings_parent = settings->parent;
 	switch (flag) {
@@ -180,13 +184,19 @@ set_scalarvalue(config_setting_t *settings, const char *key, SV *value, int flag
 				strncpy(name, settings->name, nameLength);
 				name[nameLength] = 0;
 				remove_scalar_node(settings_parent, settings->name, settings->type, &returnStatus);
-				set_scalarvalue(settings_parent, name, value, 0);
+				set_scalarvalue(settings_parent, name, value, 0, 0);
 				if (name) free(name);
 			}
 			break;
 		default:
-			settings_item = config_setting_add(settings, key, type);
-			set_scalar(settings_item, value, type, &returnStatus);
+//		Perl_warn(aTHX_ "[WARN] ##### %s %d #%d##", key, type, settings->type);
+//			if (type == CONFIG_TYPE_GROUP) {
+//				set_hashvalue(settings, key, SvSTASH(SvRV(value)), booldefined);
+//				set_hashvalue(settings, key, SVt_PVHV(value), booldefined);
+//			} else {
+				settings_item = config_setting_add(settings, key, type);
+				set_scalar(settings_item, value, type, &returnStatus);
+//			}
 	}
 	return returnStatus;
 }
@@ -231,7 +241,7 @@ set_arrayvalue(config_setting_t *settings, const char *key, AV *value, int flag)
 }
 
 int
-set_hashvalue(config_setting_t *settings, const char *key, HV *value, int flag)
+set_hashvalue(config_setting_t *settings, const char *key, HV *value, int booldefinedflag)
 {
 	int returnStatus;
 	config_setting_t *settings_item;
@@ -254,11 +264,11 @@ set_hashvalue(config_setting_t *settings, const char *key, HV *value, int flag)
 			break;
 		case CONFIG_TYPE_LIST:
 			settings_item = config_setting_add(settings, NULL, CONFIG_TYPE_GROUP);
-			set_hash(settings_item, value, &returnStatus);
+			set_hash(settings_item, value, &returnStatus, booldefinedflag);
 			break;
 		case CONFIG_TYPE_GROUP:
 			settings_item = config_setting_add(settings, key, CONFIG_TYPE_GROUP);
-			set_hash(settings_item, value, &returnStatus);
+			set_hash(settings_item, value, &returnStatus, booldefinedflag);
 			break;
 	}
 	return returnStatus;
@@ -584,7 +594,7 @@ MODULE = Conf::Libconfig     PACKAGE = Conf::Libconfig  PREFIX = libconfig_
 
 Conf::Libconfig
 libconfig_new(packname="Conf::Libconfig")
-char *packname
+	char *packname
 	PREINIT:
 	CODE:
 	{
@@ -609,6 +619,14 @@ libconfig_DESTROY(conf)
 		config_destroy(conf);
 
 int
+libconfig_read(conf, stream)
+	Conf::Libconfig conf
+	FILE *stream
+	PREINIT:
+	CODE:
+		config_read(conf, stream);
+
+int
 libconfig_read_file(conf, filename)
     Conf::Libconfig conf
     const char *filename
@@ -618,6 +636,39 @@ libconfig_read_file(conf, filename)
     }
     OUTPUT:
         RETVAL
+
+int
+libconfig_read_string(conf, string)
+    Conf::Libconfig conf
+    const char *string
+    CODE:
+    {
+        RETVAL = config_read_string(conf, string);
+    }
+    OUTPUT:
+        RETVAL
+
+const char *
+libconfig_get_include_dir(conf)
+    Conf::Libconfig conf
+    PREINIT:
+    CODE:
+    {
+       
+        RETVAL = config_get_include_dir(conf);
+    }
+    OUTPUT:
+        RETVAL
+
+void
+libconfig_set_include_dir(conf, string)
+    Conf::Libconfig conf
+    const char *string
+	PREINIT:
+    CODE:
+    {
+        config_set_include_dir(conf, string);
+    }
 
 long
 libconfig_lookup_int(conf, path)
@@ -789,7 +840,7 @@ libconfig_add_scalar(conf, path, key, value)
 	CODE:
 	{
         settings = config_lookup(conf, path);
-		RETVAL = set_scalarvalue(settings, key, value, 0);
+		RETVAL = set_scalarvalue(settings, key, value, 0, 0);
 	}
 	OUTPUT:
 		RETVAL
@@ -805,7 +856,7 @@ libconfig_add_boolscalar(conf, path, key, value)
 	CODE:
 	{
         settings = config_lookup(conf, path);
-		RETVAL = set_scalarvalue(settings, key, value, 2);
+		RETVAL = set_scalarvalue(settings, key, value, 0, 2);
 	}
 	OUTPUT:
 		RETVAL
@@ -821,7 +872,7 @@ libconfig_modify_scalar(conf, path, value)
 	{
         settings = config_lookup(conf, path);
 		if (settings != NULL)
-			RETVAL = set_scalarvalue(settings, settings->name, value, 1);
+			RETVAL = set_scalarvalue(settings, settings->name, value, 1, 0);
 		else
 		{
 			Perl_warn(aTHX_ "[WARN] Path is null!");
@@ -870,6 +921,20 @@ libconfig_add_hash(conf, path, key, value)
 	CODE:
         settings = config_lookup(conf, path);
 		RETVAL = set_hashvalue(settings, key, value, 0);
+	OUTPUT:
+		RETVAL
+
+int
+libconfig_add_boolhash(conf, path, key, value)
+	Conf::Libconfig conf
+    const char *path
+	const char *key
+	HV *value
+    PREINIT:
+        config_setting_t *settings;
+	CODE:
+        settings = config_lookup(conf, path);
+		RETVAL = set_hashvalue(settings, key, value, 2);
 	OUTPUT:
 		RETVAL
 
