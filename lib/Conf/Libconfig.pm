@@ -107,11 +107,11 @@ write to a file.
 
 =head2 $self->get_include_dir()
 
-get a include dir, like @include './conf/config.cfg', and get a absolute path.
+get a include directory, like @include './conf/config.cfg', and get a absolute path.
 
 =head2 $self->set_include_dir($path)
 
-set a include dir, you can search the content of @include in $path.
+set a include directory, you can search the content of @include in $path.
 
 =head2 $self->lookup_value ($path)
 
@@ -145,6 +145,10 @@ add a pair of key and value node to handle and return true if add successfully.
 
 modify new value to handle and return true if add successfully.
 
+=head2 $self->modify_boolscalar ($path, $value)
+
+modify new bool value to handle and return true if add successfully.
+
 =head2 $self->add_array ($path, $key, \@array)
 
 add array value to handle and return true if add successfully.
@@ -156,6 +160,10 @@ the same as B<add_array>, add list value to handle and return true if add succes
 =head2 $self->add_hash ($path, $key, \%hash)
 
 add hash value to handle and return true if add successfully.
+
+=head2 $self->add_boolhash ($path, $key, \%hash)
+
+add bool hash value to handle and return true if add successfully.
 
 =head2 $self->delete_node ($path)
 

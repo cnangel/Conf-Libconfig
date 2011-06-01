@@ -26,3 +26,5 @@ libconfig
 Redistributions
 xml
 yaml
+MERCHANTABILITY
+transportability

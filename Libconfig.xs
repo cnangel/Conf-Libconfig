@@ -883,6 +883,27 @@ libconfig_modify_scalar(conf, path, value)
 		RETVAL
 
 int
+libconfig_modify_boolscalar(conf, path, value)
+	Conf::Libconfig conf
+    const char *path
+	SV *value
+    PREINIT:
+        config_setting_t *settings;
+	CODE:
+	{
+        settings = config_lookup(conf, path);
+		if (settings != NULL)
+			RETVAL = set_scalarvalue(settings, settings->name, value, 1, 2);
+		else
+		{
+			Perl_warn(aTHX_ "[WARN] Path is null!");
+			RETVAL = 0;
+		}
+	}
+	OUTPUT:
+		RETVAL
+
+int
 libconfig_add_array(conf, path, key, value)
 	Conf::Libconfig conf
     const char *path
