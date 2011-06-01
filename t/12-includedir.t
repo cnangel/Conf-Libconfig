@@ -26,8 +26,6 @@ if (-e $foopath) {
 	$foo4->set_include_dir($foopath);
 	my $dir = $foo4->get_include_dir();
 	ok($dir eq $foopath, "set and get include dir - status ok");
-} else {
-	plan skip_all => "include dir test";
 }
 
 ok($foo1->write_file($cfg1), 'write file - status ok');
