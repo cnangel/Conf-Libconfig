@@ -16,6 +16,7 @@ my $foo1 = new Conf::Libconfig;
 my $foo2 = new Conf::Libconfig;
 my $foo3 = new Conf::Libconfig;
 my $foo4 = new Conf::Libconfig;
+my $foo5 = new Conf::Libconfig;
 
 my $foopath = '/home/cnangel/works/libconfig';
 
@@ -23,8 +24,8 @@ ok($foo1->new(), 'new - status ok');
 ok($foo1->read_string("key = \"value\";"), 'read string - status ok');
 
 if (-e $foopath) {
-	$foo4->set_include_dir($foopath);
-	my $dir = $foo4->get_include_dir();
+	$foo5->set_include_dir($foopath);
+	my $dir = $foo5->get_include_dir();
 	ok($dir eq $foopath, "set and get include dir - status ok");
 }
 
