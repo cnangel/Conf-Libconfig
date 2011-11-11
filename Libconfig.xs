@@ -301,17 +301,17 @@ get_value(Conf__Libconfig conf, const char *path, SV **svref)
 	int valueBool;
 	char *valueChar;
 	double valueFloat;
-	if (config_lookup_int(conf, path, &valueInt))
-		*svref = newSViv((int)valueInt);
-	else if (config_lookup_string(conf, path, (const char **)&valueChar))
-		*svref = newSVpvn(valueChar, strlen(valueChar));
-	else if (config_lookup_float(conf, path, &valueFloat))
-		*svref = newSVnv(valueFloat);
-	else if (config_lookup_bool(conf, path, &valueBool))
-		*svref = newSViv(valueBool);
-	else if (config_lookup_int64(conf, path, &valueBigint)) {
+	if (config_lookup_int64(conf, path, &valueBigint)) {
 		valueBigintArrLen = sprintf(valueBigintArr, "%lld", valueBigint);
 		*svref = newSVpv(valueBigintArr, valueBigintArrLen);
+	} else if (config_lookup_int(conf, path, &valueInt)) {
+		*svref = newSViv((int)valueInt);
+	} else if (config_lookup_float(conf, path, &valueFloat)) {
+		*svref = newSVnv(valueFloat);
+	} else if (config_lookup_string(conf, path, (const char **)&valueChar)) {
+		*svref = newSVpvn(valueChar, strlen(valueChar));
+	} else if (config_lookup_bool(conf, path, &valueBool)) {
+		*svref = newSViv(valueBool);
 	} else {
 		*svref = newSV(0);
 	}
