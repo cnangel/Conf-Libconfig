@@ -11,8 +11,8 @@ requires            'XSLoader' => 0.05;
 configure_requires  'ExtUtils::PkgConfig';
 
 test_requires       'Test::Deep' => 0.10;
-test_requires       'Test::More' => 0.90;
-test_requires       'Test::Warn' => 0.20;
+test_requires       'Test::More' => 0.60;
+test_requires       'Test::Warn' => 0.10;
 test_requires       'Test::Exception' => 0.25;
 test_requires       'ExtUtils::PkgConfig' => 0;
 

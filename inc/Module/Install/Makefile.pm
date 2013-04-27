@@ -225,8 +225,8 @@ sub write {
 	} else {
 		# Allow legacy-compatibility with 5.005 by depending on the
 		# most recent EU:MM that supported 5.005.
-		$self->build_requires(     'ExtUtils::MakeMaker' => 6.42 );
-		$self->configure_requires( 'ExtUtils::MakeMaker' => 6.42 );
+		$self->build_requires(     'ExtUtils::MakeMaker' => 6.30 );
+		$self->configure_requires( 'ExtUtils::MakeMaker' => 6.30 );
 	}
 
 	# Generate the MakeMaker params

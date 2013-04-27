@@ -3,8 +3,9 @@ use strict;
 use warnings;
 use Data::Dumper;
 use Test::More;
-use Test::Deep;
+plan skip_all => 'Test::More version is too lower!' if $Test::More::VERSION < 0.90;
 
+use Test::Deep;
 use Conf::Libconfig;
 
 my $cfg1 = 't/1_foo.cfg';

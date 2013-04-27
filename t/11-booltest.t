@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More;
+use Test::More tests => 13;
 use Test::Deep;
 
 use Conf::Libconfig;
@@ -41,4 +41,3 @@ ok($specfoo->write_file($cfg2), 'write file - status ok');
 unlink($cfg1);
 unlink($cfg2);
 
-done_testing();

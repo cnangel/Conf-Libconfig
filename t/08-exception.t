@@ -2,11 +2,8 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More;
-#eval "use Test::Warn";
-#plan skip_all => "Test::Warn required for testing" if $@;
-#eval "use Test::Exception";
-#plan skip_all => "Test::Exception required for testing" if $@;
+use Test::More tests => 10;
+
 use Test::Warn;
 use Test::Exception;
 
@@ -45,4 +42,3 @@ ok($foo->write_file($newcfgfile), "write file - status ok");
 
 unlink($newcfgfile);
 
-done_testing();
