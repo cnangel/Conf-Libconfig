@@ -4,7 +4,7 @@ use 5.006001;
 use strict;
 use warnings;
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 require XSLoader;
 XSLoader::load('Conf::Libconfig', $VERSION);
@@ -95,7 +95,7 @@ read from a config file.
 
 =head2 $self->read_string ($string)
 
-read from a string.
+read from a string, require libconfig version > 1.4.
 
 =head2 $self->write($buffer)
 
@@ -107,11 +107,11 @@ write to a file.
 
 =head2 $self->get_include_dir()
 
-get a include directory, like @include './conf/config.cfg', and get a absolute path.
+get a include directory, like @include './conf/config.cfg', and get a absolute path, require libconfig version > 1.4.
 
 =head2 $self->set_include_dir($path)
 
-set a include directory, you can search the content of @include in $path.
+set a include directory, you can search the content of @include in $path, require libconfig version > 1.4.
 
 =head2 $self->lookup_value ($path)
 

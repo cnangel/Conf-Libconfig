@@ -643,7 +643,12 @@ libconfig_read_string(conf, string)
     const char *string
     CODE:
     {
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 4)) \
+		               || (LIBCONFIG_VER_MAJOR > 1))
         RETVAL = config_read_string(conf, string);
+#else
+		RETVAL = 0;
+#endif
     }
     OUTPUT:
         RETVAL
@@ -654,8 +659,12 @@ libconfig_get_include_dir(conf)
     PREINIT:
     CODE:
     {
-       
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 4)) \
+		               || (LIBCONFIG_VER_MAJOR > 1))
         RETVAL = config_get_include_dir(conf);
+#else
+		RETVAL = 0;
+#endif
     }
     OUTPUT:
         RETVAL
@@ -667,7 +676,10 @@ libconfig_set_include_dir(conf, string)
 	PREINIT:
     CODE:
     {
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 4)) \
+		               || (LIBCONFIG_VER_MAJOR > 1))
         config_set_include_dir(conf, string);
+#endif
     }
 
 long
