@@ -14,6 +14,7 @@ my $cfg3 = 't/3_foo.cfg';
 my $includedir_cfg = 't/include_dir.cfg';
 
 my $foo1 = new Conf::Libconfig;
+plan skip_all => 'libconfig version is too lower!' if ($foo1->getversion() < 1.4);
 my $foo2 = new Conf::Libconfig;
 my $foo3 = new Conf::Libconfig;
 my $foo4 = new Conf::Libconfig;

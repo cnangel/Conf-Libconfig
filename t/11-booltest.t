@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More tests => 13;
+use Test::More tests => 14;
 use Test::Deep;
 
 use Conf::Libconfig;
@@ -31,7 +31,13 @@ cmp_deeply(
 );
 
 ok($specfoo->new(), 'new - status ok');
-ok($specfoo->read_string("new:{key = \"value\";};"), 'read string - status ok');
+ok($specfoo->getversion(), 'getversion - status ok');
+my $libconfig_version = $specfoo->getversion();
+if ($libconfig_version > 1.4) {
+	ok($specfoo->read_string("new:{key = \"value\";};"), 'read string - status ok');
+} else {
+	is($libconfig_version < 1.4, 1, 'check libconfig version lower 1.4');
+}
 ok($specfoo->add_hash('', 'plcs', \%fooplc), 'add hash - status ok');
 ok($specfoo->add_boolscalar('plcs', 'spec_1', 0), 'add bool scalar - status ok');
 ok($specfoo->add_scalar('plcs', 'spec_2', 1), 'add scalar - status ok');

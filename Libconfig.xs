@@ -618,6 +618,23 @@ libconfig_DESTROY(conf)
     CODE:
 		config_destroy(conf);
 
+double
+libconfig_getversion(conf)
+    Conf::Libconfig conf
+    CODE:
+	{
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 4)) \
+		               || (LIBCONFIG_VER_MAJOR > 1))
+		char tmpChar[16];
+        sprintf(tmpChar, "%d.%d%d", LIBCONFIG_VER_MAJOR, LIBCONFIG_VER_MINOR, LIBCONFIG_VER_REVISION);
+		RETVAL = atof(tmpChar);
+#else
+		RETVAL = 1.32;
+#endif
+	}
+    OUTPUT:
+        RETVAL
+
 int
 libconfig_read(conf, stream)
 	Conf::Libconfig conf

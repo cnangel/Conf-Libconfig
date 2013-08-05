@@ -4,7 +4,7 @@ use 5.006001;
 use strict;
 use warnings;
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 require XSLoader;
 XSLoader::load('Conf::Libconfig', $VERSION);
@@ -84,6 +84,10 @@ destruct.
 =head2 $self->DESTROY()
 
 destruct and auto release memory.
+
+=head2 $self->getversion()
+
+get current libconfig version.
 
 =head2 $self->read($buffer)
 
