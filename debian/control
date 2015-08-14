@@ -1,0 +1,13 @@
+Source: perl-libconfig
+Section: perl
+Priority: optional
+Maintainer: Artiom Molchanov <a.mv@gmx.fr>
+Build-Depends: debhelper (>= 7.0.50~), dh-autoreconf, libconfig-dev,perl, libtest-deep-perl, libtest-exception-perl, libtest-warn-perl
+Standards-Version: 3.9.2
+Homepage: https://github.com/cnangel/Conf-Libconfig
+
+Package: perl-libconfig
+Architecture: any
+Depends:${perl:Depends}, ${misc:Depends}, ${shlibs:Depends}
+Description: Perl bindings to the C library libconfig
+

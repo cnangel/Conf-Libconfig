@@ -1,0 +1,6 @@
+perl-libconfig (0.021-1) unstable; urgency=low
+
+    * Debian package creation
+
+ -- Artiom M <a.mv@gmx.fr>  Wed, 12 Aug 2015 10:39:25 +0200
+
