@@ -4,7 +4,7 @@ use 5.006001;
 use strict;
 use warnings;
 
-our $VERSION = '0.200';
+our $VERSION = '1.0';
 
 require XSLoader;
 XSLoader::load('Conf::Libconfig', $VERSION);
