@@ -49,7 +49,8 @@ Conf::Libconfig - Perl extension for libconfig
   my $self = new Conf::Libconfig;
   $self->read_file($cfg);
   $self->read_string("test:{key = \"only for test!\";};");
-  my $value = $self->lookup_value("abc.edf");
+  my $value = $self->value("abc.edf");
+  my $value = $self->lookup_value("abc.edf"); // deprecated
   print $value;
 
   use Data::Dumper;
@@ -199,23 +200,23 @@ return value type of setting resource.
 
 =head2 $self->lookup_bool ($path)
 
-only get value type of bool from config file, please use lookup_value replace it.
+only get value type of bool from config file, please use value replace it.
 
 =head2 $self->lookup_int ($path)
 
-only get value type of long int from config file, please use lookup_value replace it.
+only get value type of long int from config file, please use value replace it.
 
 =head2 $self->lookup_int64 ($path)
 
-only get value type of long long int from config file, please use lookup_value replace it.
+only get value type of long long int from config file, please use value replace it.
 
 =head2 $self->lookup_float ($path)
 
-only get value type of float from config file, please use lookup_value replace it.
+only get value type of float from config file, please use value replace it.
 
 =head2 $self->lookup_string ($path)
 
-only get value type of string from config file, please use lookup_value replace it.
+only get value type of string from config file, please use value replace it.
 
 =head1 PREREQUISITES
 
