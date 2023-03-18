@@ -4,7 +4,7 @@ use 5.006001;
 use strict;
 use warnings;
 
-our $VERSION = '0.100';
+our $VERSION = '0.200';
 
 require XSLoader;
 XSLoader::load('Conf::Libconfig', $VERSION);
@@ -117,9 +117,13 @@ get a include directory, like @include './conf/config.cfg', and get a absolute p
 
 set a include directory, you can search the content of @include in $path, require libconfig version > 1.4.
 
-=head2 $self->lookup_value ($path)
+=head2 $self->value ($path)
 
 automatically check and get value from config file, suggest use it.
+
+=head2 $self->lookup_value ($path)
+
+automatically check and get value from config file, the API will be deprecated.
 
 =head2 $self->setting_lookup ($path)
 

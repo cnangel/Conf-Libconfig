@@ -42,7 +42,7 @@ ok($foo2->write_file($cfg2), 'write file - status ok');
 ok($foo4->read_file($includedir_cfg), 'read @include file - status ok');
 
 cmp_deeply(
-	my $fooref = $foo4->fetch_hashref('.'),
+	my $fooref = $foo4->fetch_hashref(''),
 	{
  		'include_dir' => {
                     'hahaha' => 'happy!',
