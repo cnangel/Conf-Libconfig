@@ -4,7 +4,7 @@ use 5.006001;
 use strict;
 use warnings;
 
-our $VERSION = '1.0';
+our $VERSION = '1.0.0';
 
 require XSLoader;
 XSLoader::load('Conf::Libconfig', $VERSION);
@@ -59,6 +59,11 @@ Conf::Libconfig - Perl extension for libconfig
   my $hashref = $self->fetch_hashref("cdef.abcd.hashref");
   print Dumper $hashref;
 
+  $self->set_boolean_value("key", "value");
+  $self->set_value("key", "value");
+  $self->set_value("key", 12.34); // can modify the key
+  my $svalue = { "a" => 123 };
+  $self->set_value("abcde", $svalue); // can use reference
   $self->add("fghj.rtyu", "binarykey", "0b1");
   $self->add_boolscalar("fghj.rtyu", "binarykey", 0);
 
@@ -117,6 +122,14 @@ get a include directory, like @include './conf/config.cfg', and get a absolute p
 =head2 $self->set_include_dir($path)
 
 set a include directory, you can search the content of @include in $path, require libconfig version > 1.4.
+
+=head2 $self->set_value ($path, $value)
+
+automatically check and set value, the value can be a I<scalar value> or I<reference value>, suggest use it.
+
+=head2 $self->set_boolean_value($path, $value)
+
+automatically check and set boolean value, the value can be a I<scalar value> or I<string value>(B<True>/B<False>), suggest use it.
 
 =head2 $self->value ($path)
 
@@ -200,23 +213,23 @@ return value type of setting resource.
 
 =head2 $self->lookup_bool ($path)
 
-only get value type of bool from config file, please use value replace it.
+only get value type of bool from config file, please use B<value> replace it.
 
 =head2 $self->lookup_int ($path)
 
-only get value type of long int from config file, please use value replace it.
+only get value type of long int from config file, please use B<value> replace it.
 
 =head2 $self->lookup_int64 ($path)
 
-only get value type of long long int from config file, please use value replace it.
+only get value type of long long int from config file, please use B<value> replace it.
 
 =head2 $self->lookup_float ($path)
 
-only get value type of float from config file, please use value replace it.
+only get value type of float from config file, please use B<value> replace it.
 
 =head2 $self->lookup_string ($path)
 
-only get value type of string from config file, please use value replace it.
+only get value type of string from config file, please use B<value> replace it.
 
 =head1 PREREQUISITES
 
