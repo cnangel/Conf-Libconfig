@@ -408,6 +408,7 @@ int sv2addarray(config_setting_t *parent_setting, char *key, config_setting_t *s
 						break;
 					}
 				default:
+					break;
 			}
 		}
 		else
@@ -433,6 +434,7 @@ int sv2addarray(config_setting_t *parent_setting, char *key, config_setting_t *s
 						break;
 					}
 				default:
+					break;
 			}
 		}
 	}
@@ -475,6 +477,7 @@ int sv2addobject(config_setting_t *parent_setting, char *key, config_setting_t *
 						break;
 					}
 				default:
+					break;
 			}
 		}
 		else
@@ -497,6 +500,7 @@ int sv2addobject(config_setting_t *parent_setting, char *key, config_setting_t *
 						break;
 					}
 				default:
+					break;
 			}
 		}
 	}
@@ -530,6 +534,7 @@ int set_general_value(Conf__Libconfig conf, const char *path, SV *sv)
 					break;
 				}
 			default:
+				break;
 		}
 	}
 	else
@@ -552,6 +557,7 @@ int set_general_value(Conf__Libconfig conf, const char *path, SV *sv)
 					break;
 				}
 			default:
+				break;
 		}
 	}
 	return ret;
@@ -659,9 +665,11 @@ get_general_value(Conf__Libconfig conf, const char *path, SV **svref)
 			*svref = newSVnv(config_setting_get_float(elem));
 			break;
 		case CONFIG_TYPE_STRING:
-			const char *val = config_setting_get_string(elem);
-			*svref = newSVpvn(val, strlen(val));
-			break;
+			{
+				const char *val = config_setting_get_string(elem);
+				*svref = newSVpvn(val, strlen(val));
+				break;
+			}
 		case CONFIG_TYPE_ARRAY:
 			{
 				return get_general_array(elem, svref);
