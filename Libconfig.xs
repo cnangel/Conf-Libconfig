@@ -362,7 +362,11 @@ int sv2addarray(config_setting_t *parent_setting, char *key, config_setting_t *s
 {
 	int ret = LIBCONFIG_OK;
 	AV *av = (AV *)SvRV(sv);
+#if PERL_VERSION_GT(5,32,0)
 	int avlen = (int)av_count(av);
+#else
+	int avlen = av_top_index(av) + 1;
+#endif
 	// get the first one
 	SV *child_sv_0 = *(av_fetch(av, 0, 0));
 	int save_type = SvROK(child_sv_0) ? SvTYPE(SvRV(child_sv_0)) : SvTYPE(child_sv_0);
