@@ -362,16 +362,18 @@ int sv2addarray(config_setting_t *parent_setting, char *key, config_setting_t *s
 {
 	int ret = LIBCONFIG_OK;
 	AV *av = (AV *)SvRV(sv);
-#if PERL_VERSION_GT(5,32,0)
+#if PERL_API_REVISION >= 5 && PERL_API_VERSION >= 32
 	int avlen = (int)av_count(av);
 #else
-	int avlen = av_top_index(av) + 1;
+	int avlen = av_len(av) + 1;
 #endif
 	// get the first one
-	SV *child_sv_0 = *(av_fetch(av, 0, 0));
+	int i = 0;
+	SV *child_sv_0 = *(av_fetch(av, i, 0));
 	int save_type = SvROK(child_sv_0) ? SvTYPE(SvRV(child_sv_0)) : SvTYPE(child_sv_0);
 	int is_setting_array_type = 1;
-	for (int i = 1; i < avlen; i ++)
+	i ++;
+	for (; i < avlen; i ++)
 	{
 		SV *child_sv = *(av_fetch(av, i, 0));
 		if (save_type != (SvROK(child_sv) ? SvTYPE(SvRV(child_sv)) : SvTYPE(child_sv)))
@@ -390,7 +392,8 @@ int sv2addarray(config_setting_t *parent_setting, char *key, config_setting_t *s
 	}
 	int settinglen = config_setting_length(setting);
 	// Perl_warn(aTHX_ "ss name: %s av index: %d, settinglen: %d and setting type: %d", setting->name, avlen, settinglen, setting->type);
-	for (int i = 0; i < avlen; i ++)
+	i = 0;
+	for (; i < avlen; i ++)
 	{
 		SV *child_sv = *(av_fetch(av, i, 0));
 		// check type
@@ -701,7 +704,8 @@ int get_general_array(config_setting_t *setting, SV **sv_pptr)
 	}
 	AV *child_av_ptr = newAV();
 	int arr_len = config_setting_length(setting);
-	for (int i = 0; i < arr_len; i++)
+	int i = 0;
+	for (; i < arr_len; i++)
 	{
 		config_setting_t *child_setting = config_setting_get_elem(setting, i);
 		switch (config_setting_type(child_setting))
@@ -751,7 +755,8 @@ int get_general_list(config_setting_t *setting, SV **sv_pptr)
 	}
 	AV *child_av_ptr = newAV();
 	int list_size = config_setting_length(setting);
-	for (int i = 0; i < list_size; i++)
+	int i = 0;
+	for (; i < list_size; i++)
 	{
 		config_setting_t *child_setting = config_setting_get_elem(setting, i);
 		switch (config_setting_type(child_setting))
@@ -831,7 +836,8 @@ int get_general_object(config_setting_t *setting, SV **sv_pptr)
 	}
 	HV *child_hv_ptr = newHV();
 	int obj_cnt = config_setting_length(setting);
-	for (int i = 0; i < obj_cnt; i++)
+	int i = 0;
+	for (; i < obj_cnt; i++)
 	{
 		config_setting_t *child_setting = config_setting_get_elem(setting, i);
 		switch (config_setting_type(child_setting))
