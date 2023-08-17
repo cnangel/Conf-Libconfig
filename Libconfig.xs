@@ -116,10 +116,10 @@ set_array(config_setting_t *settings, AV *value, int *status)
     SV *g_v = newSViv(2);
 
     allStatus = 1;
-#if PERL_API_REVISION >= 5 && PERL_API_VERSION >= 32
-    valueMaxIndex = (int)av_count(value) - 1;
-#else
+#if PERL_API_REVISION <= 5 && PERL_API_VERSION <= 32
     valueMaxIndex = (int)av_len(value);
+#else
+    valueMaxIndex = (int)av_count(value) - 1;
 #endif
     for (i = 0; i <= valueMaxIndex; i ++)
     {
@@ -366,10 +366,10 @@ int sv2addarray(config_setting_t *parent_setting, char *key, config_setting_t *s
 {
     int ret = LIBCONFIG_OK;
     AV *av = (AV *)SvRV(sv);
-#if PERL_API_REVISION >= 5 && PERL_API_VERSION >= 32
-    int avlen = (int)av_count(av);
-#else
+#if PERL_API_REVISION <= 5 && PERL_API_VERSION <= 32
     int avlen = (int)av_len(av) + 1;
+#else
+    int avlen = (int)av_count(av);
 #endif
     if (avlen < 1)
     {
