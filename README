@@ -7,9 +7,10 @@ INSTALLATION
 
 First install libconfig and its development files.
 
-Redhat:     yum install libconfig libconfig-devel -y
-Debian:     apt-get libconfig libconfig-devel
-openSUSE:   zypper install libconfig8 libconfig-devel
+Redhat(<RHEL8):     yum install libconfig libconfig-devel -y 
+Redhat(>=RHEL8):    dnf install libconfig libconfig-devel -y
+Debian:             apt-get libconfig libconfig-dev
+openSUSE:           zypper install libconfig8 libconfig-devel
             (available in the Packman repository)
 
 On other platforms, you can compile libconfig from source:
