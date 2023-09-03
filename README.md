@@ -1,4 +1,4 @@
-[![Releasing](https://github.com/cnangel/Conf-Libconfig/actions/workflows/lint.yml/badge.svg)](https://github.com/cnangel/Conf-Libconfig/actions/workflows/release-workflow.yml)
+[![Releasing](https://github.com/cnangel/Conf-Libconfig/actions/workflows/release-workflow.yml/badge.svg)](https://github.com/cnangel/Conf-Libconfig/actions/workflows/release-workflow.yml)
 [![Testing](https://github.com/cnangel/Conf-Libconfig/actions/workflows/test.yml/badge.svg)](https://github.com/cnangel/Conf-Libconfig/actions/workflows/test.yml)
 
 # Conf-Libconfig
