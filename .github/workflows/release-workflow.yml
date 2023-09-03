@@ -1,0 +1,170 @@
+---
+name: Create Release
+
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+      # Push events to matching v*, i.e. v1.0, v20.15.10
+      - 'v*'
+
+jobs:
+  basic-build:
+    name: Basic Build
+    runs-on: ubuntu-latest
+    outputs:
+      our_date: ${{ env.our_date }}
+      git_hash: ${{ env.git_hash }}
+      cc_files_hash_id: ${{ env.cc_files_hash_id }}
+      version_id: ${{ env.version_id }}
+      package_name: ${{ env.package_name }}
+      deb_path: ${{ env.deb_path }}
+      rpm_path: ${{ env.rpm_path }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@master
+      - name: Set Variables
+        run: |
+          version_id=${GITHUB_REF_NAME:1}
+          package_name=${GITHUB_REPOSITORY##*/}
+          sha_short=$(git rev-parse --short "$GITHUB_SHA")
+          cc_hash_id=${{ hashFiles('cello.c') }}
+          echo "our_date=$(/bin/date -u "+%Y%m%d")" >> $GITHUB_ENV
+          echo "git_hash=$sha_short" >> $GITHUB_ENV
+          echo "version_id=$version_id" >> $GITHUB_ENV
+          echo "package_name=$package_name" >> $GITHUB_ENV
+          echo "cc_files_hash_id=${cc_hash_id:0:10}" >> $GITHUB_ENV
+          echo "deb_path=debian/artifacts" >> $GITHUB_ENV
+          echo "rpm_path=rpmbuild/RPMS" >> $GITHUB_ENV
+      - name: Restore JQ and JO
+        id: jqjo_cache_restore
+        uses: actions/cache/restore@v3
+        with:
+          path: |
+            ~/.local/bin/jq
+            ~/.local/bin/jo
+          key: ${{ runner.os }}-jqjo
+      - name: Install JQ and JO Dependencies
+        if: steps.jqjo_cache_restore.outputs.cache-hit != 'true'
+        run: |
+          sudo apt update
+          sudo apt install -y jq jo
+          mkdir -p ~/.local/bin
+          cp /usr/bin/jq ~/.local/bin
+          cp /usr/bin/jo ~/.local/bin
+      - name: Save JQ and JO
+        id: jqjo_cache_save
+        uses: actions/cache/save@v3
+        with:
+          path: |
+            ~/.local/bin/jq
+            ~/.local/bin/jo
+          key: ${{ steps.jqjo_cache_restore.outputs.cache-primary-key }}
+
+
+  rpm-build-fc38:
+    name: Create fc38 Release
+    runs-on: ubuntu-latest
+    needs: [basic-build]
+    outputs:
+      rpm_packages: ${{ steps.output_info.outputs.rpm_packages }}
+    env:
+      our_date: ${{ needs.basic-build.outputs.our_date }}
+      git_hash: ${{ needs.basic-build.outputs.git_hash }}
+      version_id: ${{ needs.basic-build.outputs.version_id }}
+      package_name: ${{ needs.basic-build.outputs.package_name }}
+      cc_files_hash_id: ${{ needs.basic-build.outputs.cc_files_hash_id }}
+      deb_path: ${{ needs.basic-build.outputs.deb_path }}
+      rpm_path: ${{ needs.basic-build.outputs.rpm_path }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@master
+      - name: Before Build Hook
+        run: |
+          sed -i 's#version:   1.0.3#version: ${{ env.version_id }}#' "${{ env.package_name }}.spec"
+
+      - name: Restore RPM Cache
+        id: rpm_cache_restore
+        uses: actions/cache/restore@v3
+        with:
+          path: ${{ env.rpm_path }}
+          key: ${{ runner.os }}-${{ env.package_name }}-${{ env.version_id }}-${{ env.cc_files_hash_id }}-${{ github.job }}
+
+      - if: steps.rpm_cache_restore.outputs.cache-hit != 'true'
+        name: Build RPM Package
+        id: rpm_build
+        uses: cnangel/build-rpm-action@master
+        with:
+          docker_image: cnangel/fc38
+          extra_build_deps: libconfig-devel
+
+      - name: Save RPM Cache
+        id: rpm_cache_save
+        uses: actions/cache/save@v3
+        with:
+          path: |
+            ${{ env.rpm_path }}
+          key: ${{ steps.rpm_cache_restore.outputs.cache-primary-key }}
+
+      - name: Restore JQ and JO
+        id: jqjo_cache_restore
+        uses: actions/cache/restore@v3
+        with:
+          path: |
+            ~/.local/bin/jq
+            ~/.local/bin/jo
+          key: ${{ runner.os }}-jqjo
+
+      - name: Set Output Info
+        id: output_info
+        run: |
+          export PATH=~/.local/bin:$PATH
+          echo "rpm_packages=$(find ${{ env.rpm_path }} -name '*.rpm' 2>/dev/null | jo -a | jq -r 'join("'","'")')" >> $GITHUB_OUTPUT
+
+
+  publish-release:
+    name: Publish Release
+    runs-on: ubuntu-latest
+    needs: [rpm-build-fc38, basic-build]
+    env:
+      our_date: ${{ needs.basic-build.outputs.our_date }}
+      git_hash: ${{ needs.basic-build.outputs.git_hash }}
+      version_id: ${{ needs.basic-build.outputs.version_id }}
+      package_name: ${{ needs.basic-build.outputs.package_name }}
+      cc_files_hash_id: ${{ needs.basic-build.outputs.cc_files_hash_id }}
+      deb_path: ${{ needs.basic-build.outputs.deb_path }}
+      rpm_path: ${{ needs.basic-build.outputs.rpm_path }}
+      fc38_rpm_packages: ${{ needs.rpm-build-fc38.outputs.rpm_packages }}
+
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@master
+
+      - name: Restore DEB Cache for Ubuntu
+        uses: actions/cache/restore@v3
+        with:
+          path: |
+            ${{ env.deb_path }}
+          key: ${{ runner.os }}-${{ env.package_name }}-${{ env.version_id }}-${{ env.cc_files_hash_id }}-deb-build
+      - name: Restore RPM Cache for fc38
+        uses: actions/cache/restore@v3
+        with:
+          path: |
+            ${{ env.rpm_path }}
+          key: ${{ runner.os }}-${{ env.package_name }}-${{ env.version_id }}-${{ env.cc_files_hash_id }}-rpm-build-fc38
+
+      - name: Release ${{ github.ref_name }}
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref }}
+          name: Release ${{ github.ref_name }}
+          body_path: Changes-20230903.md
+          files: |
+            README
+            ${{ env.fc38_rpm_packages }}
+          token: ${{ secrets.SSE_TOKEN }}
+          draft: false
+          prerelease: false
+
