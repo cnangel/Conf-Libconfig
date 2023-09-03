@@ -162,7 +162,7 @@ jobs:
           name: Release ${{ github.ref_name }}
           body_path: Changes-20230903.md
           files: |
-            README
+            README.md
             ${{ env.fc38_rpm_packages }}
           token: ${{ secrets.SSE_TOKEN }}
           draft: false
