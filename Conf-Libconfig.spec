@@ -59,7 +59,7 @@ rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root)
-%doc Changes README
+%doc Changes.md README.md
 %{perl_archlib}/*
 %{_mandir}/man3/*
 

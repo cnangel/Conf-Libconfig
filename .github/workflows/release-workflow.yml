@@ -62,6 +62,67 @@ jobs:
           key: ${{ steps.jqjo_cache_restore.outputs.cache-primary-key }}
 
 
+  deb-build:
+    name: Create Ubuntu Release
+    runs-on: ubuntu-latest
+    needs: [basic-build]
+    outputs:
+      deb_packages: ${{ steps.output_info.outputs.deb_packages }}
+    env:
+      our_date: ${{ needs.basic-build.outputs.our_date }}
+      git_hash: ${{ needs.basic-build.outputs.git_hash }}
+      version_id: ${{ needs.basic-build.outputs.version_id }}
+      package_name: ${{ needs.basic-build.outputs.package_name }}
+      cc_files_hash_id: ${{ needs.basic-build.outputs.cc_files_hash_id }}
+      deb_path: ${{ needs.basic-build.outputs.deb_path }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@master
+
+      - name: Restore DEB Cache for Ubuntu
+        id: deb_cache_restore
+        uses: actions/cache/restore@v3
+        with:
+          path: |
+            ${{ env.deb_path }}
+          key: ${{ runner.os }}-${{ env.package_name }}-${{ env.version_id }}-${{ env.cc_files_hash_id }}-${{ github.job }}
+
+      - if: steps.deb_cache_restore.outputs.cache-hit != 'true'
+        name: Build DEB Package for Ubuntu
+        id: deb_build_ubuntu
+        uses: cnangel/build-deb-action@master
+        with:
+          before_build_hook: |
+            dch --maintmaint --newversion ${{ env.version_id }}-1 "verion ${{ env.version_id }}"
+            dch --maintmaint --release ""
+          buildpackage_opts: --build=binary
+          extra_build_deps: libconfig-dev libextutils-pkgconfig-perl
+          is_output_all_files: false
+
+      - name: Save DEB Cache for Ubuntu
+        id: deb_cache_save
+        uses: actions/cache/save@v3
+        with:
+          path: |
+            ${{ env.deb_path }}
+          key: ${{ steps.deb_cache_restore.outputs.cache-primary-key }}
+
+      - name: Restore JQ and JO
+        id: jqjo_cache_restore
+        uses: actions/cache/restore@v3
+        with:
+          path: |
+            ~/.local/bin/jq
+            ~/.local/bin/jo
+          key: ${{ runner.os }}-jqjo
+
+      - name: Set Output Info
+        id: output_info
+        run: |
+          export PATH=~/.local/bin:$PATH
+          echo "deb_packages=$(find ${{ env.deb_path }} -name '*.deb' 2>/dev/null | jo -a | jq -r 'join("'","'")')" >> $GITHUB_OUTPUT
+
   rpm-build-fc38:
     name: Create fc38 Release
     runs-on: ubuntu-latest
@@ -126,7 +187,7 @@ jobs:
   publish-release:
     name: Publish Release
     runs-on: ubuntu-latest
-    needs: [rpm-build-fc38, basic-build]
+    needs: [deb-build, rpm-build-fc38, basic-build]
     env:
       our_date: ${{ needs.basic-build.outputs.our_date }}
       git_hash: ${{ needs.basic-build.outputs.git_hash }}
@@ -135,6 +196,7 @@ jobs:
       cc_files_hash_id: ${{ needs.basic-build.outputs.cc_files_hash_id }}
       deb_path: ${{ needs.basic-build.outputs.deb_path }}
       rpm_path: ${{ needs.basic-build.outputs.rpm_path }}
+      deb_packages: ${{ needs.deb-build.outputs.deb_packages }}
       fc38_rpm_packages: ${{ needs.rpm-build-fc38.outputs.rpm_packages }}
 
 
@@ -148,6 +210,24 @@ jobs:
           path: |
             ${{ env.deb_path }}
           key: ${{ runner.os }}-${{ env.package_name }}-${{ env.version_id }}-${{ env.cc_files_hash_id }}-deb-build
+      - name: Restore RPM Cache for el7
+        uses: actions/cache/restore@v3
+        with:
+          path: |
+            ${{ env.rpm_path }}
+          key: ${{ runner.os }}-${{ env.package_name }}-${{ env.version_id }}-${{ env.cc_files_hash_id }}-rpm-build-el7
+      - name: Restore RPM Cache for el8
+        uses: actions/cache/restore@v3
+        with:
+          path: |
+            ${{ env.rpm_path }}
+          key: ${{ runner.os }}-${{ env.package_name }}-${{ env.version_id }}-${{ env.cc_files_hash_id }}-rpm-build-el8
+      - name: Restore RPM Cache for el9
+        uses: actions/cache/restore@v3
+        with:
+          path: |
+            ${{ env.rpm_path }}
+          key: ${{ runner.os }}-${{ env.package_name }}-${{ env.version_id }}-${{ env.cc_files_hash_id }}-rpm-build-el9
       - name: Restore RPM Cache for fc38
         uses: actions/cache/restore@v3
         with:
@@ -160,9 +240,10 @@ jobs:
         with:
           tag_name: ${{ github.ref }}
           name: Release ${{ github.ref_name }}
-          body_path: Changes-20230903.md
+          body_path: Changes.md
           files: |
             README.md
+            ${{ env.deb_packages }}
             ${{ env.fc38_rpm_packages }}
           token: ${{ secrets.SSE_TOKEN }}
           draft: false
