@@ -23,3 +23,5 @@ debian/files
 debian/perl-libconfig.debhelper.log
 debian/perl-libconfig.substvars
 debian/perl-libconfig/
+*.gcov
+*.deb

@@ -1,6 +1,16 @@
+perl-libconfig (1.1.0-1) unstable; urgency=low
+
+  * Upgrade to support libconfig 1.8.x API
+  * Add options, format, precision, tab_width, hook, clear, error handling
+  * Add setting-level lookup, safe getters, type checks, source info
+  * Fix stray semicolon bugs
+  * Optimize fragile type detection logic
+  * Switch build system to ExtUtils::MakeMaker
+
+ -- Cnangel <cnangel@gmail.com>  Fri, 15 May 2026 10:00:00 +0800
+
 perl-libconfig (0.021-1) unstable; urgency=low
 
-    * Debian package creation
+  * Debian package creation
 
  -- Artiom M <a.mv@gmx.fr>  Wed, 12 Aug 2015 10:39:25 +0200
-
