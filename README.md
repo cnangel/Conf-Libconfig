@@ -31,7 +31,7 @@ Perl bindings to the C library libconfig
     zypper install libconfig8 libconfig-devel
     ```
 
-* On other platforms, you can compile libconfig from source: http://www.hyperrealm.com/libconfig/
+* On other platforms, you can compile libconfig from source: https://hyperrealm.github.io/libconfig/
 
 
 
@@ -39,13 +39,9 @@ Perl bindings to the C library libconfig
 ## Instructions:
 * Install libconfig from source:
   ```
-  wget http://www.hyperrealm.com/libconfig/libconfig-1.3.2.tar.gz
-  # Support libconfig-1.4.x
-  # wget http://www.hyperrealm.com/libconfig/libconfig-1.4.7.tar.gz
-  # Support libconfig-1.7.x
-  # wget https://hyperrealm.github.io/libconfig/dist/libconfig-1.7.2.tar.gz
-  tar -zxf libconfig-1.3.2.tar.gz
-  cd libconfig-1.3.2
+  wget https://hyperrealm.github.io/libconfig/dist/libconfig-1.8.2.tar.gz
+  tar -zxf libconfig-1.8.2.tar.gz
+  cd libconfig-1.8.2
   export MYPREFIX=/usr
   # or if you lack privileges for making system-wide changes:
   # export MYPREFIX=$HOME/local
@@ -90,6 +86,6 @@ perldoc command.
 
 * Copyright (c) 2009, Alibaba Search Center, Alibaba Inc. All rights reserved.
 
-* Copyright (C) 2009-2023 cnangel
+* Copyright (C) 2009-2026 cnangel
 
 * This program is released under the following license: bsd

@@ -113,7 +113,6 @@ set_array(config_setting_t *settings, AV *value, int *status)
     int type;
     int elemStatus;
     int allStatus;
-    SV *g_v = newSViv(2);
 
     allStatus = 1;
 #if PERL_API_REVISION <= 5 && PERL_API_VERSION <= 32
@@ -124,9 +123,14 @@ set_array(config_setting_t *settings, AV *value, int *status)
     for (i = 0; i <= valueMaxIndex; i ++)
     {
         sv = *(av_fetch(value, i, 0));
-        type = (int)(log(SvIOK(sv) + SvNOK(sv) + SvPOK(sv))/log(2)) - (SvIOK(g_v) == 256 ? 5 : 13);
-        if (type == 3) {
-            if (SvUV(sv) <= UINTNUM) type = 2;
+        if (SvIOK(sv)) {
+            type = (SvUV(sv) <= UINTNUM) ? CONFIG_TYPE_INT : CONFIG_TYPE_INT64;
+        } else if (SvNOK(sv)) {
+            type = CONFIG_TYPE_FLOAT;
+        } else if (SvPOK(sv)) {
+            type = CONFIG_TYPE_STRING;
+        } else {
+            Perl_croak(aTHX_ "[ERROR] Unrecognized scalar type in set_array!");
         }
         set_scalar_elem(settings, -1, sv, type, &elemStatus);
         allStatus = allStatus | elemStatus;
@@ -164,20 +168,27 @@ set_scalarvalue(config_setting_t *settings, const char *key, SV *value, int flag
     int returnStatus;
     config_setting_t *settings_item;
     config_setting_t *settings_parent;
-    SV *g_v = newSViv(2);
 
     if (settings == NULL) {
         Perl_warn(aTHX_ "[WARN] Settings is null in set_scalarvalue!");
         return 0;
     }
-    if (SvIOK(value) + SvNOK(value) + SvPOK(value) == 0) {
-        type = (int)(log(SvROK(value))/log(2)) - (SvIOK(g_v) == 256 ? 10 : 18);
+    if (SvROK(value)) {
+        type = SvTYPE(SvRV(value)) == SVt_PVAV ? CONFIG_TYPE_ARRAY
+             : SvTYPE(SvRV(value)) == SVt_PVHV ? CONFIG_TYPE_GROUP
+             : CONFIG_TYPE_NONE;
+    } else if (SvIOK(value)) {
+        type = CONFIG_TYPE_INT;
+    } else if (SvNOK(value)) {
+        type = CONFIG_TYPE_FLOAT;
+    } else if (SvPOK(value)) {
+        type = CONFIG_TYPE_STRING;
     } else {
-        type = (int)(log(SvIOK(value) + SvNOK(value) + SvPOK(value) + SvROK(value))/log(2)) - (SvIOK(g_v) == 256 ? 5 : 13);
+        type = CONFIG_TYPE_NONE;
     }
-    if (type == 3) {
-        if (SvUV(value) <= UINTNUM) type = 2;
-        if ((SvUV(value) == 0 || SvUV(value) == 1) && booldefined == 2) type = 6;
+    if (type == CONFIG_TYPE_INT) {
+        if (SvUV(value) > UINTNUM) type = CONFIG_TYPE_INT64;
+        if ((SvUV(value) == 0 || SvUV(value) == 1) && booldefined == 2) type = CONFIG_TYPE_BOOL;
     }
     returnStatus = 0;
     settings_parent = settings->parent;
@@ -814,7 +825,7 @@ int get_general_list(config_setting_t *setting, SV **sv_pptr)
             case CONFIG_TYPE_LIST:
                 {
                     SV *sv;
-                    if (get_general_list(child_setting, &sv) == LIBCONFIG_OK);
+                    if (get_general_list(child_setting, &sv) == LIBCONFIG_OK)
                     {
                         av_push(child_av_ptr, sv);
                     }
@@ -824,7 +835,7 @@ int get_general_list(config_setting_t *setting, SV **sv_pptr)
             case CONFIG_TYPE_GROUP:
                 {
                     SV *sv;
-                    if (get_general_object(child_setting, &sv) == LIBCONFIG_OK);
+                    if (get_general_object(child_setting, &sv) == LIBCONFIG_OK)
                     {
                         av_push(child_av_ptr, sv);
                     }
@@ -935,7 +946,6 @@ MODULE = Conf::Libconfig     PACKAGE = Conf::Libconfig  PREFIX = libconfig_
 
 Conf::Libconfig
 libconfig_new(packname="Conf::Libconfig")
-    char *packname
     PREINIT:
     CODE:
     {
@@ -964,6 +974,7 @@ libconfig_getversion(conf)
     Conf::Libconfig conf
     CODE:
     {
+        (void)conf;
 #if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 4)) \
                        || (LIBCONFIG_VER_MAJOR > 1))
         char tmpChar[16];
@@ -980,9 +991,10 @@ int
 libconfig_read(conf, stream)
     Conf::Libconfig conf
     FILE *stream
-    PREINIT:
     CODE:
-        config_read(conf, stream);
+        RETVAL = config_read(conf, stream);
+    OUTPUT:
+        RETVAL
 
 int
 libconfig_read_file(conf, filename)
@@ -1476,7 +1488,7 @@ libconfig_delete_node(conf, path)
     const char *path
     PREINIT:
         config_setting_t *settings;
-        char *key;
+        const char *key;
         char parentpath[256];
     CODE:
     {
@@ -1520,6 +1532,272 @@ libconfig_delete_node_elem(conf, path, idx)
             Perl_croak (aTHX_ "[ERROR] Not the node of path.!");
         }
         RETVAL = 1 | config_setting_remove_elem(settings, idx);
+    OUTPUT:
+        RETVAL
+
+int
+libconfig_set_options(conf, options)
+    Conf::Libconfig conf
+    int options
+    CODE:
+    {
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 8)) \
+                       || (LIBCONFIG_VER_MAJOR > 1))
+        config_set_options(conf, options);
+        RETVAL = CONFIG_TRUE;
+#else
+        Perl_warn(aTHX_ "[WARN] config_set_options requires libconfig >= 1.8");
+        RETVAL = CONFIG_FALSE;
+#endif
+    }
+    OUTPUT:
+        RETVAL
+
+int
+libconfig_get_options(conf)
+    Conf::Libconfig conf
+    CODE:
+    {
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 8)) \
+                       || (LIBCONFIG_VER_MAJOR > 1))
+        RETVAL = config_get_options(conf);
+#else
+        Perl_warn(aTHX_ "[WARN] config_get_options requires libconfig >= 1.8");
+        RETVAL = 0;
+#endif
+    }
+    OUTPUT:
+        RETVAL
+
+int
+libconfig_set_option(conf, option, flag)
+    Conf::Libconfig conf
+    int option
+    int flag
+    CODE:
+    {
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 8)) \
+                       || (LIBCONFIG_VER_MAJOR > 1))
+        config_set_option(conf, option, flag);
+        RETVAL = CONFIG_TRUE;
+#else
+        Perl_warn(aTHX_ "[WARN] config_set_option requires libconfig >= 1.8");
+        RETVAL = CONFIG_FALSE;
+#endif
+    }
+    OUTPUT:
+        RETVAL
+
+int
+libconfig_get_option(conf, option)
+    Conf::Libconfig conf
+    int option
+    CODE:
+    {
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 8)) \
+                       || (LIBCONFIG_VER_MAJOR > 1))
+        RETVAL = config_get_option(conf, option);
+#else
+        Perl_warn(aTHX_ "[WARN] config_get_option requires libconfig >= 1.8");
+        RETVAL = 0;
+#endif
+    }
+    OUTPUT:
+        RETVAL
+
+void
+libconfig_set_auto_convert(conf, flag)
+    Conf::Libconfig conf
+    int flag
+    CODE:
+    {
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 8)) \
+                       || (LIBCONFIG_VER_MAJOR > 1))
+        config_set_auto_convert(conf, flag);
+#endif
+    }
+
+int
+libconfig_get_auto_convert(conf)
+    Conf::Libconfig conf
+    CODE:
+    {
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 8)) \
+                       || (LIBCONFIG_VER_MAJOR > 1))
+        RETVAL = config_get_auto_convert(conf);
+#else
+        RETVAL = 0;
+#endif
+    }
+    OUTPUT:
+        RETVAL
+
+void
+libconfig_set_float_precision(conf, digits)
+    Conf::Libconfig conf
+    unsigned short digits
+    CODE:
+    {
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 8)) \
+                       || (LIBCONFIG_VER_MAJOR > 1))
+        config_set_float_precision(conf, digits);
+#endif
+    }
+
+unsigned short
+libconfig_get_float_precision(conf)
+    Conf::Libconfig conf
+    CODE:
+    {
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 8)) \
+                       || (LIBCONFIG_VER_MAJOR > 1))
+        RETVAL = config_get_float_precision(conf);
+#else
+        RETVAL = 0;
+#endif
+    }
+    OUTPUT:
+        RETVAL
+
+void
+libconfig_set_tab_width(conf, width)
+    Conf::Libconfig conf
+    unsigned short width
+    CODE:
+    {
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 8)) \
+                       || (LIBCONFIG_VER_MAJOR > 1))
+        config_set_tab_width(conf, width);
+#endif
+    }
+
+unsigned short
+libconfig_get_tab_width(conf)
+    Conf::Libconfig conf
+    CODE:
+    {
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 8)) \
+                       || (LIBCONFIG_VER_MAJOR > 1))
+        RETVAL = config_get_tab_width(conf);
+#else
+        RETVAL = 0;
+#endif
+    }
+    OUTPUT:
+        RETVAL
+
+void
+libconfig_set_default_format(conf, format)
+    Conf::Libconfig conf
+    unsigned short format
+    CODE:
+    {
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 4)) \
+                       || (LIBCONFIG_VER_MAJOR > 1))
+        config_set_default_format(conf, format);
+#endif
+    }
+
+unsigned short
+libconfig_get_default_format(conf)
+    Conf::Libconfig conf
+    CODE:
+    {
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 4)) \
+                       || (LIBCONFIG_VER_MAJOR > 1))
+        RETVAL = config_get_default_format(conf);
+#else
+        RETVAL = 0;
+#endif
+    }
+    OUTPUT:
+        RETVAL
+
+void
+libconfig_set_hook(conf, hook)
+    Conf::Libconfig conf
+    void *hook
+    CODE:
+    {
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 4)) \
+                       || (LIBCONFIG_VER_MAJOR > 1))
+        config_setting_set_hook(config_root_setting(conf), hook);
+#endif
+    }
+
+void *
+libconfig_get_hook(conf)
+    Conf::Libconfig conf
+    CODE:
+    {
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 4)) \
+                       || (LIBCONFIG_VER_MAJOR > 1))
+        RETVAL = config_setting_get_hook(config_root_setting(conf));
+#else
+        RETVAL = NULL;
+#endif
+    }
+    OUTPUT:
+        RETVAL
+
+void
+libconfig_clear(conf)
+    Conf::Libconfig conf
+    CODE:
+    {
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 8)) \
+                       || (LIBCONFIG_VER_MAJOR > 1))
+        config_clear(conf);
+#endif
+    }
+
+const char *
+libconfig_error_text(conf)
+    Conf::Libconfig conf
+    CODE:
+    {
+        RETVAL = config_error_text(conf);
+    }
+    OUTPUT:
+        RETVAL
+
+const char *
+libconfig_error_file(conf)
+    Conf::Libconfig conf
+    CODE:
+    {
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 4)) \
+                       || (LIBCONFIG_VER_MAJOR > 1))
+        RETVAL = config_error_file(conf);
+#else
+        RETVAL = NULL;
+#endif
+    }
+    OUTPUT:
+        RETVAL
+
+int
+libconfig_error_line(conf)
+    Conf::Libconfig conf
+    CODE:
+    {
+        RETVAL = config_error_line(conf);
+    }
+    OUTPUT:
+        RETVAL
+
+int
+libconfig_error_type(conf)
+    Conf::Libconfig conf
+    CODE:
+    {
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 4)) \
+                       || (LIBCONFIG_VER_MAJOR > 1))
+        RETVAL = config_error_type(conf);
+#else
+        RETVAL = 0;
+#endif
+    }
     OUTPUT:
         RETVAL
 
@@ -1601,6 +1879,365 @@ libconfig_setting_get_item(setting, i)
         else
             sv = newSV(0);
         RETVAL = sv;
+    }
+    OUTPUT:
+        RETVAL
+
+Conf::Libconfig::Settings
+libconfig_setting_lookup(setting, path)
+    Conf::Libconfig::Settings setting
+    const char *path
+    CODE:
+    {
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 5)) \
+                       || (LIBCONFIG_VER_MAJOR > 1))
+        RETVAL = config_setting_lookup(setting, path);
+#else
+        RETVAL = NULL;
+#endif
+    }
+    OUTPUT:
+        RETVAL
+
+int
+libconfig_setting_lookup_int(setting, name)
+    Conf::Libconfig::Settings setting
+    const char *name
+    PREINIT:
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 4)) \
+                       || (LIBCONFIG_VER_MAJOR > 1))
+        int value = 0;
+#else
+        long value = 0;
+#endif
+    CODE:
+    {
+        config_setting_lookup_int(setting, name, &value);
+        RETVAL = (int)value;
+    }
+    OUTPUT:
+        RETVAL
+
+SV *
+libconfig_setting_lookup_int64(setting, name)
+    Conf::Libconfig::Settings setting
+    const char *name
+    PREINIT:
+        long long int value;
+        char valueArr[256];
+        STRLEN valueArrLen;
+    CODE:
+    {
+        config_setting_lookup_int64(setting, name, &value);
+        valueArrLen = sprintf(valueArr, "%lld", value);
+        RETVAL = sv_2mortal(newSVpv(valueArr, valueArrLen));
+    }
+    OUTPUT:
+        RETVAL
+
+int
+libconfig_setting_lookup_bool(setting, name)
+    Conf::Libconfig::Settings setting
+    const char *name
+    PREINIT:
+        int value;
+    CODE:
+    {
+        config_setting_lookup_bool(setting, name, &value);
+        RETVAL = value;
+    }
+    OUTPUT:
+        RETVAL
+
+double
+libconfig_setting_lookup_float(setting, name)
+    Conf::Libconfig::Settings setting
+    const char *name
+    PREINIT:
+        double value;
+    CODE:
+    {
+        config_setting_lookup_float(setting, name, &value);
+        RETVAL = value;
+    }
+    OUTPUT:
+        RETVAL
+
+const char *
+libconfig_setting_lookup_string(setting, name)
+    Conf::Libconfig::Settings setting
+    const char *name
+    PREINIT:
+        const char *value;
+    CODE:
+    {
+        config_setting_lookup_string(setting, name, &value);
+        RETVAL = value;
+    }
+    OUTPUT:
+        RETVAL
+
+int
+libconfig_setting_get_int_safe(setting)
+    Conf::Libconfig::Settings setting
+    PREINIT:
+        int value;
+    CODE:
+    {
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 8)) \
+                       || (LIBCONFIG_VER_MAJOR > 1))
+        RETVAL = config_setting_get_int_safe(setting, &value) == CONFIG_TRUE ? value : 0;
+#else
+        Perl_warn(aTHX_ "[WARN] config_setting_get_int_safe requires libconfig >= 1.8");
+        RETVAL = 0;
+#endif
+    }
+    OUTPUT:
+        RETVAL
+
+SV *
+libconfig_setting_get_int64_safe(setting)
+    Conf::Libconfig::Settings setting
+    PREINIT:
+        long long int value;
+        char valueArr[256];
+        STRLEN valueArrLen;
+    CODE:
+    {
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 8)) \
+                       || (LIBCONFIG_VER_MAJOR > 1))
+        if (config_setting_get_int64_safe(setting, &value) == CONFIG_TRUE) {
+            valueArrLen = sprintf(valueArr, "%lld", value);
+            RETVAL = newSVpv(valueArr, valueArrLen);
+        } else {
+            RETVAL = newSViv(0);
+        }
+#else
+        Perl_warn(aTHX_ "[WARN] config_setting_get_int64_safe requires libconfig >= 1.8");
+        RETVAL = newSViv(0);
+#endif
+    }
+    OUTPUT:
+        RETVAL
+
+double
+libconfig_setting_get_float_safe(setting)
+    Conf::Libconfig::Settings setting
+    PREINIT:
+        double value;
+    CODE:
+    {
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 8)) \
+                       || (LIBCONFIG_VER_MAJOR > 1))
+        RETVAL = config_setting_get_float_safe(setting, &value) == CONFIG_TRUE ? value : 0.0;
+#else
+        Perl_warn(aTHX_ "[WARN] config_setting_get_float_safe requires libconfig >= 1.8");
+        RETVAL = 0.0;
+#endif
+    }
+    OUTPUT:
+        RETVAL
+
+int
+libconfig_setting_get_bool_safe(setting)
+    Conf::Libconfig::Settings setting
+    PREINIT:
+        int value;
+    CODE:
+    {
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 8)) \
+                       || (LIBCONFIG_VER_MAJOR > 1))
+        RETVAL = config_setting_get_bool_safe(setting, &value) == CONFIG_TRUE ? value : 0;
+#else
+        Perl_warn(aTHX_ "[WARN] config_setting_get_bool_safe requires libconfig >= 1.8");
+        RETVAL = 0;
+#endif
+    }
+    OUTPUT:
+        RETVAL
+
+const char *
+libconfig_setting_get_string_safe(setting)
+    Conf::Libconfig::Settings setting
+    PREINIT:
+        const char *value;
+    CODE:
+    {
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 8)) \
+                       || (LIBCONFIG_VER_MAJOR > 1))
+        if (config_setting_get_string_safe(setting, &value) != CONFIG_TRUE)
+            value = "";
+        RETVAL = value;
+#else
+        Perl_warn(aTHX_ "[WARN] config_setting_get_string_safe requires libconfig >= 1.8");
+        RETVAL = "";
+#endif
+    }
+    OUTPUT:
+        RETVAL
+
+int
+libconfig_setting_set_format(setting, format)
+    Conf::Libconfig::Settings setting
+    unsigned short format
+    CODE:
+    {
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 8)) \
+                       || (LIBCONFIG_VER_MAJOR > 1))
+        RETVAL = config_setting_set_format(setting, format);
+#else
+        RETVAL = CONFIG_FALSE;
+#endif
+    }
+    OUTPUT:
+        RETVAL
+
+unsigned short
+libconfig_setting_get_format(setting)
+    Conf::Libconfig::Settings setting
+    CODE:
+    {
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 8)) \
+                       || (LIBCONFIG_VER_MAJOR > 1))
+        RETVAL = config_setting_get_format(setting);
+#else
+        RETVAL = 0;
+#endif
+    }
+    OUTPUT:
+        RETVAL
+
+int
+libconfig_setting_is_scalar(setting)
+    Conf::Libconfig::Settings setting
+    CODE:
+    {
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 8)) \
+                       || (LIBCONFIG_VER_MAJOR > 1))
+        RETVAL = config_setting_is_scalar(setting);
+#else
+        RETVAL = CONFIG_FALSE;
+#endif
+    }
+    OUTPUT:
+        RETVAL
+
+int
+libconfig_setting_is_aggregate(setting)
+    Conf::Libconfig::Settings setting
+    CODE:
+    {
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 8)) \
+                       || (LIBCONFIG_VER_MAJOR > 1))
+        RETVAL = config_setting_is_aggregate(setting);
+#else
+        RETVAL = CONFIG_FALSE;
+#endif
+    }
+    OUTPUT:
+        RETVAL
+
+int
+libconfig_setting_is_group(setting)
+    Conf::Libconfig::Settings setting
+    CODE:
+    {
+        RETVAL = config_setting_is_group(setting);
+    }
+    OUTPUT:
+        RETVAL
+
+int
+libconfig_setting_is_array(setting)
+    Conf::Libconfig::Settings setting
+    CODE:
+    {
+        RETVAL = config_setting_is_array(setting);
+    }
+    OUTPUT:
+        RETVAL
+
+int
+libconfig_setting_is_list(setting)
+    Conf::Libconfig::Settings setting
+    CODE:
+    {
+        RETVAL = config_setting_is_list(setting);
+    }
+    OUTPUT:
+        RETVAL
+
+int
+libconfig_setting_is_number(setting)
+    Conf::Libconfig::Settings setting
+    CODE:
+    {
+        RETVAL = config_setting_is_number(setting);
+    }
+    OUTPUT:
+        RETVAL
+
+const char *
+libconfig_setting_name(setting)
+    Conf::Libconfig::Settings setting
+    CODE:
+    {
+        RETVAL = config_setting_name(setting);
+    }
+    OUTPUT:
+        RETVAL
+
+Conf::Libconfig::Settings
+libconfig_setting_parent(setting)
+    Conf::Libconfig::Settings setting
+    CODE:
+    {
+        RETVAL = config_setting_parent(setting);
+    }
+    OUTPUT:
+        RETVAL
+
+int
+libconfig_setting_is_root(setting)
+    Conf::Libconfig::Settings setting
+    CODE:
+    {
+        RETVAL = config_setting_is_root(setting);
+    }
+    OUTPUT:
+        RETVAL
+
+int
+libconfig_setting_index(setting)
+    Conf::Libconfig::Settings setting
+    CODE:
+    {
+        RETVAL = config_setting_index(setting);
+    }
+    OUTPUT:
+        RETVAL
+
+unsigned int
+libconfig_setting_source_line(setting)
+    Conf::Libconfig::Settings setting
+    CODE:
+    {
+        RETVAL = config_setting_source_line(setting);
+    }
+    OUTPUT:
+        RETVAL
+
+const char *
+libconfig_setting_source_file(setting)
+    Conf::Libconfig::Settings setting
+    CODE:
+    {
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 4)) \
+                       || (LIBCONFIG_VER_MAJOR > 1))
+        RETVAL = config_setting_source_file(setting);
+#else
+        RETVAL = NULL;
+#endif
     }
     OUTPUT:
         RETVAL
