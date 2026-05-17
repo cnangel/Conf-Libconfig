@@ -3,9 +3,7 @@ name: Create Release
 
 on:
   push:
-    # Sequence of patterns matched against refs/tags
     tags:
-      # Push events to matching v*, i.e. v1.0, v20.15.10
       - 'v*'
 
 jobs:
@@ -38,22 +36,30 @@ jobs:
           echo "rpm_path=rpmbuild/RPMS" >> $GITHUB_ENV
       - name: Run Unit Tests
         run: |
-          sudo apt update
-          sudo apt install -y libconfig-dev libextutils-pkgconfig-perl libtest-deep-perl libtest-exception-perl libtest-warn-perl
+          sudo apt-get update
+          sudo apt-get install -y libconfig-dev libextutils-pkgconfig-perl libtest-deep-perl libtest-exception-perl libtest-warn-perl
           perl Makefile.PL
           make
           make test
 
-  deb-build-resolute:
-    name: Create Ubuntu Resolute Release
-    runs-on: ubuntu-24.04
+  deb-build:
+    name: Create Ubuntu ${{ matrix.distro }} Release
+    runs-on: ${{ matrix.runs-on }}
     continue-on-error: true
     needs: [basic-build]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - distro: resolute
+            runs-on: ubuntu-24.04
+          - distro: jammy
+            runs-on: ubuntu-22.04
+          - distro: noble
+            runs-on: ubuntu-24.04
     outputs:
       deb_packages: ${{ steps.output_info.outputs.deb_packages }}
     env:
-      our_date: ${{ needs.basic-build.outputs.our_date }}
-      git_hash: ${{ needs.basic-build.outputs.git_hash }}
       version_id: ${{ needs.basic-build.outputs.version_id }}
       package_name: ${{ needs.basic-build.outputs.package_name }}
       cc_files_hash_id: ${{ needs.basic-build.outputs.cc_files_hash_id }}
@@ -63,17 +69,17 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v6
 
-      - name: Restore DEB Cache Ubuntu Resolute
+      - name: Restore DEB Cache
         id: deb_cache_restore
         uses: actions/cache/restore@v5
         with:
           path: |
-            ${{ env.deb_path }}/resolute
-          key: ${{ runner.os }}-${{ env.package_name }}-${{ env.version_id }}-${{ env.cc_files_hash_id }}-${{ github.job }}
+            ${{ env.deb_path }}/${{ matrix.distro }}
+          key: ${{ runner.os }}-${{ env.package_name }}-${{ env.version_id }}-${{ env.cc_files_hash_id }}-deb-${{ matrix.distro }}
 
       - if: steps.deb_cache_restore.outputs.cache-hit != 'true'
-        name: Build DEB Package Ubuntu Resolute
-        id: deb_build_resolute
+        name: Build DEB Package
+        id: deb_build
         uses: cnangel/build-deb-action@master
         with:
           before_build_hook: |
@@ -87,29 +93,24 @@ jobs:
         name: Move DEB to distro subdir
         run: |
           sudo chown -R $(id -u):$(id -g) ${{ env.deb_path }}/
-          mkdir -p ${{ env.deb_path }}/resolute
-          mv ${{ env.deb_path }}/*.deb ${{ env.deb_path }}/resolute/
-          for f in ${{ env.deb_path }}/resolute/*.deb; do mv "$f" "${{ env.deb_path }}/resolute/resolute-$(basename "$f")"; done
+          mkdir -p ${{ env.deb_path }}/${{ matrix.distro }}
+          mv ${{ env.deb_path }}/*.deb ${{ env.deb_path }}/${{ matrix.distro }}/
+          for f in ${{ env.deb_path }}/${{ matrix.distro }}/*.deb; do mv "$f" "${{ env.deb_path }}/${{ matrix.distro }}/${{ matrix.distro }}-$(basename "$f")"; done
 
       - if: steps.deb_cache_restore.outputs.cache-hit != 'true'
-        name: Save DEB Cache Ubuntu Resolute
+        name: Save DEB Cache
         id: deb_cache_save
         uses: actions/cache/save@v5
         with:
           path: |
-            ${{ env.deb_path }}/resolute
+            ${{ env.deb_path }}/${{ matrix.distro }}
           key: ${{ steps.deb_cache_restore.outputs.cache-primary-key }}
-
-      - name: Install JQ and JO
-        run: |
-          sudo apt update
-          sudo apt install -y jq jo
 
       - name: Set Output Info
         id: output_info
         run: |
-          export PATH=~/.local/bin:$PATH
-          echo "deb_packages=$(find ${{ env.deb_path }}/resolute -name '*.deb' 2>/dev/null | jo -a | jq -r 'join(",")')" >> $GITHUB_OUTPUT
+          sudo apt-get install -y jq jo
+          echo "deb_packages=$(find ${{ env.deb_path }}/${{ matrix.distro }} -name '*.deb' 2>/dev/null | jo -a | jq -r 'join(",")')" >> $GITHUB_OUTPUT
 
   deb-build-focal:
     name: Create Ubuntu Focal Release
@@ -119,8 +120,6 @@ jobs:
     outputs:
       deb_packages: ${{ steps.output_info.outputs.deb_packages }}
     env:
-      our_date: ${{ needs.basic-build.outputs.our_date }}
-      git_hash: ${{ needs.basic-build.outputs.git_hash }}
       version_id: ${{ needs.basic-build.outputs.version_id }}
       package_name: ${{ needs.basic-build.outputs.package_name }}
       cc_files_hash_id: ${{ needs.basic-build.outputs.cc_files_hash_id }}
@@ -130,22 +129,34 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v6
 
-      - name: Restore DEB Cache Ubuntu Focal
+      - name: Restore Focal DEB Cache
         id: deb_cache_restore
         uses: actions/cache/restore@v5
         with:
           path: |
             ${{ env.deb_path }}/focal
-          key: ${{ runner.os }}-${{ env.package_name }}-${{ env.version_id }}-${{ env.cc_files_hash_id }}-${{ github.job }}
+          key: ${{ runner.os }}-${{ env.package_name }}-${{ env.version_id }}-${{ env.cc_files_hash_id }}-deb-focal
+
+      - name: Restore Pbuilder Base Cache
+        id: pbuilder_cache_restore
+        if: steps.deb_cache_restore.outputs.cache-hit != 'true'
+        uses: actions/cache/restore@v5
+        with:
+          path: /var/cache/pbuilder/focal-base.tgz
+          key: pbuilder-focal-base-${{ hashFiles('debian/control') }}
 
       - if: steps.deb_cache_restore.outputs.cache-hit != 'true'
-        name: Build DEB Package Ubuntu Focal via pbuilder
+        name: Build DEB Package Focal via pbuilder
         run: |
-          sudo apt update
-          sudo apt install -y pbuilder ubuntu-dev-tools devscripts
+          sudo apt-get update
+          sudo apt-get install -y pbuilder ubuntu-dev-tools devscripts
           dch --maintmaint --newversion ${{ env.version_id }}-1 "version ${{ env.version_id }}"
           dch --maintmaint --release ""
-          pbuilder-dist focal create --mirror http://archive.ubuntu.com/ubuntu
+          if [ -f /var/cache/pbuilder/focal-base.tgz ]; then
+            sudo mkdir -p /var/cache/pbuilder
+            sudo cp /var/cache/pbuilder/focal-base.tgz /var/cache/pbuilder/
+          fi
+          pbuilder-dist focal create --mirror http://archive.ubuntu.com/ubuntu || true
           (cd .. && dpkg-source -b ${{ env.package_name }})
           mkdir -p ./pbuilder-result
           pbuilder-dist focal build --buildresult ./pbuilder-result ../*.dsc
@@ -155,7 +166,7 @@ jobs:
           for f in ${{ env.deb_path }}/focal/*.deb; do mv "$f" "${{ env.deb_path }}/focal/focal-$(basename "$f")"; done
 
       - if: steps.deb_cache_restore.outputs.cache-hit != 'true'
-        name: Save DEB Cache Ubuntu Focal
+        name: Save Focal DEB Cache
         id: deb_cache_save
         uses: actions/cache/save@v5
         with:
@@ -163,400 +174,62 @@ jobs:
             ${{ env.deb_path }}/focal
           key: ${{ steps.deb_cache_restore.outputs.cache-primary-key }}
 
-      - name: Install JQ and JO
-        run: |
-          sudo apt update
-          sudo apt install -y jq jo
+      - if: steps.deb_cache_restore.outputs.cache-hit != 'true' && steps.pbuilder_cache_restore.outputs.cache-hit != 'true'
+        name: Save Pbuilder Base Cache
+        uses: actions/cache/save@v5
+        with:
+          path: /var/cache/pbuilder/focal-base.tgz
+          key: ${{ steps.pbuilder_cache_restore.outputs.cache-primary-key }}
 
       - name: Set Output Info
         id: output_info
         run: |
-          export PATH=~/.local/bin:$PATH
+          sudo apt-get install -y jq jo
           echo "deb_packages=$(find ${{ env.deb_path }}/focal -name '*.deb' 2>/dev/null | jo -a | jq -r 'join(",")')" >> $GITHUB_OUTPUT
 
-  deb-build-jammy:
-    name: Create Ubuntu Jammy Release
-    runs-on: ubuntu-22.04
+  rpm-build:
+    name: Create ${{ matrix.distro }} Release
+    runs-on: ${{ matrix.runs-on || 'ubuntu-latest' }}
     continue-on-error: true
     needs: [basic-build]
-    outputs:
-      deb_packages: ${{ steps.output_info.outputs.deb_packages }}
-    env:
-      our_date: ${{ needs.basic-build.outputs.our_date }}
-      git_hash: ${{ needs.basic-build.outputs.git_hash }}
-      version_id: ${{ needs.basic-build.outputs.version_id }}
-      package_name: ${{ needs.basic-build.outputs.package_name }}
-      cc_files_hash_id: ${{ needs.basic-build.outputs.cc_files_hash_id }}
-      deb_path: ${{ needs.basic-build.outputs.deb_path }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - distro: el7
+            docker_image: cnangel/el7
+          - distro: el8
+            docker_image: cnangel/el8
+            dnf_opts: --enablerepo=powertools
+            extra_build_deps: libconfig-devel perl-devel perl-generators perl-ExtUtils-MakeMaker perl-ExtUtils-PkgConfig perl-Test-Deep perl-Test-Exception perl-Test-Warn
+          - distro: el9
+            docker_image: cnangel/el9
+            dnf_opts: --enablerepo=crb
+            extra_build_deps: libconfig-devel perl-devel perl-generators perl-ExtUtils-MakeMaker perl-ExtUtils-PkgConfig perl-Test-Deep perl-Test-Exception perl-Test-Warn
+          - distro: el10-amd64
+            docker_image: quay.io/centos/centos:stream10-minimal
+            dnf_opts: --enablerepo=crb
+            additional_repos: '["https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm"]'
+            extra_build_deps: rpm-build libconfig-devel perl-devel perl-generators perl-ExtUtils-MakeMaker perl-ExtUtils-PkgConfig perl-Test-Deep perl-Test-Exception perl-Test-Warn
+          - distro: el10-arm64
+            runs-on: ubuntu-24.04-arm
+            docker_image: quay.io/centos/centos:stream10-minimal
+            dnf_opts: --enablerepo=crb
+            additional_repos: '["https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm"]'
+            extra_build_deps: rpm-build libconfig-devel perl-devel perl-generators perl-ExtUtils-MakeMaker perl-ExtUtils-PkgConfig perl-Test-Deep perl-Test-Exception perl-Test-Warn
+          - distro: fc38
+            docker_image: cnangel/fc38
+            extra_build_deps: libconfig-devel perl-devel perl-generators perl-ExtUtils-MakeMaker perl-ExtUtils-PkgConfig perl-Test-Deep perl-Test-Exception perl-Test-Warn
+          - distro: fc44
+            docker_image: fedora:44
+            extra_build_deps: rpm-build rpmdevtools yum-utils gcc-c++ libconfig-devel perl-devel perl-generators perl-ExtUtils-MakeMaker perl-ExtUtils-PkgConfig perl-Test-Deep perl-Test-Exception perl-Test-Warn
 
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v6
-
-      - name: Restore DEB Cache Ubuntu Jammy
-        id: deb_cache_restore
-        uses: actions/cache/restore@v5
-        with:
-          path: |
-            ${{ env.deb_path }}/jammy
-          key: ${{ runner.os }}-${{ env.package_name }}-${{ env.version_id }}-${{ env.cc_files_hash_id }}-${{ github.job }}
-
-      - if: steps.deb_cache_restore.outputs.cache-hit != 'true'
-        name: Build DEB Package Ubuntu Jammy
-        id: deb_build_jammy
-        uses: cnangel/build-deb-action@master
-        with:
-          before_build_hook: |
-            dch --maintmaint --newversion ${{ env.version_id }}-1 "version ${{ env.version_id }}"
-            dch --maintmaint --release ""
-          buildpackage_opts: --build=binary
-          extra_build_deps: libconfig-dev libextutils-pkgconfig-perl
-          is_output_all_files: false
-
-      - if: steps.deb_cache_restore.outputs.cache-hit != 'true'
-        name: Move DEB to distro subdir
-        run: |
-          sudo chown -R $(id -u):$(id -g) ${{ env.deb_path }}/
-          mkdir -p ${{ env.deb_path }}/jammy
-          mv ${{ env.deb_path }}/*.deb ${{ env.deb_path }}/jammy/
-          for f in ${{ env.deb_path }}/jammy/*.deb; do mv "$f" "${{ env.deb_path }}/jammy/jammy-$(basename "$f")"; done
-
-      - if: steps.deb_cache_restore.outputs.cache-hit != 'true'
-        name: Save DEB Cache Ubuntu Jammy
-        id: deb_cache_save
-        uses: actions/cache/save@v5
-        with:
-          path: |
-            ${{ env.deb_path }}/jammy
-          key: ${{ steps.deb_cache_restore.outputs.cache-primary-key }}
-
-      - name: Install JQ and JO
-        run: |
-          sudo apt update
-          sudo apt install -y jq jo
-
-      - name: Set Output Info
-        id: output_info
-        run: |
-          export PATH=~/.local/bin:$PATH
-          echo "deb_packages=$(find ${{ env.deb_path }}/jammy -name '*.deb' 2>/dev/null | jo -a | jq -r 'join(",")')" >> $GITHUB_OUTPUT
-
-  deb-build-noble:
-    name: Create Ubuntu Noble Release
-    runs-on: ubuntu-24.04
-    continue-on-error: true
-    needs: [basic-build]
-    outputs:
-      deb_packages: ${{ steps.output_info.outputs.deb_packages }}
-    env:
-      our_date: ${{ needs.basic-build.outputs.our_date }}
-      git_hash: ${{ needs.basic-build.outputs.git_hash }}
-      version_id: ${{ needs.basic-build.outputs.version_id }}
-      package_name: ${{ needs.basic-build.outputs.package_name }}
-      cc_files_hash_id: ${{ needs.basic-build.outputs.cc_files_hash_id }}
-      deb_path: ${{ needs.basic-build.outputs.deb_path }}
-
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v6
-
-      - name: Restore DEB Cache Ubuntu Noble
-        id: deb_cache_restore
-        uses: actions/cache/restore@v5
-        with:
-          path: |
-            ${{ env.deb_path }}/noble
-          key: ${{ runner.os }}-${{ env.package_name }}-${{ env.version_id }}-${{ env.cc_files_hash_id }}-${{ github.job }}
-
-      - if: steps.deb_cache_restore.outputs.cache-hit != 'true'
-        name: Build DEB Package Ubuntu Noble
-        id: deb_build_noble
-        uses: cnangel/build-deb-action@master
-        with:
-          before_build_hook: |
-            dch --maintmaint --newversion ${{ env.version_id }}-1 "version ${{ env.version_id }}"
-            dch --maintmaint --release ""
-          buildpackage_opts: --build=binary
-          extra_build_deps: libconfig-dev libextutils-pkgconfig-perl
-          is_output_all_files: false
-
-      - if: steps.deb_cache_restore.outputs.cache-hit != 'true'
-        name: Move DEB to distro subdir
-        run: |
-          sudo chown -R $(id -u):$(id -g) ${{ env.deb_path }}/
-          mkdir -p ${{ env.deb_path }}/noble
-          mv ${{ env.deb_path }}/*.deb ${{ env.deb_path }}/noble/
-          for f in ${{ env.deb_path }}/noble/*.deb; do mv "$f" "${{ env.deb_path }}/noble/noble-$(basename "$f")"; done
-
-      - if: steps.deb_cache_restore.outputs.cache-hit != 'true'
-        name: Save DEB Cache Ubuntu Noble
-        id: deb_cache_save
-        uses: actions/cache/save@v5
-        with:
-          path: |
-            ${{ env.deb_path }}/noble
-          key: ${{ steps.deb_cache_restore.outputs.cache-primary-key }}
-
-      - name: Install JQ and JO
-        run: |
-          sudo apt update
-          sudo apt install -y jq jo
-
-      - name: Set Output Info
-        id: output_info
-        run: |
-          export PATH=~/.local/bin:$PATH
-          echo "deb_packages=$(find ${{ env.deb_path }}/noble -name '*.deb' 2>/dev/null | jo -a | jq -r 'join(",")')" >> $GITHUB_OUTPUT
-
-  rpm-build-el7:
-    name: Create el7 Release
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    needs: [basic-build]
     outputs:
       rpm_packages: ${{ steps.output_info.outputs.rpm_packages }}
     env:
-      our_date: ${{ needs.basic-build.outputs.our_date }}
-      git_hash: ${{ needs.basic-build.outputs.git_hash }}
       version_id: ${{ needs.basic-build.outputs.version_id }}
       package_name: ${{ needs.basic-build.outputs.package_name }}
       cc_files_hash_id: ${{ needs.basic-build.outputs.cc_files_hash_id }}
-      deb_path: ${{ needs.basic-build.outputs.deb_path }}
-      rpm_path: ${{ needs.basic-build.outputs.rpm_path }}
-
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v6
-      - name: Before Build Hook
-        run: |
-          sed -i 's/^Version:.*/Version:        ${{ env.version_id }}/' "${{ env.package_name }}.spec"
-
-      - name: Restore RPM Cache
-        id: rpm_cache_restore
-        uses: actions/cache/restore@v5
-        with:
-          path: ${{ env.rpm_path }}
-          key: ${{ runner.os }}-${{ env.package_name }}-${{ env.version_id }}-${{ env.cc_files_hash_id }}-${{ github.job }}
-
-      - if: steps.rpm_cache_restore.outputs.cache-hit != 'true'
-        name: Build RPM Package
-        id: rpm_build
-        uses: cnangel/build-rpm-action@master
-        with:
-          docker_image: cnangel/el7
-
-      - if: steps.rpm_cache_restore.outputs.cache-hit != 'true'
-        name: Save RPM Cache
-        id: rpm_cache_save
-        uses: actions/cache/save@v5
-        with:
-          path: |
-            ${{ env.rpm_path }}
-          key: ${{ steps.rpm_cache_restore.outputs.cache-primary-key }}
-
-      - name: Install JQ and JO
-        run: |
-          sudo apt update
-          sudo apt install -y jq jo
-
-      - name: Set Output Info
-        id: output_info
-        run: |
-          export PATH=~/.local/bin:$PATH
-          echo "rpm_packages=$(find ${{ env.rpm_path }} -name '*.rpm' 2>/dev/null | jo -a | jq -r 'join(",")')" >> $GITHUB_OUTPUT
-
-  rpm-build-el8:
-    name: Create el8 Release
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    needs: [basic-build]
-    outputs:
-      rpm_packages: ${{ steps.output_info.outputs.rpm_packages }}
-    env:
-      our_date: ${{ needs.basic-build.outputs.our_date }}
-      git_hash: ${{ needs.basic-build.outputs.git_hash }}
-      version_id: ${{ needs.basic-build.outputs.version_id }}
-      package_name: ${{ needs.basic-build.outputs.package_name }}
-      cc_files_hash_id: ${{ needs.basic-build.outputs.cc_files_hash_id }}
-      deb_path: ${{ needs.basic-build.outputs.deb_path }}
-      rpm_path: ${{ needs.basic-build.outputs.rpm_path }}
-
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v6
-      - name: Before Build Hook
-        run: |
-          sed -i 's/^Version:.*/Version:        ${{ env.version_id }}/' "${{ env.package_name }}.spec"
-
-      - name: Restore RPM Cache
-        id: rpm_cache_restore
-        uses: actions/cache/restore@v5
-        with:
-          path: ${{ env.rpm_path }}
-          key: ${{ runner.os }}-${{ env.package_name }}-${{ env.version_id }}-${{ env.cc_files_hash_id }}-${{ github.job }}
-
-      - if: steps.rpm_cache_restore.outputs.cache-hit != 'true'
-        name: Build RPM Package
-        id: rpm_build
-        uses: cnangel/build-rpm-action@master
-        with:
-          docker_image: cnangel/el8
-          dnf_opts: --enablerepo=powertools
-          extra_build_deps: libconfig-devel perl-devel perl-generators perl-ExtUtils-MakeMaker perl-ExtUtils-PkgConfig perl-Test-Deep perl-Test-Exception perl-Test-Warn
-
-      - if: steps.rpm_cache_restore.outputs.cache-hit != 'true'
-        name: Save RPM Cache
-        id: rpm_cache_save
-        uses: actions/cache/save@v5
-        with:
-          path: |
-            ${{ env.rpm_path }}
-          key: ${{ steps.rpm_cache_restore.outputs.cache-primary-key }}
-
-      - name: Install JQ and JO
-        run: |
-          sudo apt update
-          sudo apt install -y jq jo
-
-      - name: Set Output Info
-        id: output_info
-        run: |
-          export PATH=~/.local/bin:$PATH
-          echo "rpm_packages=$(find ${{ env.rpm_path }} -name '*.rpm' 2>/dev/null | jo -a | jq -r 'join(",")')" >> $GITHUB_OUTPUT
-
-  rpm-build-el9:
-    name: Create el9 Release
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    needs: [basic-build]
-    outputs:
-      rpm_packages: ${{ steps.output_info.outputs.rpm_packages }}
-    env:
-      our_date: ${{ needs.basic-build.outputs.our_date }}
-      git_hash: ${{ needs.basic-build.outputs.git_hash }}
-      version_id: ${{ needs.basic-build.outputs.version_id }}
-      package_name: ${{ needs.basic-build.outputs.package_name }}
-      cc_files_hash_id: ${{ needs.basic-build.outputs.cc_files_hash_id }}
-      deb_path: ${{ needs.basic-build.outputs.deb_path }}
-      rpm_path: ${{ needs.basic-build.outputs.rpm_path }}
-
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v6
-      - name: Before Build Hook
-        run: |
-          sed -i 's/^Version:.*/Version:        ${{ env.version_id }}/' "${{ env.package_name }}.spec"
-
-      - name: Restore RPM Cache
-        id: rpm_cache_restore
-        uses: actions/cache/restore@v5
-        with:
-          path: ${{ env.rpm_path }}
-          key: ${{ runner.os }}-${{ env.package_name }}-${{ env.version_id }}-${{ env.cc_files_hash_id }}-${{ github.job }}
-
-      - if: steps.rpm_cache_restore.outputs.cache-hit != 'true'
-        name: Build RPM Package
-        id: rpm_build
-        uses: cnangel/build-rpm-action@master
-        with:
-          docker_image: cnangel/el9
-          dnf_opts: --enablerepo=crb
-          extra_build_deps: libconfig-devel perl-devel perl-generators perl-ExtUtils-MakeMaker perl-ExtUtils-PkgConfig perl-Test-Deep perl-Test-Exception perl-Test-Warn
-
-      - if: steps.rpm_cache_restore.outputs.cache-hit != 'true'
-        name: Save RPM Cache
-        id: rpm_cache_save
-        uses: actions/cache/save@v5
-        with:
-          path: |
-            ${{ env.rpm_path }}
-          key: ${{ steps.rpm_cache_restore.outputs.cache-primary-key }}
-
-      - name: Install JQ and JO
-        run: |
-          sudo apt update
-          sudo apt install -y jq jo
-
-      - name: Set Output Info
-        id: output_info
-        run: |
-          export PATH=~/.local/bin:$PATH
-          echo "rpm_packages=$(find ${{ env.rpm_path }} -name '*.rpm' 2>/dev/null | jo -a | jq -r 'join(",")')" >> $GITHUB_OUTPUT
-
-  rpm-build-el10-amd64:
-    name: Create el10 amd64 Release
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    needs: [basic-build]
-    outputs:
-      rpm_packages: ${{ steps.output_info.outputs.rpm_packages }}
-    env:
-      our_date: ${{ needs.basic-build.outputs.our_date }}
-      git_hash: ${{ needs.basic-build.outputs.git_hash }}
-      version_id: ${{ needs.basic-build.outputs.version_id }}
-      package_name: ${{ needs.basic-build.outputs.package_name }}
-      cc_files_hash_id: ${{ needs.basic-build.outputs.cc_files_hash_id }}
-      deb_path: ${{ needs.basic-build.outputs.deb_path }}
-      rpm_path: ${{ needs.basic-build.outputs.rpm_path }}
-
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v6
-      - name: Before Build Hook
-        run: |
-          sed -i 's/^Version:.*/Version:        ${{ env.version_id }}/' "${{ env.package_name }}.spec"
-
-      - name: Restore RPM Cache
-        id: rpm_cache_restore
-        uses: actions/cache/restore@v5
-        with:
-          path: ${{ env.rpm_path }}
-          key: ${{ runner.os }}-${{ env.package_name }}-${{ env.version_id }}-${{ env.cc_files_hash_id }}-${{ github.job }}
-
-      - if: steps.rpm_cache_restore.outputs.cache-hit != 'true'
-        name: Build RPM Package
-        id: rpm_build
-        uses: cnangel/build-rpm-action@master
-        with:
-          docker_image: quay.io/centos/centos:stream10-minimal
-          dnf_opts: --enablerepo=crb
-          additional_repos: '["https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm"]'
-          extra_build_deps: rpm-build libconfig-devel perl-devel perl-generators perl-ExtUtils-MakeMaker perl-ExtUtils-PkgConfig perl-Test-Deep perl-Test-Exception perl-Test-Warn
-
-      - if: steps.rpm_cache_restore.outputs.cache-hit != 'true'
-        name: Save RPM Cache
-        id: rpm_cache_save
-        uses: actions/cache/save@v5
-        with:
-          path: |
-            ${{ env.rpm_path }}
-          key: ${{ steps.rpm_cache_restore.outputs.cache-primary-key }}
-
-      - name: Install JQ and JO
-        run: |
-          sudo apt update
-          sudo apt install -y jq jo
-
-      - name: Set Output Info
-        id: output_info
-        run: |
-          export PATH=~/.local/bin:$PATH
-          echo "rpm_packages=$(find ${{ env.rpm_path }} -name '*.rpm' 2>/dev/null | jo -a | jq -r 'join(",")')" >> $GITHUB_OUTPUT
-
-  rpm-build-el10-arm64:
-    name: Create el10 arm64 Release
-    runs-on: ubuntu-24.04-arm
-    continue-on-error: true
-    needs: [basic-build]
-    outputs:
-      rpm_packages: ${{ steps.output_info.outputs.rpm_packages }}
-    env:
-      our_date: ${{ needs.basic-build.outputs.our_date }}
-      git_hash: ${{ needs.basic-build.outputs.git_hash }}
-      version_id: ${{ needs.basic-build.outputs.version_id }}
-      package_name: ${{ needs.basic-build.outputs.package_name }}
-      cc_files_hash_id: ${{ needs.basic-build.outputs.cc_files_hash_id }}
-      deb_path: ${{ needs.basic-build.outputs.deb_path }}
       rpm_path: ${{ needs.basic-build.outputs.rpm_path }}
 
     steps:
@@ -572,17 +245,17 @@ jobs:
         uses: actions/cache/restore@v5
         with:
           path: ${{ env.rpm_path }}
-          key: ${{ runner.os }}-${{ env.package_name }}-${{ env.version_id }}-${{ env.cc_files_hash_id }}-${{ github.job }}
+          key: ${{ runner.os }}-${{ env.package_name }}-${{ env.version_id }}-${{ env.cc_files_hash_id }}-rpm-${{ matrix.distro }}
 
       - if: steps.rpm_cache_restore.outputs.cache-hit != 'true'
         name: Build RPM Package
         id: rpm_build
         uses: cnangel/build-rpm-action@master
         with:
-          docker_image: quay.io/centos/centos:stream10-minimal
-          dnf_opts: --enablerepo=crb
-          additional_repos: '["https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm"]'
-          extra_build_deps: rpm-build libconfig-devel perl-devel perl-generators perl-ExtUtils-MakeMaker perl-ExtUtils-PkgConfig perl-Test-Deep perl-Test-Exception perl-Test-Warn
+          docker_image: ${{ matrix.docker_image }}
+          dnf_opts: ${{ matrix.dnf_opts }}
+          additional_repos: ${{ matrix.additional_repos }}
+          extra_build_deps: ${{ matrix.extra_build_deps }}
 
       - if: steps.rpm_cache_restore.outputs.cache-hit != 'true'
         name: Save RPM Cache
@@ -593,252 +266,110 @@ jobs:
             ${{ env.rpm_path }}
           key: ${{ steps.rpm_cache_restore.outputs.cache-primary-key }}
 
-      - name: Install JQ and JO
-        run: |
-          sudo apt update
-          sudo apt install -y jq jo
-
       - name: Set Output Info
         id: output_info
         run: |
-          export PATH=~/.local/bin:$PATH
+          sudo apt-get install -y jq jo
           echo "rpm_packages=$(find ${{ env.rpm_path }} -name '*.rpm' 2>/dev/null | jo -a | jq -r 'join(",")')" >> $GITHUB_OUTPUT
-
-  rpm-build-fc38:
-    name: Create fc38 Release
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    needs: [basic-build]
-    outputs:
-      rpm_packages: ${{ steps.output_info.outputs.rpm_packages }}
-    env:
-      our_date: ${{ needs.basic-build.outputs.our_date }}
-      git_hash: ${{ needs.basic-build.outputs.git_hash }}
-      version_id: ${{ needs.basic-build.outputs.version_id }}
-      package_name: ${{ needs.basic-build.outputs.package_name }}
-      cc_files_hash_id: ${{ needs.basic-build.outputs.cc_files_hash_id }}
-      deb_path: ${{ needs.basic-build.outputs.deb_path }}
-      rpm_path: ${{ needs.basic-build.outputs.rpm_path }}
-
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v6
-      - name: Before Build Hook
-        run: |
-          sed -i 's/^Version:.*/Version:        ${{ env.version_id }}/' "${{ env.package_name }}.spec"
-
-      - name: Restore RPM Cache
-        id: rpm_cache_restore
-        uses: actions/cache/restore@v5
-        with:
-          path: ${{ env.rpm_path }}
-          key: ${{ runner.os }}-${{ env.package_name }}-${{ env.version_id }}-${{ env.cc_files_hash_id }}-${{ github.job }}
-
-      - if: steps.rpm_cache_restore.outputs.cache-hit != 'true'
-        name: Build RPM Package
-        id: rpm_build
-        uses: cnangel/build-rpm-action@master
-        with:
-          docker_image: cnangel/fc38
-          extra_build_deps: libconfig-devel perl-devel perl-generators perl-ExtUtils-MakeMaker perl-ExtUtils-PkgConfig perl-Test-Deep perl-Test-Exception perl-Test-Warn
-
-      - if: steps.rpm_cache_restore.outputs.cache-hit != 'true'
-        name: Save RPM Cache
-        id: rpm_cache_save
-        uses: actions/cache/save@v5
-        with:
-          path: |
-            ${{ env.rpm_path }}
-          key: ${{ steps.rpm_cache_restore.outputs.cache-primary-key }}
-
-      - name: Install JQ and JO
-        run: |
-          sudo apt update
-          sudo apt install -y jq jo
-
-      - name: Set Output Info
-        id: output_info
-        run: |
-          export PATH=~/.local/bin:$PATH
-          echo "rpm_packages=$(find ${{ env.rpm_path }} -name '*.rpm' 2>/dev/null | jo -a | jq -r 'join(",")')" >> $GITHUB_OUTPUT
-
-
-  rpm-build-fc44:
-    name: Create fc44 Release
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    needs: [basic-build]
-    outputs:
-      rpm_packages: ${{ steps.output_info.outputs.rpm_packages }}
-    env:
-      our_date: ${{ needs.basic-build.outputs.our_date }}
-      git_hash: ${{ needs.basic-build.outputs.git_hash }}
-      version_id: ${{ needs.basic-build.outputs.version_id }}
-      package_name: ${{ needs.basic-build.outputs.package_name }}
-      cc_files_hash_id: ${{ needs.basic-build.outputs.cc_files_hash_id }}
-      deb_path: ${{ needs.basic-build.outputs.deb_path }}
-      rpm_path: ${{ needs.basic-build.outputs.rpm_path }}
-
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v6
-      - name: Before Build Hook
-        run: |
-          sed -i 's/^Version:.*/Version:        ${{ env.version_id }}/' "${{ env.package_name }}.spec"
-
-      - name: Restore RPM Cache
-        id: rpm_cache_restore
-        uses: actions/cache/restore@v5
-        with:
-          path: ${{ env.rpm_path }}
-          key: ${{ runner.os }}-${{ env.package_name }}-${{ env.version_id }}-${{ env.cc_files_hash_id }}-${{ github.job }}
-
-      - if: steps.rpm_cache_restore.outputs.cache-hit != 'true'
-        name: Build RPM Package
-        id: rpm_build
-        uses: cnangel/build-rpm-action@master
-        with:
-          docker_image: fedora:44
-          extra_build_deps: rpm-build rpmdevtools yum-utils gcc-c++ libconfig-devel perl-devel perl-generators perl-ExtUtils-MakeMaker perl-ExtUtils-PkgConfig perl-Test-Deep perl-Test-Exception perl-Test-Warn
-
-      - if: steps.rpm_cache_restore.outputs.cache-hit != 'true'
-        name: Save RPM Cache
-        id: rpm_cache_save
-        uses: actions/cache/save@v5
-        with:
-          path: |
-            ${{ env.rpm_path }}
-          key: ${{ steps.rpm_cache_restore.outputs.cache-primary-key }}
-
-      - name: Install JQ and JO
-        run: |
-          sudo apt update
-          sudo apt install -y jq jo
-
-      - name: Set Output Info
-        id: output_info
-        run: |
-          export PATH=~/.local/bin:$PATH
-          echo "rpm_packages=$(find ${{ env.rpm_path }} -name '*.rpm' 2>/dev/null | jo -a | jq -r 'join(",")')" >> $GITHUB_OUTPUT
-
 
   publish-release:
     name: Publish Release
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    needs: [deb-build-focal, deb-build-resolute, deb-build-jammy, deb-build-noble, rpm-build-el7, rpm-build-el8, rpm-build-el9, rpm-build-el10-amd64, rpm-build-el10-arm64, rpm-build-fc38, rpm-build-fc44, basic-build]
+    needs: [deb-build, deb-build-focal, rpm-build, basic-build]
     env:
-      our_date: ${{ needs.basic-build.outputs.our_date }}
-      git_hash: ${{ needs.basic-build.outputs.git_hash }}
       version_id: ${{ needs.basic-build.outputs.version_id }}
-      package_name: ${{ needs.basic-build.outputs.package_name }}
-      cc_files_hash_id: ${{ needs.basic-build.outputs.cc_files_hash_id }}
       deb_path: ${{ needs.basic-build.outputs.deb_path }}
       rpm_path: ${{ needs.basic-build.outputs.rpm_path }}
-      deb_focal_packages: ${{ needs.deb-build-focal.outputs.deb_packages }}
-      deb_resolute_packages: ${{ needs.deb-build-resolute.outputs.deb_packages }}
-      deb_jammy_packages: ${{ needs.deb-build-jammy.outputs.deb_packages }}
-      deb_noble_packages: ${{ needs.deb-build-noble.outputs.deb_packages }}
-      el7_rpm_packages: ${{ needs.rpm-build-el7.outputs.rpm_packages }}
-      el8_rpm_packages: ${{ needs.rpm-build-el8.outputs.rpm_packages }}
-      el9_rpm_packages: ${{ needs.rpm-build-el9.outputs.rpm_packages }}
-      fc38_rpm_packages: ${{ needs.rpm-build-fc38.outputs.rpm_packages }}
-      el10_amd64_rpm_packages: ${{ needs.rpm-build-el10-amd64.outputs.rpm_packages }}
-      el10_arm64_rpm_packages: ${{ needs.rpm-build-el10-arm64.outputs.rpm_packages }}
-      fc44_rpm_packages: ${{ needs.rpm-build-fc44.outputs.rpm_packages }}
-
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v6
 
-      - name: Restore DEB Cache Ubuntu Focal
+      - name: Restore DEB Cache Focal
         uses: actions/cache/restore@v5
         with:
           path: |
             ${{ env.deb_path }}/focal
-          key: ${{ runner.os }}-${{ env.package_name }}-${{ env.version_id }}-${{ env.cc_files_hash_id }}-deb-build-focal
-      - name: Restore DEB Cache Ubuntu Resolute
+          key: Linux-${{ needs.basic-build.outputs.package_name }}-${{ env.version_id }}-${{ needs.basic-build.outputs.cc_files_hash_id }}-deb-focal
+          fail-on-cache-miss: true
+      - name: Restore DEB Cache Resolute
         uses: actions/cache/restore@v5
         with:
           path: |
             ${{ env.deb_path }}/resolute
-          key: ${{ runner.os }}-${{ env.package_name }}-${{ env.version_id }}-${{ env.cc_files_hash_id }}-deb-build-resolute
-      - name: Restore DEB Cache Ubuntu Jammy
+          key: Linux-${{ needs.basic-build.outputs.package_name }}-${{ env.version_id }}-${{ needs.basic-build.outputs.cc_files_hash_id }}-deb-resolute
+          fail-on-cache-miss: true
+      - name: Restore DEB Cache Jammy
         uses: actions/cache/restore@v5
         with:
           path: |
             ${{ env.deb_path }}/jammy
-          key: ${{ runner.os }}-${{ env.package_name }}-${{ env.version_id }}-${{ env.cc_files_hash_id }}-deb-build-jammy
-      - name: Restore DEB Cache Ubuntu Noble
+          key: Linux-${{ needs.basic-build.outputs.package_name }}-${{ env.version_id }}-${{ needs.basic-build.outputs.cc_files_hash_id }}-deb-jammy
+          fail-on-cache-miss: true
+      - name: Restore DEB Cache Noble
         uses: actions/cache/restore@v5
         with:
           path: |
             ${{ env.deb_path }}/noble
-          key: ${{ runner.os }}-${{ env.package_name }}-${{ env.version_id }}-${{ env.cc_files_hash_id }}-deb-build-noble
-      - name: Restore RPM Cache for el7
+          key: Linux-${{ needs.basic-build.outputs.package_name }}-${{ env.version_id }}-${{ needs.basic-build.outputs.cc_files_hash_id }}-deb-noble
+          fail-on-cache-miss: true
+
+      - name: Restore RPM Cache el7
         uses: actions/cache/restore@v5
         with:
-          path: |
-            ${{ env.rpm_path }}
-          key: ${{ runner.os }}-${{ env.package_name }}-${{ env.version_id }}-${{ env.cc_files_hash_id }}-rpm-build-el7
-      - name: Restore RPM Cache for el8
+          path: ${{ env.rpm_path }}
+          key: Linux-${{ needs.basic-build.outputs.package_name }}-${{ env.version_id }}-${{ needs.basic-build.outputs.cc_files_hash_id }}-rpm-el7
+          fail-on-cache-miss: true
+      - name: Restore RPM Cache el8
         uses: actions/cache/restore@v5
         with:
-          path: |
-            ${{ env.rpm_path }}
-          key: ${{ runner.os }}-${{ env.package_name }}-${{ env.version_id }}-${{ env.cc_files_hash_id }}-rpm-build-el8
-      - name: Restore RPM Cache for el9
+          path: ${{ env.rpm_path }}
+          key: Linux-${{ needs.basic-build.outputs.package_name }}-${{ env.version_id }}-${{ needs.basic-build.outputs.cc_files_hash_id }}-rpm-el8
+          fail-on-cache-miss: true
+      - name: Restore RPM Cache el9
         uses: actions/cache/restore@v5
         with:
-          path: |
-            ${{ env.rpm_path }}
-          key: ${{ runner.os }}-${{ env.package_name }}-${{ env.version_id }}-${{ env.cc_files_hash_id }}-rpm-build-el9
-      - name: Restore RPM Cache for fc38
+          path: ${{ env.rpm_path }}
+          key: Linux-${{ needs.basic-build.outputs.package_name }}-${{ env.version_id }}-${{ needs.basic-build.outputs.cc_files_hash_id }}-rpm-el9
+          fail-on-cache-miss: true
+      - name: Restore RPM Cache el10-amd64
         uses: actions/cache/restore@v5
         with:
-          path: |
-            ${{ env.rpm_path }}
-          key: ${{ runner.os }}-${{ env.package_name }}-${{ env.version_id }}-${{ env.cc_files_hash_id }}-rpm-build-fc38
-      - name: Restore RPM Cache for fc44
+          path: ${{ env.rpm_path }}
+          key: Linux-${{ needs.basic-build.outputs.package_name }}-${{ env.version_id }}-${{ needs.basic-build.outputs.cc_files_hash_id }}-rpm-el10-amd64
+          fail-on-cache-miss: true
+      - name: Restore RPM Cache el10-arm64
         uses: actions/cache/restore@v5
         with:
-          path: |
-            ${{ env.rpm_path }}
-          key: ${{ runner.os }}-${{ env.package_name }}-${{ env.version_id }}-${{ env.cc_files_hash_id }}-rpm-build-fc44
-      - name: Restore RPM Cache for el10 amd64
+          path: ${{ env.rpm_path }}
+          key: Linux-${{ needs.basic-build.outputs.package_name }}-${{ env.version_id }}-${{ needs.basic-build.outputs.cc_files_hash_id }}-rpm-el10-arm64
+          fail-on-cache-miss: true
+      - name: Restore RPM Cache fc38
         uses: actions/cache/restore@v5
         with:
-          path: |
-            ${{ env.rpm_path }}
-          key: ${{ runner.os }}-${{ env.package_name }}-${{ env.version_id }}-${{ env.cc_files_hash_id }}-rpm-build-el10-amd64
-      - name: Restore RPM Cache for el10 arm64
+          path: ${{ env.rpm_path }}
+          key: Linux-${{ needs.basic-build.outputs.package_name }}-${{ env.version_id }}-${{ needs.basic-build.outputs.cc_files_hash_id }}-rpm-fc38
+          fail-on-cache-miss: true
+      - name: Restore RPM Cache fc44
         uses: actions/cache/restore@v5
         with:
-          path: |
-            ${{ env.rpm_path }}
-          key: ${{ runner.os }}-${{ env.package_name }}-${{ env.version_id }}-${{ env.cc_files_hash_id }}-rpm-build-el10-arm64
+          path: ${{ env.rpm_path }}
+          key: Linux-${{ needs.basic-build.outputs.package_name }}-${{ env.version_id }}-${{ needs.basic-build.outputs.cc_files_hash_id }}-rpm-fc44
+          fail-on-cache-miss: true
 
       - name: Collect Release Assets
         id: collect_assets
         run: |
-          ASSETS="README.md"
-          for v in deb_focal_packages deb_resolute_packages deb_jammy_packages deb_noble_packages \
-                   el7_rpm_packages el8_rpm_packages el9_rpm_packages \
-                   el10_amd64_rpm_packages el10_arm64_rpm_packages \
-                   fc38_rpm_packages fc44_rpm_packages; do
-            val="${!v}"
-            if [ -n "$val" ]; then
-              # split comma-separated values
-              IFS=',' read -ra PKGS <<< "$val"
-              for p in "${PKGS[@]}"; do
-                p=$(echo "$p" | xargs)  # trim whitespace
-                if [ -n "$p" ]; then
-                  ASSETS="$ASSETS"$'\n'"$p"
-                fi
-              done
-            fi
+          ASSETS=""
+          for d in focal resolute jammy noble; do
+            for f in ${{ env.deb_path }}/$d/*.deb; do
+              [ -f "$f" ] && ASSETS="$ASSETS"$'\n'"$f"
+            done
+          done
+          for f in ${{ env.rpm_path }}/**/*.rpm; do
+            [ -f "$f" ] && ASSETS="$ASSETS"$'\n'"$f"
           done
           echo "ASSETS<<EOF" >> $GITHUB_OUTPUT
           echo "$ASSETS" >> $GITHUB_OUTPUT
