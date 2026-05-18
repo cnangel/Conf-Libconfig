@@ -1,3 +1,13 @@
+perl-libconfig (1.1.1-1) unstable; urgency=low
+
+  * Fix version guards for multi-version libconfig compatibility (1.1.x ~ 1.8.x)
+  * Fix config_setting_lookup_int type for pre-1.4 (long* vs int*)
+  * Fix config_setting_source_file, config_set_default_format, config_setting_lookup guards
+  * Fix config_set_hook to use config_setting_set_hook
+  * Add version guards for error_type/error_file (1.4+)
+
+ -- Cnangel <cnangel@gmail.com>  Sat, 17 May 2026 10:00:00 +0800
+
 perl-libconfig (1.1.0-1) unstable; urgency=low
 
   * Upgrade to support libconfig 1.8.x API

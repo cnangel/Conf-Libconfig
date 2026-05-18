@@ -42,6 +42,7 @@ int get_general_array(config_setting_t *, SV **);
 int get_general_list(config_setting_t *, SV **);
 int get_general_object(config_setting_t *, SV **);
 int get_general_value(Conf__Libconfig, const char *, SV **);
+int populate_scalar_sv(config_setting_t *, SV **);
 
 int set_boolean_value(Conf__Libconfig, const char *, SV *);
 int set_general_value(Conf__Libconfig, const char *, SV *);
@@ -53,6 +54,7 @@ set_scalar(config_setting_t *settings, SV *value, int valueType, int *status)
 {
     if (settings == NULL) {
         Perl_warn(aTHX_ "[WARN] Settings is null in set_scalar!");
+        return;
     }
     switch (valueType) {
         case CONFIG_TYPE_INT:
@@ -81,6 +83,7 @@ set_scalar_elem(config_setting_t *settings, int idx, SV *value, int valueType, i
     config_setting_t *settings_item;
     if (settings == NULL) {
         Perl_warn(aTHX_ "[WARN] Settings is null in set_scalar_elem!");
+        return;
     }
     switch (valueType) {
         case CONFIG_TYPE_INT:
@@ -665,6 +668,35 @@ int set_boolean_value(Conf__Libconfig conf, const char *path, SV *sv)
 
 /* }}} */
 
+/* {{{ get value - shared helper */
+int populate_scalar_sv(config_setting_t *setting, SV **sv_ptr)
+{
+    switch (config_setting_type(setting)) {
+        case CONFIG_TYPE_BOOL:
+            *sv_ptr = newSViv(config_setting_get_bool(setting));
+            return LIBCONFIG_OK;
+        case CONFIG_TYPE_INT:
+            *sv_ptr = newSViv(config_setting_get_int(setting));
+            return LIBCONFIG_OK;
+        case CONFIG_TYPE_INT64:
+            *sv_ptr = newSViv(setting->value.llval);
+            return LIBCONFIG_OK;
+        case CONFIG_TYPE_FLOAT:
+            *sv_ptr = newSVnv(config_setting_get_float(setting));
+            return LIBCONFIG_OK;
+        case CONFIG_TYPE_STRING:
+            {
+                const char *val = config_setting_get_string(setting);
+                *sv_ptr = newSVpvn(val, strlen(val));
+                return LIBCONFIG_OK;
+            }
+        default:
+            *sv_ptr = NULL;
+            return LIBCONFIG_ERR_COMMON;
+    }
+}
+/* }}} */
+
 /* {{{ get value */
 int
 get_general_value(Conf__Libconfig conf, const char *path, SV **svref)
@@ -731,40 +763,13 @@ int get_general_array(config_setting_t *setting, SV **sv_pptr)
     for (; i < arr_len; i++)
     {
         config_setting_t *child_setting = config_setting_get_elem(setting, i);
-        switch (config_setting_type(child_setting))
-        {
-            case CONFIG_TYPE_BOOL:
-                {
-                    av_push(child_av_ptr, newSViv(config_setting_get_bool(child_setting)));
-                    break;
-                }
-            case CONFIG_TYPE_INT:
-                {
-                    av_push(child_av_ptr, newSViv(config_setting_get_int(child_setting)));
-                    break;
-                }
-            case CONFIG_TYPE_INT64:
-                {
-                    av_push(child_av_ptr, newSViv(child_setting->value.llval));
-                    break;
-                }
-            case CONFIG_TYPE_FLOAT:
-                {
-                    av_push(child_av_ptr, newSVnv(config_setting_get_float(child_setting)));
-                    break;
-                }
-            case CONFIG_TYPE_STRING:
-                {
-                    const char *child_val = config_setting_get_string(child_setting);
-                    av_push(child_av_ptr, newSVpvn(child_val, strlen(child_val)));
-                    break;
-                }
-            default:
-                {
-                    Perl_warn(aTHX_ "[WARN] Array have not this type: %d", config_setting_type(setting));
-                    *sv_pptr = newRV_inc((SV *)child_av_ptr);
-                    return LIBCONFIG_ERR_COMMON;
-                }
+        SV *sv;
+        if (populate_scalar_sv(child_setting, &sv) == LIBCONFIG_OK)
+            av_push(child_av_ptr, sv);
+        else {
+            Perl_warn(aTHX_ "[WARN] Array have not this type: %d", config_setting_type(child_setting));
+            *sv_pptr = newRV_inc((SV *)child_av_ptr);
+            return LIBCONFIG_ERR_COMMON;
         }
     }
     *sv_pptr = newRV_inc((SV *)child_av_ptr);
@@ -784,70 +789,32 @@ int get_general_list(config_setting_t *setting, SV **sv_pptr)
     for (; i < list_size; i++)
     {
         config_setting_t *child_setting = config_setting_get_elem(setting, i);
-        switch (config_setting_type(child_setting))
+        int child_type = config_setting_type(child_setting);
+        SV *sv;
+        if (populate_scalar_sv(child_setting, &sv) == LIBCONFIG_OK)
         {
-            case CONFIG_TYPE_BOOL:
-                {
-                    av_push(child_av_ptr, newSViv(config_setting_get_bool(child_setting)));
-                    break;
-                }
-            case CONFIG_TYPE_INT:
-                {
-                    av_push(child_av_ptr, newSViv(config_setting_get_int(child_setting)));
-                    break;
-                }
-            case CONFIG_TYPE_INT64:
-                {
-                    av_push(child_av_ptr, newSViv(child_setting->value.llval));
-                    break;
-                }
-            case CONFIG_TYPE_FLOAT:
-                {
-                    av_push(child_av_ptr, newSVnv(config_setting_get_float(child_setting)));
-                    break;
-                }
-            case CONFIG_TYPE_STRING:
-                {
-                    const char *child_val = config_setting_get_string(child_setting);
-                    av_push(child_av_ptr, newSVpvn(child_val, strlen(child_val)));
-                    break;
-                }
-            case CONFIG_TYPE_ARRAY:
-                {
-                    SV *sv;
-                    if (get_general_array(child_setting, &sv) == LIBCONFIG_OK)
-                    {
-                        av_push(child_av_ptr, sv);
-                    }
-                    // ignore error
-                    break;
-                }
-            case CONFIG_TYPE_LIST:
-                {
-                    SV *sv;
-                    if (get_general_list(child_setting, &sv) == LIBCONFIG_OK)
-                    {
-                        av_push(child_av_ptr, sv);
-                    }
-                    // ignore error
-                    break;
-                }
-            case CONFIG_TYPE_GROUP:
-                {
-                    SV *sv;
-                    if (get_general_object(child_setting, &sv) == LIBCONFIG_OK)
-                    {
-                        av_push(child_av_ptr, sv);
-                    }
-                    // ignore error
-                    break;
-                }
-            default:
-                {
-                    Perl_warn(aTHX_ "[WARN] List have not this type: %d in [%d]", config_setting_type(setting), i);
-                    *sv_pptr = newRV_inc((SV *)child_av_ptr);
-                    return LIBCONFIG_ERR_COMMON;
-                }
+            av_push(child_av_ptr, sv);
+        }
+        else if (child_type == CONFIG_TYPE_ARRAY)
+        {
+            if (get_general_array(child_setting, &sv) == LIBCONFIG_OK)
+                av_push(child_av_ptr, sv);
+        }
+        else if (child_type == CONFIG_TYPE_LIST)
+        {
+            if (get_general_list(child_setting, &sv) == LIBCONFIG_OK)
+                av_push(child_av_ptr, sv);
+        }
+        else if (child_type == CONFIG_TYPE_GROUP)
+        {
+            if (get_general_object(child_setting, &sv) == LIBCONFIG_OK)
+                av_push(child_av_ptr, sv);
+        }
+        else
+        {
+            Perl_warn(aTHX_ "[WARN] List have not this type: %d in [%d]", config_setting_type(setting), i);
+            *sv_pptr = newRV_inc((SV *)child_av_ptr);
+            return LIBCONFIG_ERR_COMMON;
         }
     }
     *sv_pptr = newRV_inc((SV *)child_av_ptr);
@@ -867,70 +834,33 @@ int get_general_object(config_setting_t *setting, SV **sv_pptr)
     for (; i < obj_cnt; i++)
     {
         config_setting_t *child_setting = config_setting_get_elem(setting, i);
-        switch (config_setting_type(child_setting))
+        int child_type = config_setting_type(child_setting);
+        const char *name = child_setting->name;
+        SV *sv;
+        if (populate_scalar_sv(child_setting, &sv) == LIBCONFIG_OK)
         {
-            case CONFIG_TYPE_BOOL:
-                {
-                    hv_store(child_hv_ptr, child_setting->name, strlen(child_setting->name), newSViv(config_setting_get_bool(child_setting)), 0);
-                    break;
-                }
-            case CONFIG_TYPE_INT:
-                {
-                    hv_store(child_hv_ptr, child_setting->name, strlen(child_setting->name), newSViv(config_setting_get_int(child_setting)), 0);
-                    break;
-                }
-            case CONFIG_TYPE_INT64:
-                {
-                    hv_store(child_hv_ptr, child_setting->name, strlen(child_setting->name), newSViv(child_setting->value.llval), 0);
-                    break;
-                }
-            case CONFIG_TYPE_FLOAT:
-                {
-                    hv_store(child_hv_ptr, child_setting->name, strlen(child_setting->name), newSVnv(config_setting_get_float(child_setting)), 0);
-                    break;
-                }
-            case CONFIG_TYPE_STRING:
-                {
-                    const char *child_val = config_setting_get_string(child_setting);
-                    hv_store(child_hv_ptr, child_setting->name, strlen(child_setting->name), newSVpvn(child_val, strlen(child_val)), 0);
-                    break;
-                }
-            case CONFIG_TYPE_ARRAY:
-                {
-                    SV *sv;
-                    if (get_general_array(child_setting, &sv) == LIBCONFIG_OK)
-                    {
-                        hv_store(child_hv_ptr, child_setting->name, strlen(child_setting->name), sv, 0);
-                    }
-                    // ignore error
-                    break;
-                }
-            case CONFIG_TYPE_LIST:
-                {
-                    SV *sv;
-                    if (get_general_list(child_setting, &sv) == LIBCONFIG_OK)
-                    {
-                        hv_store(child_hv_ptr, child_setting->name, strlen(child_setting->name), sv, 0);
-                    }
-                    // ignore error
-                    break;
-                }
-            case CONFIG_TYPE_GROUP:
-                {
-                    SV *sv;
-                    if (get_general_object(child_setting, &sv) == LIBCONFIG_OK)
-                    {
-                        hv_store(child_hv_ptr, child_setting->name, strlen(child_setting->name), sv, 0);
-                    }
-                    // ignore error
-                    break;
-                }
-            default:
-                {
-                    Perl_warn(aTHX_ "[WARN] Object have not this type: %d", config_setting_type(setting));
-                    *sv_pptr = newRV_inc((SV *)child_hv_ptr);
-                    return LIBCONFIG_ERR_COMMON;
-                }
+            hv_store(child_hv_ptr, name, strlen(name), sv, 0);
+        }
+        else if (child_type == CONFIG_TYPE_ARRAY)
+        {
+            if (get_general_array(child_setting, &sv) == LIBCONFIG_OK)
+                hv_store(child_hv_ptr, name, strlen(name), sv, 0);
+        }
+        else if (child_type == CONFIG_TYPE_LIST)
+        {
+            if (get_general_list(child_setting, &sv) == LIBCONFIG_OK)
+                hv_store(child_hv_ptr, name, strlen(name), sv, 0);
+        }
+        else if (child_type == CONFIG_TYPE_GROUP)
+        {
+            if (get_general_object(child_setting, &sv) == LIBCONFIG_OK)
+                hv_store(child_hv_ptr, name, strlen(name), sv, 0);
+        }
+        else
+        {
+            Perl_warn(aTHX_ "[WARN] Object have not this type: %d", config_setting_type(setting));
+            *sv_pptr = newRV_inc((SV *)child_hv_ptr);
+            return LIBCONFIG_ERR_COMMON;
         }
     }
     *sv_pptr = newRV_inc((SV *)child_hv_ptr);
@@ -1492,7 +1422,11 @@ libconfig_delete_node(conf, path)
         char parentpath[256];
     CODE:
     {
-        key = strrchr(path, '.') + 1;
+        key = strrchr(path, '.');
+        if (!key) {
+            Perl_croak(aTHX_ "[ERROR] Path '%s' has no dot separator", path);
+        }
+        key++;
         sprintf(parentpath, "%.*s", (int)(strlen(path) - strlen(key) - 1), path);
         settings = config_lookup(conf, parentpath);
         if (!settings) {

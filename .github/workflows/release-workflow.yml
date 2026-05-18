@@ -252,82 +252,41 @@ jobs:
       version_id: ${{ needs.basic-build.outputs.version_id }}
       deb_path: ${{ needs.basic-build.outputs.deb_path }}
       rpm_path: ${{ needs.basic-build.outputs.rpm_path }}
+      cache_prefix: Linux-${{ needs.basic-build.outputs.package_name }}-${{ needs.basic-build.outputs.version_id }}-${{ needs.basic-build.outputs.cc_files_hash_id }}
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v6
 
-      - name: Restore DEB Cache Focal
-        uses: actions/cache/restore@v5
-        with:
-          path: |
-            ${{ env.deb_path }}/focal
-          key: Linux-${{ needs.basic-build.outputs.package_name }}-${{ env.version_id }}-${{ needs.basic-build.outputs.cc_files_hash_id }}-deb-focal
-          fail-on-cache-miss: true
-      - name: Restore DEB Cache Resolute
-        uses: actions/cache/restore@v5
-        with:
-          path: |
-            ${{ env.deb_path }}/resolute
-          key: Linux-${{ needs.basic-build.outputs.package_name }}-${{ env.version_id }}-${{ needs.basic-build.outputs.cc_files_hash_id }}-deb-resolute
-          fail-on-cache-miss: true
-      - name: Restore DEB Cache Jammy
-        uses: actions/cache/restore@v5
-        with:
-          path: |
-            ${{ env.deb_path }}/jammy
-          key: Linux-${{ needs.basic-build.outputs.package_name }}-${{ env.version_id }}-${{ needs.basic-build.outputs.cc_files_hash_id }}-deb-jammy
-          fail-on-cache-miss: true
-      - name: Restore DEB Cache Noble
-        uses: actions/cache/restore@v5
-        with:
-          path: |
-            ${{ env.deb_path }}/noble
-          key: Linux-${{ needs.basic-build.outputs.package_name }}-${{ env.version_id }}-${{ needs.basic-build.outputs.cc_files_hash_id }}-deb-noble
-          fail-on-cache-miss: true
+      - name: Restore All Build Caches
+        run: |
+          set -euo pipefail
+          PREFIX="${{ env.cache_prefix }}"
 
-      - name: Restore RPM Cache el7
-        uses: actions/cache/restore@v5
-        with:
-          path: ${{ env.rpm_path }}
-          key: Linux-${{ needs.basic-build.outputs.package_name }}-${{ env.version_id }}-${{ needs.basic-build.outputs.cc_files_hash_id }}-rpm-el7
-          fail-on-cache-miss: true
-      - name: Restore RPM Cache el8
-        uses: actions/cache/restore@v5
-        with:
-          path: ${{ env.rpm_path }}
-          key: Linux-${{ needs.basic-build.outputs.package_name }}-${{ env.version_id }}-${{ needs.basic-build.outputs.cc_files_hash_id }}-rpm-el8
-          fail-on-cache-miss: true
-      - name: Restore RPM Cache el9
-        uses: actions/cache/restore@v5
-        with:
-          path: ${{ env.rpm_path }}
-          key: Linux-${{ needs.basic-build.outputs.package_name }}-${{ env.version_id }}-${{ needs.basic-build.outputs.cc_files_hash_id }}-rpm-el9
-          fail-on-cache-miss: true
-      - name: Restore RPM Cache el10-amd64
-        uses: actions/cache/restore@v5
-        with:
-          path: ${{ env.rpm_path }}
-          key: Linux-${{ needs.basic-build.outputs.package_name }}-${{ env.version_id }}-${{ needs.basic-build.outputs.cc_files_hash_id }}-rpm-el10-amd64
-          fail-on-cache-miss: true
-      - name: Restore RPM Cache el10-arm64
-        uses: actions/cache/restore@v5
-        with:
-          path: ${{ env.rpm_path }}
-          key: Linux-${{ needs.basic-build.outputs.package_name }}-${{ env.version_id }}-${{ needs.basic-build.outputs.cc_files_hash_id }}-rpm-el10-arm64
-          fail-on-cache-miss: true
-      - name: Restore RPM Cache fc38
-        uses: actions/cache/restore@v5
-        with:
-          path: ${{ env.rpm_path }}
-          key: Linux-${{ needs.basic-build.outputs.package_name }}-${{ env.version_id }}-${{ needs.basic-build.outputs.cc_files_hash_id }}-rpm-fc38
-          fail-on-cache-miss: true
-      - name: Restore RPM Cache fc44
-        uses: actions/cache/restore@v5
-        with:
-          path: ${{ env.rpm_path }}
-          key: Linux-${{ needs.basic-build.outputs.package_name }}-${{ env.version_id }}-${{ needs.basic-build.outputs.cc_files_hash_id }}-rpm-fc44
-          fail-on-cache-miss: true
+          restore_cache() {
+            local key="$1" target="$2"
+            local resp
+            resp=$(curl -sS -H "Authorization: Bearer ${ACTIONS_RUNTIME_TOKEN}" \
+              "${ACTIONS_CACHE_URL}_apis/artifactcache/cache?keys=${key}")
+            local loc
+            loc=$(echo "${resp}" | jq -r '.archiveLocation // empty')
+            if [ -z "${loc}" ]; then
+              echo "ERROR: cache not found: ${key}"
+              exit 1
+            fi
+            mkdir -p "${target}"
+            curl -sS -H "Authorization: Bearer ${ACTIONS_RUNTIME_TOKEN}" "${loc}" \
+              | tar -xz -C "${target}"
+          }
+
+          for d in focal resolute jammy noble; do
+            echo "Restoring DEB cache: ${d}"
+            restore_cache "${PREFIX}-deb-${d}" "${{ env.deb_path }}/${d}"
+          done
+          for d in el7 el8 el9 el10-amd64 el10-arm64 fc38 fc44; do
+            echo "Restoring RPM cache: ${d}"
+            restore_cache "${PREFIX}-rpm-${d}" "${{ env.rpm_path }}"
+          done
 
       - name: Collect Release Assets
         id: collect_assets
