@@ -15,6 +15,14 @@ if (eval { require ExtUtils::PkgConfig; 1 }) {
     }
 }
 
+if (eval { require Devel::CheckLib; 1 }) {
+    Devel::CheckLib->import;
+    check_lib_or_exit(
+        lib     => 'config',
+        header  => 'libconfig.h',
+    );
+}
+
 WriteMakefile(
     NAME          => 'Conf::Libconfig',
     VERSION_FROM  => 'lib/Conf/Libconfig.pm',
@@ -32,6 +40,9 @@ WriteMakefile(
         'Test::More'      => '0.60',
         'Test::Warn'      => '0.10',
         'Test::Exception' => '0.25',
+    },
+    CONFIGURE_REQUIRES => {
+        'Devel::CheckLib' => '1.16',
     },
     META_MERGE => {
         'meta-spec' => { version => 2 },

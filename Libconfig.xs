@@ -610,7 +610,7 @@ void auto_check_and_create(Conf__Libconfig conf, const char *path, config_settin
             child_setting = config_setting_add(parent_setting, tmp_path, CONFIG_TYPE_GROUP);
         }
         parent_setting = child_setting;
-        while ((end_path = strrchr(start_path, '.')))
+        while ((end_path = strchr(start_path, '.')))
         {
             sprintf(tmp_path, "%.*s", (int)(end_path - start_path), start_path);
             start_path = end_path + 1;
@@ -1219,18 +1219,6 @@ libconfig_add_scalar(conf, path, key, value)
             settings = config_lookup(conf, path);
         }
         RETVAL = set_scalarvalue(settings, key, value, 0, 0);
-        /*
-        char *new_path = (char *)malloc(strlen(path) + strlen(key) + 2);
-        if (path != NULL && strlen(path) == 0)
-        {
-            sprintf(new_path, "%s", key);
-        } else {
-            sprintf(new_path, "%s.%s", path, key);
-        }
-        int ret = set_general_value(conf, new_path, value);
-        free(new_path);
-        RETVAL = ret == 0;
-        */
     }
     OUTPUT:
         RETVAL
@@ -1252,18 +1240,6 @@ libconfig_add_boolscalar(conf, path, key, value)
             settings = config_lookup(conf, path);
         }
         RETVAL = set_scalarvalue(settings, key, value, 0, 2);
-        /*
-        char *new_path = (char *)malloc(strlen(path) + strlen(key) + 2);
-        if (path != NULL && strlen(path) == 0)
-        {
-            sprintf(new_path, "%s", key);
-        } else {
-            sprintf(new_path, "%s.%s", path, key);
-        }
-        int ret = set_boolean_value(conf, new_path, value);
-        free(new_path);
-        RETVAL = ret == 0;
-        */
     }
     OUTPUT:
         RETVAL
@@ -1345,18 +1321,6 @@ libconfig_add_list(conf, path, key, value)
             settings = config_lookup(conf, path);
         }
         RETVAL = set_arrayvalue(settings, key, value, 1);
-        /*
-        char *new_path = (char *)malloc(strlen(path) + strlen(key) + 2);
-        if (path != NULL && strlen(path) == 0)
-        {
-            sprintf(new_path, "%s", key);
-        } else {
-            sprintf(new_path, "%s.%s", path, key);
-        }
-        int ret = set_general_value(conf, new_path, value);
-        free(new_path);
-        RETVAL = ret == 0;
-        */
     OUTPUT:
         RETVAL
 
@@ -1377,18 +1341,6 @@ libconfig_add_hash(conf, path, key, value)
             settings = config_lookup(conf, path);
         }
         RETVAL = set_hashvalue(settings, key, value, 0);
-        /*
-        char *new_path = (char *)malloc(strlen(path) + strlen(key) + 2);
-        if (path != NULL && strlen(path) == 0)
-        {
-            sprintf(new_path, "%s", key);
-        } else {
-            sprintf(new_path, "%s.%s", path, key);
-        }
-        int ret = set_general_value(conf, new_path, value);
-        free(new_path);
-        RETVAL = ret == 0;
-        */
     }
     OUTPUT:
         RETVAL
@@ -1653,8 +1605,10 @@ libconfig_set_hook(conf, hook)
     void *hook
     CODE:
     {
-#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 4)) \
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 7)) \
                        || (LIBCONFIG_VER_MAJOR > 1))
+        config_set_hook(conf, hook);
+#else
         config_setting_set_hook(config_root_setting(conf), hook);
 #endif
     }
@@ -1664,11 +1618,11 @@ libconfig_get_hook(conf)
     Conf::Libconfig conf
     CODE:
     {
-#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 4)) \
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 7)) \
                        || (LIBCONFIG_VER_MAJOR > 1))
-        RETVAL = config_setting_get_hook(config_root_setting(conf));
+        RETVAL = config_get_hook(conf);
 #else
-        RETVAL = NULL;
+        RETVAL = config_setting_get_hook(config_root_setting(conf));
 #endif
     }
     OUTPUT:
@@ -1679,7 +1633,7 @@ libconfig_clear(conf)
     Conf::Libconfig conf
     CODE:
     {
-#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 8)) \
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 7)) \
                        || (LIBCONFIG_VER_MAJOR > 1))
         config_clear(conf);
 #endif
@@ -1735,6 +1689,46 @@ libconfig_error_type(conf)
     OUTPUT:
         RETVAL
 
+void
+libconfig_set_destructor(conf, func)
+    Conf::Libconfig conf
+    SV *func
+    CODE:
+    {
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 4)) \
+                       || (LIBCONFIG_VER_MAJOR > 1))
+        if (SvOK(func))
+            config_set_destructor(conf, (void (*)(void *))SvIV(func));
+#endif
+    }
+
+void
+libconfig_set_include_func(conf, func)
+    Conf::Libconfig conf
+    SV *func
+    CODE:
+    {
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 7)) \
+                       || (LIBCONFIG_VER_MAJOR > 1))
+        if (SvOK(func))
+            config_set_include_func(conf, (config_include_fn_t)SvIV(func));
+#endif
+    }
+
+void
+libconfig_set_fatal_error_func(CLASS, func)
+    const char *CLASS
+    SV *func
+    CODE:
+    {
+        (void)CLASS;
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 8)) \
+                       || (LIBCONFIG_VER_MAJOR > 1))
+        if (SvOK(func))
+            config_set_fatal_error_func((config_fatal_error_fn_t)SvIV(func));
+#endif
+    }
+
 MODULE = Conf::Libconfig     PACKAGE = Conf::Libconfig::Settings    PREFIX = libconfig_setting_
 
 int
@@ -1784,33 +1778,12 @@ libconfig_setting_get_item(setting, i)
     Conf::Libconfig::Settings setting
     int i
     PREINIT:
-        const char *itemChar;
-        double itemFloat;
-        long long itemBigint;
-        char itemBigintArr[256];
-        STRLEN itemBigintArrLen;
-#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 4)) \
-                       || (LIBCONFIG_VER_MAJOR > 1))
-        long itemInt;
-#else
-        int itemInt;
-#endif
-        int itemBool;
+        config_setting_t *child;
         SV *sv;
     CODE:
     {
-        if ((itemInt = config_setting_get_int_elem(setting, i)))
-            sv = newSViv(itemInt);
-        else if ((itemBigint = config_setting_get_int64_elem(setting, i))) {
-            itemBigintArrLen = sprintf(itemBigintArr, "%lld", itemBigint);
-            sv = newSVpv(itemBigintArr, itemBigintArrLen);
-        } else if ((itemBool = config_setting_get_bool_elem(setting, i)))
-            sv = newSViv(itemBool);
-        else if ((itemFloat = config_setting_get_float_elem(setting, i)))
-            sv = newSVnv(itemFloat);
-        else if ((itemChar = config_setting_get_string_elem(setting, i)))
-            sv = newSVpvn(itemChar, strlen(itemChar));
-        else
+        child = config_setting_get_elem(setting, i);
+        if (child == NULL || populate_scalar_sv(child, &sv) != LIBCONFIG_OK)
             sv = newSV(0);
         RETVAL = sv;
     }
@@ -2169,6 +2142,44 @@ libconfig_setting_source_file(setting)
 #if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 4)) \
                        || (LIBCONFIG_VER_MAJOR > 1))
         RETVAL = config_setting_source_file(setting);
+#else
+        RETVAL = NULL;
+#endif
+    }
+    OUTPUT:
+        RETVAL
+
+Conf::Libconfig::Settings
+libconfig_setting_get_elem(setting, idx)
+    Conf::Libconfig::Settings setting
+    unsigned int idx
+    CODE:
+    {
+        RETVAL = config_setting_get_elem(setting, idx);
+    }
+    OUTPUT:
+        RETVAL
+
+void
+libconfig_setting_set_hook(setting, hook)
+    Conf::Libconfig::Settings setting
+    void *hook
+    CODE:
+    {
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 4)) \
+                       || (LIBCONFIG_VER_MAJOR > 1))
+        config_setting_set_hook(setting, hook);
+#endif
+    }
+
+void *
+libconfig_setting_get_hook(setting)
+    Conf::Libconfig::Settings setting
+    CODE:
+    {
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 4)) \
+                       || (LIBCONFIG_VER_MAJOR > 1))
+        RETVAL = config_setting_get_hook(setting);
 #else
         RETVAL = NULL;
 #endif

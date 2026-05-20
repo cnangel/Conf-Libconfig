@@ -5,7 +5,7 @@
 
 Name:           perl-Conf-Libconfig
 Summary:        Perl extension for libconfig
-Version:        1.1.1
+Version:        1.1.2
 Release:        1%{?dist}
 Vendor:         Cnangel <cnangel@gmail.com>
 Packager:       Cnangel <cnangel@gmail.com>
@@ -67,6 +67,14 @@ find %{buildroot} -name '*.bs' -delete 2>/dev/null || true
 %{_mandir}/man3/Conf::Libconfig.3pm.gz
 
 %changelog
+* Tue May 20 2026 Cnangel <cnangel@gmail.com> 1.1.2-1
+- Fix set_hook/get_hook to use config-level API
+- Fix get_item zero-value bug via config_setting_get_elem + type check
+- Fix auto_check_and_create strrchr -> strchr path resolution
+- Add bindings: set_destructor, set_include_func, set_fatal_error_func, get_elem, setting hooks
+- Add Devel::CheckLib configure-time check for libconfig
+- Clean up dead commented-out code
+
 * Sat May 16 2026 Cnangel <cnangel@gmail.com> 1.1.1-1
 - Fix version guards for multi-version libconfig compatibility (1.1.x ~ 1.8.x)
 - Fix config_setting_lookup_int type for pre-1.4 (long* vs int*)

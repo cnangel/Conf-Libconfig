@@ -10,7 +10,8 @@ build_requires:
   Test::More: 0.60
   Test::Warn: 0.10
 configure_requires:
-  ExtUtils::MakeMaker: 6.30
+  Devel::CheckLib: 1.16
+  ExtUtils::MakeMaker: 6.52
   ExtUtils::PkgConfig: 0
 distribution_type: module
 generated_by: 'ExtUtils::MakeMaker version 7.70'
@@ -29,4 +30,4 @@ requires:
 resources:
   license: http://opensource.org/licenses/bsd-license.php
   repository: http://github.com/cnangel/Conf-Libconfig
-version: 1.1.1
+version: 1.1.2

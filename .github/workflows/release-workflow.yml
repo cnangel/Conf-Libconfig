@@ -259,6 +259,9 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Restore All Build Caches
+        env:
+          ACTIONS_RUNTIME_TOKEN: ${{ env.ACTIONS_RUNTIME_TOKEN }}
+          ACTIONS_CACHE_URL: ${{ env.ACTIONS_CACHE_URL }}
         run: |
           set -euo pipefail
           PREFIX="${{ env.cache_prefix }}"

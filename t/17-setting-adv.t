@@ -9,8 +9,6 @@ my $conf = Conf::Libconfig->new;
 my $ver = $conf->getversion();
 if ($ver < 1.8) {
     plan skip_all => "libconfig $ver is too old for setting-adv test (need >= 1.8)";
-} else {
-    plan tests => 25;
 }
 
 my $cfgfile = "./t/test.cfg";
@@ -69,5 +67,15 @@ ok($arr_setting->is_array(), "is_array (array) - status ok");
 my $window = $conf->setting_lookup("application.window");
 isa_ok($window, 'Conf::Libconfig::Settings');
 is($window->name(), "window", "setting_lookup deep path - status ok");
+
+# get_elem
+my $elem0 = $arr_setting->get_elem(0);
+isa_ok($elem0, 'Conf::Libconfig::Settings', "get_elem returns Settings");
+is($elem0->name(), undef, "array element has no name");
+
+# setting set_hook / get_hook
+$arr_setting->set_hook(42);
+my $hook = $arr_setting->get_hook();
+cmp_ok($hook, '==', 42, "setting set_hook/get_hook round-trip");
 
 done_testing();

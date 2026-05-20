@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Exporter 'import';
 
-our $VERSION = '1.1.1';
+our $VERSION = '1.1.2';
 
 require XSLoader;
 XSLoader::load('Conf::Libconfig', $VERSION);
@@ -326,6 +326,10 @@ set a custom include function callback (libconfig >= 1.8).
 
 set a custom destructor callback for the config object.
 
+=head2 $self->set_fatal_error_func($func)
+
+set a global fatal error handler callback. This is a class method -- it affects all config instances (libconfig >= 1.8).
+
 =head2 $setting->lookup ($path)
 
 lookup a setting by path from this setting (libconfig >= 1.8).
@@ -426,6 +430,14 @@ get the source file line number where this setting was defined.
 
 get the source file name where this setting was defined.
 
+=head2 $setting->set_hook ($hook)
+
+set a custom hook pointer on this setting (libconfig >= 1.4).
+
+=head2 $setting->get_hook ()
+
+get the custom hook pointer from this setting (libconfig >= 1.4).
+
 =head2 $setting->length ()
 
 return count of setting resource.
@@ -433,6 +445,10 @@ return count of setting resource.
 =head2 $setting->get_item ($i)
 
 return value of the $i item.
+
+=head2 $setting->get_elem ($idx)
+
+return the child setting at index $idx as a Settings object.
 
 =head2 $setting->get_type ()
 
